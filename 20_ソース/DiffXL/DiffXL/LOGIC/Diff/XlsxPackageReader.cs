@@ -75,6 +75,26 @@ namespace DiffXL.LOGIC.Diff
         private Dictionary<string, string> _sheetPaths;
 
         /// <summary>
+        /// cellXfs インデックス → 背景 ARGB（#AARRGGBB）。塗りなし・解決不能は null。
+        /// </summary>
+        private string[] _xfBackgroundArgb;
+
+        /// <summary>
+        /// cellXfs インデックス → 四辺いずれかにボーダーがあるか。
+        /// </summary>
+        private bool[] _xfHasAnyBorder;
+
+        /// <summary>
+        /// theme 色（0=dk1 … 11=folHlink）。#AARRGGBB。
+        /// </summary>
+        private string[] _themeColors;
+
+        /// <summary>
+        /// indexed 色パレット（#AARRGGBB）。
+        /// </summary>
+        private string[] _indexedColors;
+
+        /// <summary>
         /// 破棄済み。
         /// </summary>
         private bool _disposed;
@@ -135,11 +155,30 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// 指定シートのセルを列挙する。
+        /// 指定シートのセルを列挙する（テキスト互換。背景・ボーダーは含まない）。
         /// </summary>
         /// <param name="sheetName">シート名</param>
         /// <returns>セル値</returns>
         public IEnumerable<CellValue> EnumerateCells(string sheetName)
+        {
+            foreach (CellContent c in EnumerateCellContents(sheetName))
+            {
+                yield return new CellValue
+                {
+                    Address = c.Address,
+                    Text = c.Text,
+                    Row = c.Row,
+                    Column = c.Column
+                };
+            }
+        }
+
+        /// <summary>
+        /// 指定シートのセル内容（テキスト・背景色・ボーダー有無）を列挙する。
+        /// </summary>
+        /// <param name="sheetName">シート名</param>
+        /// <returns>セル内容</returns>
+        public IEnumerable<CellContent> EnumerateCellContents(string sheetName)
         {
             EnsureOpen();
             if (string.IsNullOrEmpty(sheetName) || !_sheetPaths.ContainsKey(sheetName))
@@ -166,12 +205,34 @@ namespace DiffXL.LOGIC.Diff
                 int row;
                 int col;
                 ParseAddress(address, out row, out col);
-                yield return new CellValue
+
+                int styleIndex = 0;
+                string sAttr = (string)c.Attribute("s");
+                if (!string.IsNullOrEmpty(sAttr))
+                {
+                    int.TryParse(sAttr, NumberStyles.Integer, CultureInfo.InvariantCulture, out styleIndex);
+                }
+
+                string bg = null;
+                bool hasBorder = false;
+                if (_xfBackgroundArgb != null && styleIndex >= 0 && styleIndex < _xfBackgroundArgb.Length)
+                {
+                    bg = _xfBackgroundArgb[styleIndex];
+                }
+
+                if (_xfHasAnyBorder != null && styleIndex >= 0 && styleIndex < _xfHasAnyBorder.Length)
+                {
+                    hasBorder = _xfHasAnyBorder[styleIndex];
+                }
+
+                yield return new CellContent
                 {
                     Address = address,
                     Text = text ?? string.Empty,
                     Row = row,
-                    Column = col
+                    Column = col,
+                    BackgroundArgb = bg,
+                    HasAnyBorder = hasBorder
                 };
             }
         }
@@ -419,6 +480,7 @@ namespace DiffXL.LOGIC.Diff
         {
             _sheetPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             _sharedStrings = LoadSharedStrings();
+            LoadStyles();
 
             XDocument workbook = ReadXmlEntry("xl/workbook.xml");
             if (workbook == null)
@@ -455,6 +517,516 @@ namespace DiffXL.LOGIC.Diff
             {
                 throw new InvalidOperationException("シートが見つかりません: " + _path);
             }
+        }
+
+        /// <summary>
+        /// xl/styles.xml（と任意で theme）から fill / border を cellXfs 単位で解決する。
+        /// </summary>
+        private void LoadStyles()
+        {
+            // 最低限のデフォルト（style index 0 = 標準）
+            _xfBackgroundArgb = new string[] { null };
+            _xfHasAnyBorder = new bool[] { false };
+            _themeColors = CreateDefaultThemeColors();
+            _indexedColors = CreateDefaultIndexedColors();
+
+            try
+            {
+                LoadThemeColors();
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("theme 色読込スキップ: " + ex.Message);
+            }
+
+            XDocument doc = ReadXmlEntry("xl/styles.xml");
+            if (doc == null)
+            {
+                return;
+            }
+
+            try
+            {
+                // カスタム indexedColors（あれば上書き）
+                XElement colorsRoot = doc.Root != null ? doc.Root.Element(NsMain + "colors") : null;
+                if (colorsRoot != null)
+                {
+                    XElement indexed = colorsRoot.Element(NsMain + "indexedColors");
+                    if (indexed != null)
+                    {
+                        var list = new List<string>();
+                        foreach (XElement rgbColor in indexed.Elements(NsMain + "rgbColor"))
+                        {
+                            list.Add(NormalizeArgb((string)rgbColor.Attribute("rgb")));
+                        }
+
+                        if (list.Count > 0)
+                        {
+                            // 既存パレット長を維持しつつ先頭を差し替え
+                            string[] merged = CreateDefaultIndexedColors();
+                            for (int i = 0; i < list.Count && i < merged.Length; i++)
+                            {
+                                if (list[i] != null)
+                                {
+                                    merged[i] = list[i];
+                                }
+                            }
+
+                            _indexedColors = merged;
+                        }
+                    }
+                }
+
+                // fills: インデックス → 背景 ARGB
+                var fillArgb = new List<string>();
+                XElement fills = doc.Root.Element(NsMain + "fills");
+                if (fills != null)
+                {
+                    foreach (XElement fill in fills.Elements(NsMain + "fill"))
+                    {
+                        fillArgb.Add(ResolveFillBackground(fill));
+                    }
+                }
+
+                if (fillArgb.Count == 0)
+                {
+                    fillArgb.Add(null);
+                }
+
+                // borders: インデックス → 四辺いずれか有り
+                var borderFlags = new List<bool>();
+                XElement borders = doc.Root.Element(NsMain + "borders");
+                if (borders != null)
+                {
+                    foreach (XElement border in borders.Elements(NsMain + "border"))
+                    {
+                        borderFlags.Add(BorderHasAnySide(border));
+                    }
+                }
+
+                if (borderFlags.Count == 0)
+                {
+                    borderFlags.Add(false);
+                }
+
+                // cellXfs
+                XElement cellXfs = doc.Root.Element(NsMain + "cellXfs");
+                if (cellXfs == null)
+                {
+                    return;
+                }
+
+                var bgByXf = new List<string>();
+                var borderByXf = new List<bool>();
+                foreach (XElement xf in cellXfs.Elements(NsMain + "xf"))
+                {
+                    int fillId = ParseIntAttr(xf, "fillId", 0);
+                    int borderId = ParseIntAttr(xf, "borderId", 0);
+
+                    string bg = null;
+                    if (fillId >= 0 && fillId < fillArgb.Count)
+                    {
+                        bg = fillArgb[fillId];
+                    }
+
+                    bool hasBorder = false;
+                    if (borderId >= 0 && borderId < borderFlags.Count)
+                    {
+                        hasBorder = borderFlags[borderId];
+                    }
+
+                    bgByXf.Add(bg);
+                    borderByXf.Add(hasBorder);
+                }
+
+                if (bgByXf.Count > 0)
+                {
+                    _xfBackgroundArgb = bgByXf.ToArray();
+                    _xfHasAnyBorder = borderByXf.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("styles.xml 解析失敗: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// fill 要素から solid 背景 ARGB を得る。塗りなし・解決不能は null。
+        /// </summary>
+        private string ResolveFillBackground(XElement fill)
+        {
+            if (fill == null)
+            {
+                return null;
+            }
+
+            // patternFill を優先。gradientFill は簡易対応しない
+            XElement pattern = fill.Element(NsMain + "patternFill");
+            if (pattern == null)
+            {
+                return null;
+            }
+
+            string patternType = (string)pattern.Attribute("patternType");
+            // 未指定・none・Excel 既定の gray125/gray0625 は「塗りなし」扱い
+            if (string.IsNullOrEmpty(patternType)
+                || string.Equals(patternType, "none", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(patternType, "gray125", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(patternType, "gray0625", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            // solid は fgColor。その他パターンも fg があれば採用（簡易）
+            XElement fg = pattern.Element(NsMain + "fgColor");
+            string argb = ResolveColorElement(fg);
+            if (argb != null)
+            {
+                return argb;
+            }
+
+            XElement bg = pattern.Element(NsMain + "bgColor");
+            return ResolveColorElement(bg);
+        }
+
+        /// <summary>
+        /// color 要素（rgb / theme / indexed）を #AARRGGBB に解決する。
+        /// </summary>
+        private string ResolveColorElement(XElement colorEl)
+        {
+            if (colorEl == null)
+            {
+                return null;
+            }
+
+            string rgb = (string)colorEl.Attribute("rgb");
+            if (!string.IsNullOrEmpty(rgb))
+            {
+                return NormalizeArgb(rgb);
+            }
+
+            string themeStr = (string)colorEl.Attribute("theme");
+            if (!string.IsNullOrEmpty(themeStr))
+            {
+                int themeIdx;
+                if (int.TryParse(themeStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out themeIdx)
+                    && _themeColors != null
+                    && themeIdx >= 0
+                    && themeIdx < _themeColors.Length
+                    && _themeColors[themeIdx] != null)
+                {
+                    string baseColor = _themeColors[themeIdx];
+                    string tintStr = (string)colorEl.Attribute("tint");
+                    double tint;
+                    if (!string.IsNullOrEmpty(tintStr)
+                        && double.TryParse(tintStr, NumberStyles.Float, CultureInfo.InvariantCulture, out tint)
+                        && Math.Abs(tint) > 1e-9)
+                    {
+                        return ApplyTint(baseColor, tint);
+                    }
+
+                    return baseColor;
+                }
+            }
+
+            string indexedStr = (string)colorEl.Attribute("indexed");
+            if (!string.IsNullOrEmpty(indexedStr))
+            {
+                int idx;
+                if (int.TryParse(indexedStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out idx)
+                    && _indexedColors != null
+                    && idx >= 0
+                    && idx < _indexedColors.Length)
+                {
+                    return _indexedColors[idx];
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// ボーダー四辺のいずれかが style != none なら true。
+        /// </summary>
+        private static bool BorderHasAnySide(XElement border)
+        {
+            if (border == null)
+            {
+                return false;
+            }
+
+            string[] sides = { "left", "right", "top", "bottom" };
+            foreach (string side in sides)
+            {
+                XElement el = border.Element(NsMain + side);
+                if (el == null)
+                {
+                    continue;
+                }
+
+                string style = (string)el.Attribute("style");
+                if (!string.IsNullOrEmpty(style)
+                    && !string.Equals(style, "none", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// OOXML の色文字列を #AARRGGBB に正規化する。
+        /// 6 桁は不透明扱い。8 桁で alpha=00 は Excel 慣習上不透明として FF にする。
+        /// </summary>
+        private static string NormalizeArgb(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return null;
+            }
+
+            string s = raw.Trim();
+            if (s.StartsWith("#", StringComparison.Ordinal))
+            {
+                s = s.Substring(1);
+            }
+
+            s = s.ToUpperInvariant();
+            if (s.Length == 6)
+            {
+                return "#FF" + s;
+            }
+
+            if (s.Length == 8)
+            {
+                // openpyxl 等は alpha を 00 で書き、Excel は不透明として扱う
+                if (s.StartsWith("00", StringComparison.Ordinal))
+                {
+                    return "#FF" + s.Substring(2);
+                }
+
+                return "#" + s;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// theme 色に tint を適用する（ECMA-376 簡易実装）。
+        /// </summary>
+        private static string ApplyTint(string argb, double tint)
+        {
+            if (string.IsNullOrEmpty(argb) || argb.Length < 9)
+            {
+                return argb;
+            }
+
+            int a = ParseHexByte(argb, 1);
+            int r = ParseHexByte(argb, 3);
+            int g = ParseHexByte(argb, 5);
+            int b = ParseHexByte(argb, 7);
+
+            if (tint < 0)
+            {
+                r = (int)Math.Round(r * (1.0 + tint));
+                g = (int)Math.Round(g * (1.0 + tint));
+                b = (int)Math.Round(b * (1.0 + tint));
+            }
+            else
+            {
+                r = (int)Math.Round(r * (1.0 - tint) + 255.0 * tint);
+                g = (int)Math.Round(g * (1.0 - tint) + 255.0 * tint);
+                b = (int)Math.Round(b * (1.0 - tint) + 255.0 * tint);
+            }
+
+            r = ClampByte(r);
+            g = ClampByte(g);
+            b = ClampByte(b);
+            return string.Format(CultureInfo.InvariantCulture, "#{0:X2}{1:X2}{2:X2}{3:X2}", a, r, g, b);
+        }
+
+        private static int ParseHexByte(string argb, int start)
+        {
+            int v;
+            if (int.TryParse(argb.Substring(start, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out v))
+            {
+                return v;
+            }
+
+            return 0;
+        }
+
+        private static int ClampByte(int v)
+        {
+            if (v < 0)
+            {
+                return 0;
+            }
+
+            if (v > 255)
+            {
+                return 255;
+            }
+
+            return v;
+        }
+
+        private static int ParseIntAttr(XElement el, string name, int defaultValue)
+        {
+            if (el == null)
+            {
+                return defaultValue;
+            }
+
+            string v = (string)el.Attribute(name);
+            int n;
+            if (!string.IsNullOrEmpty(v)
+                && int.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out n))
+            {
+                return n;
+            }
+
+            return defaultValue;
+        }
+
+        /// <summary>
+        /// xl/theme/theme1.xml から clrScheme を読む（無ければ既定のまま）。
+        /// </summary>
+        private void LoadThemeColors()
+        {
+            // theme パスは固定または rels から。まず定番パスを試す
+            string[] candidates =
+            {
+                "xl/theme/theme1.xml",
+                "xl/theme/theme.xml"
+            };
+
+            XDocument themeDoc = null;
+            foreach (string path in candidates)
+            {
+                themeDoc = ReadXmlEntry(path);
+                if (themeDoc != null)
+                {
+                    break;
+                }
+            }
+
+            if (themeDoc == null)
+            {
+                return;
+            }
+
+            // a:clrScheme 内の順: dk1, lt1, dk2, lt2, accent1..6, hlink, folHlink
+            // SpreadsheetML theme インデックス: 0=dk1, 1=lt1, ...
+            XElement clrScheme = themeDoc.Descendants().FirstOrDefault(e =>
+                string.Equals(e.Name.LocalName, "clrScheme", StringComparison.OrdinalIgnoreCase));
+            if (clrScheme == null)
+            {
+                return;
+            }
+
+            string[] order =
+            {
+                "dk1", "lt1", "dk2", "lt2",
+                "accent1", "accent2", "accent3", "accent4", "accent5", "accent6",
+                "hlink", "folHlink"
+            };
+
+            var colors = CreateDefaultThemeColors();
+            for (int i = 0; i < order.Length; i++)
+            {
+                string local = order[i];
+                XElement slot = clrScheme.Elements().FirstOrDefault(e =>
+                    string.Equals(e.Name.LocalName, local, StringComparison.OrdinalIgnoreCase));
+                if (slot == null)
+                {
+                    continue;
+                }
+
+                string resolved = ResolveThemeSlotColor(slot);
+                if (resolved != null)
+                {
+                    colors[i] = resolved;
+                }
+            }
+
+            _themeColors = colors;
+        }
+
+        /// <summary>
+        /// theme の 1 スロット（sysClr / srgbClr）から ARGB を得る。
+        /// </summary>
+        private static string ResolveThemeSlotColor(XElement slot)
+        {
+            if (slot == null)
+            {
+                return null;
+            }
+
+            foreach (XElement child in slot.Elements())
+            {
+                string local = child.Name.LocalName;
+                if (string.Equals(local, "srgbClr", StringComparison.OrdinalIgnoreCase))
+                {
+                    return NormalizeArgb((string)child.Attribute("val"));
+                }
+
+                if (string.Equals(local, "sysClr", StringComparison.OrdinalIgnoreCase))
+                {
+                    string last = (string)child.Attribute("lastClr");
+                    if (!string.IsNullOrEmpty(last))
+                    {
+                        return NormalizeArgb(last);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Office 既定に近い theme 色（#AARRGGBB）。
+        /// </summary>
+        private static string[] CreateDefaultThemeColors()
+        {
+            return new[]
+            {
+                "#FF000000", // 0 dk1
+                "#FFFFFFFF", // 1 lt1
+                "#FF1F497D", // 2 dk2
+                "#FFEEECE1", // 3 lt2
+                "#FF4F81BD", // 4 accent1
+                "#FFC0504D", // 5 accent2
+                "#FF9BBB59", // 6 accent3
+                "#FF8064A2", // 7 accent4
+                "#FF4BACC6", // 8 accent5
+                "#FFF79646", // 9 accent6
+                "#FF0000FF", // 10 hlink
+                "#FF800080"  // 11 folHlink
+            };
+        }
+
+        /// <summary>
+        /// ECMA-376 既定 indexed パレット（先頭 64 + システム予約を簡易化）。
+        /// </summary>
+        private static string[] CreateDefaultIndexedColors()
+        {
+            // 主要 64 色 + 65/66 用の黒白（システム）を含む簡易表
+            return new[]
+            {
+                "#FF000000", "#FFFFFFFF", "#FFFF0000", "#FF00FF00", "#FF0000FF", "#FFFFFF00", "#FFFF00FF", "#FF00FFFF",
+                "#FF000000", "#FFFFFFFF", "#FFFF0000", "#FF00FF00", "#FF0000FF", "#FFFFFF00", "#FFFF00FF", "#FF00FFFF",
+                "#FF800000", "#FF008000", "#FF000080", "#FF808000", "#FF800080", "#FF008080", "#FFC0C0C0", "#FF808080",
+                "#FF9999FF", "#FF993366", "#FFFFFFCC", "#FFCCFFFF", "#FF660066", "#FFFF8080", "#FF0066CC", "#FFCCCCFF",
+                "#FF000080", "#FFFF00FF", "#FFFFFF00", "#FF00FFFF", "#FF800080", "#FF800000", "#FF008080", "#FF0000FF",
+                "#FF00CCFF", "#FFCCFFFF", "#FFCCFFCC", "#FFFFFF99", "#FF99CCFF", "#FFFF99CC", "#FFCC99FF", "#FFFFCC99",
+                "#FF3366FF", "#FF33CCCC", "#FF99CC00", "#FFFFCC00", "#FFFF9900", "#FFFF6600", "#FF666699", "#FF969696",
+                "#FF003366", "#FF339966", "#FF003300", "#FF333300", "#FF993300", "#FF993366", "#FF333399", "#FF333333",
+                "#FF000000", // 64 system
+                "#FFFFFFFF"  // 65 system
+            };
         }
 
         /// <summary>
