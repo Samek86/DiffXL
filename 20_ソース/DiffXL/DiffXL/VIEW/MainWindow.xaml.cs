@@ -188,19 +188,7 @@ namespace DiffXL
             AttachLowLevelMouseHook();
             StartViewportTimer();
 
-            if (!ExcelAvailability.IsExcelInstalled())
-            {
-                // 自動テスト中はダイアログで止まらない
-                if (App.AutoTest == null || !App.AutoTest.Enabled)
-                {
-                    MessageBox.Show(
-                        ExcelAvailability.GetDiagnosticMessage(),
-                        Common.AppDisplayName,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                }
-            }
-
+            // Excel は必須ではない（内容ビューで比較結果を表示）
             ShowStartup();
 
             if (App.AutoTest != null && App.AutoTest.Enabled)
@@ -1299,8 +1287,30 @@ namespace DiffXL
                 return;
             }
 
-            IReadOnlyList<string> leftSheets = LeftPane.Session.GetSheetNames();
-            IReadOnlyList<string> rightSheets = RightPane.Session.GetSheetNames();
+            IReadOnlyList<string> leftSheets = LeftPane.GetSheetNames();
+            IReadOnlyList<string> rightSheets = RightPane.GetSheetNames();
+            if ((leftSheets == null || leftSheets.Count == 0) && _session.LastResult != null && _session.LastResult.LeftContent != null)
+            {
+                leftSheets = _session.LastResult.LeftContent.Sheets
+                    .Where(s => s != null && !string.IsNullOrEmpty(s.Name))
+                    .Select(s => s.Name)
+                    .ToList();
+            }
+
+            if ((rightSheets == null || rightSheets.Count == 0) && _session.LastResult != null && _session.LastResult.RightContent != null)
+            {
+                rightSheets = _session.LastResult.RightContent.Sheets
+                    .Where(s => s != null && !string.IsNullOrEmpty(s.Name))
+                    .Select(s => s.Name)
+                    .ToList();
+            }
+
+            if (leftSheets == null || leftSheets.Count == 0 || rightSheets == null || rightSheets.Count == 0)
+            {
+                MessageBox.Show("シート一覧を取得できません。先に比較を実行してください。", Common.AppDisplayName);
+                return;
+            }
+
             var dialog = new SheetMapDialog(leftSheets.ToList(), rightSheets.ToList()) { Owner = this };
             if (dialog.ShowDialog() == true && dialog.ResultPairs != null)
             {
@@ -2894,7 +2904,7 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// ファイルを開いて比較する。
+        /// ファイルを開いて比較する（Excel COM 不要。内容ビューへ表示）。
         /// </summary>
         private async Task OpenAndCompareAsync(string leftPath, string rightPath, bool resetOptions)
         {
@@ -2906,10 +2916,11 @@ namespace DiffXL
             _session.LeftPath = leftPath;
             _session.RightPath = rightPath;
 
-            ShowLoading("ブックを開いています...");
+            ShowLoading("比較を準備しています...");
             try
             {
                 ShowMainCompare();
+                // パス設定のみ（Excel 埋め込みはしない）
                 LeftPane.OpenFile(leftPath);
                 RightPane.OpenFile(rightPath);
                 if (!LeftPane.IsOpen || !RightPane.IsOpen)
@@ -2918,6 +2929,7 @@ namespace DiffXL
                     return;
                 }
 
+                // ScrollSync は Excel セッション無しでは no-op に近いが互換のため接続
                 AttachScrollSync();
                 await RunCompareOnlyAsync(showLoading: false);
             }
@@ -3016,6 +3028,7 @@ namespace DiffXL
 
             MiniMap.SetDiffs(result.Items);
             RebuildPairSheetCombo(result);
+            BindContentPanes(result);
             ApplyContentScrollMaps(result);
             // レイアウト確定後にもう一度
             Dispatcher.BeginInvoke(
@@ -3029,6 +3042,7 @@ namespace DiffXL
 
                     MiniMap.SetDiffs(result.Items);
                     SyncPairComboSelectionFromPanes();
+                    BindContentPanes(result);
                     ApplyContentScrollMaps(result);
                 }));
             UpdateDiffStatus(result);
@@ -3042,6 +3056,52 @@ namespace DiffXL
                     || (result.ScrollMaps != null && result.ScrollMaps.Count > 0)
                     ? " / 内容対応"
                     : string.Empty);
+        }
+
+        /// <summary>
+        /// 比較結果の LeftContent / RightContent を左右 ContentPane にバインドする。
+        /// 既定はシート対応の先頭（または各ブックの先頭シート）。
+        /// </summary>
+        private void BindContentPanes(DiffResult result)
+        {
+            if (result == null)
+            {
+                return;
+            }
+
+            string leftPreferred = null;
+            string rightPreferred = null;
+            IList<SheetPair> pairs = GetActiveSheetPairs(result);
+            if (pairs != null && pairs.Count > 0 && pairs[0] != null)
+            {
+                leftPreferred = pairs[0].LeftSheet;
+                rightPreferred = pairs[0].RightSheet;
+            }
+
+            // ツールバーコンボ選択があれば優先
+            var comboItem = PairSheetCombo != null ? PairSheetCombo.SelectedItem as SheetPairComboItem : null;
+            if (comboItem != null)
+            {
+                if (!string.IsNullOrEmpty(comboItem.LeftSheet))
+                {
+                    leftPreferred = comboItem.LeftSheet;
+                }
+
+                if (!string.IsNullOrEmpty(comboItem.RightSheet))
+                {
+                    rightPreferred = comboItem.RightSheet;
+                }
+            }
+
+            if (LeftPane != null)
+            {
+                LeftPane.LoadWorkbookContent(result.LeftContent, result.Items, isLeft: true, leftPreferred);
+            }
+
+            if (RightPane != null)
+            {
+                RightPane.LoadWorkbookContent(result.RightContent, result.Items, isLeft: false, rightPreferred);
+            }
         }
 
         /// <summary>
@@ -3389,15 +3449,26 @@ namespace DiffXL
                 return _session.Options.ManualSheetPairs;
             }
 
-            // 同名シートの交差
+            // 同名シートの交差（内容モデル or 互換 Session）
             var pairs = new List<SheetPair>();
-            if (LeftPane.Session != null && LeftPane.Session.IsOpen
-                && RightPane.Session != null && RightPane.Session.IsOpen)
+            IReadOnlyList<string> leftNames = LeftPane != null ? LeftPane.GetSheetNames() : null;
+            IReadOnlyList<string> rightNames = RightPane != null ? RightPane.GetSheetNames() : null;
+            if ((leftNames == null || leftNames.Count == 0) && LeftPane != null && LeftPane.Session != null && LeftPane.Session.IsOpen)
+            {
+                leftNames = LeftPane.Session.GetSheetNames();
+            }
+
+            if ((rightNames == null || rightNames.Count == 0) && RightPane != null && RightPane.Session != null && RightPane.Session.IsOpen)
+            {
+                rightNames = RightPane.Session.GetSheetNames();
+            }
+
+            if (leftNames != null && leftNames.Count > 0 && rightNames != null && rightNames.Count > 0)
             {
                 var rightSet = new HashSet<string>(
-                    RightPane.Session.GetSheetNames(),
+                    rightNames,
                     StringComparer.OrdinalIgnoreCase);
-                foreach (string name in LeftPane.Session.GetSheetNames())
+                foreach (string name in leftNames)
                 {
                     if (rightSet.Contains(name))
                     {
@@ -3442,9 +3513,9 @@ namespace DiffXL
 
             // 同名が相手側にあれば使う
             WorkbookPane other = fromLeft ? RightPane : LeftPane;
-            if (other.Session != null && other.Session.IsOpen)
+            if (other != null)
             {
-                foreach (string name in other.Session.GetSheetNames())
+                foreach (string name in other.GetSheetNames())
                 {
                     if (string.Equals(name, sheetName, StringComparison.OrdinalIgnoreCase))
                     {

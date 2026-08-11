@@ -1,12 +1,12 @@
 using System;
 using System.Windows;
 using DiffXL.COMMON;
-using DiffXL.LOGIC.Excel;
 
 namespace DiffXL
 {
     /// <summary>
     /// アプリケーション入口。起動時に AppData・ログ・設定を初期化する。
+    /// Excel インストールは必須ではない（内容ベース比較）。
     /// </summary>
     public partial class App : Application
     {
@@ -36,7 +36,7 @@ namespace DiffXL
                 // 起動阻害しない
             }
             NativeBootstrap.EnsureNativeBinaries();
-            Log.Info("DiffXL 起動");
+            Log.Info("DiffXL 起動（内容ベース比較・Excel 不要）");
             AppSettings.Load();
             Log.Info("設定を読み込み: " + AppPaths.SettingsFile);
 
@@ -44,15 +44,6 @@ namespace DiffXL
             if (AutoTest.Enabled)
             {
                 Log.Info("AutoLiveTest 有効 left=" + AutoTest.LeftPath + " right=" + AutoTest.RightPath);
-            }
-
-            if (!ExcelAvailability.IsExcelInstalled())
-            {
-                Log.Error(ExcelAvailability.GetDiagnosticMessage());
-            }
-            else
-            {
-                Log.Info(ExcelAvailability.GetDiagnosticMessage());
             }
 
             new MainWindow().Show();

@@ -77,7 +77,7 @@
             </Grid>
         </Border>
 
-        <!-- 差分位置は右端 MiniMap に一本化（左右ガターは廃止） -->
+        <!-- 内容ビュー（Excel 埋め込みは廃止。ContentPane が主表示） -->
         <Border
             Grid.Row="1"
             Background="#FF0B1220"
@@ -88,7 +88,10 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 ClipToBounds="True">
-                <!-- Excel ホストは code-behind で追加。ギャップ説明は Z 上位・クリック透過 -->
+                <local:ContentPane
+                    x:Name="ContentHost"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
                 <local:SyncGapOverlay
                     x:Name="GapOverlay"
                     Panel.ZIndex="100"

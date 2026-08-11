@@ -1,17 +1,19 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Threading;
 using DiffXL.COMMON;
+using DiffXL.LOGIC.Diff;
 using DiffXL.LOGIC.Excel;
 using Microsoft.Win32;
 
 namespace DiffXL.VIEW.Controls
 {
     /// <summary>
-    /// 左右いずれか 1 枚の Excel ブック表示ペイン。
+    /// 左右いずれか 1 枚のブック表示ペイン（内容ベース ContentPane ホスト）。
+    /// Excel COM 埋め込みは行わない。
     /// </summary>
     public partial class WorkbookPane : UserControl
     {
@@ -25,14 +27,24 @@ namespace DiffXL.VIEW.Controls
             new PropertyMetadata("ブック"));
 
         /// <summary>
-        /// Excel 埋め込みホスト。
+        /// 開いているファイルパス。
         /// </summary>
-        private readonly ExcelHostControl _host = new ExcelHostControl();
+        private string _filePath;
 
         /// <summary>
-        /// 現在のブックセッション。
+        /// 比較結果のブック内容（シート切替用）。
         /// </summary>
-        private ExcelWorkbookSession _session;
+        private WorkbookContent _workbook;
+
+        /// <summary>
+        /// 比較結果の全差分。
+        /// </summary>
+        private IList<DiffItem> _allDiffs = new List<DiffItem>();
+
+        /// <summary>
+        /// 左ペインかどうか。
+        /// </summary>
+        private bool _isLeft = true;
 
         /// <summary>
         /// シート切替中の再入防止。
@@ -40,7 +52,7 @@ namespace DiffXL.VIEW.Controls
         private bool _suppressSheetEvent;
 
         /// <summary>
-        /// 最後に把握した ScrollRow（ホイール時 Get 失敗のフォールバック）。
+        /// 最後に把握した ScrollRow（互換用キャッシュ。内容ビューでは未使用）。
         /// </summary>
         private int _lastKnownScrollRow = 1;
 
@@ -50,10 +62,12 @@ namespace DiffXL.VIEW.Controls
         private int _lastKnownScrollCol = 1;
 
         /// <summary>
-        /// ホイール等でスクロール操作が成功した直後（verify 後の実 ScrollRow/Col）。
+        /// ホイール等でスクロール操作が成功した直後（互換イベント・内容ビューでは未使用）。
         /// 引数: 自身, row, col, horizontal。
         /// </summary>
+#pragma warning disable CS0067
         public event Action<WorkbookPane, int, int, bool> ScrollInteracted;
+#pragma warning restore CS0067
 
         /// <summary>
         /// コンストラクタ。
@@ -61,58 +75,20 @@ namespace DiffXL.VIEW.Controls
         public WorkbookPane()
         {
             InitializeComponent();
-            _host.HorizontalAlignment = HorizontalAlignment.Stretch;
-            _host.VerticalAlignment = VerticalAlignment.Stretch;
-            Panel.SetZIndex(_host, 0);
-            HostContainer.Children.Add(_host);
-            // GapOverlay は XAML で ZIndex=100・IsHitTestVisible=false
             Unloaded += WorkbookPane_Unloaded;
-            SizeChanged += WorkbookPane_SizeChanged;
-            HostContainer.SizeChanged += HostContainer_SizeChanged;
-            HostContainer.MouseEnter += HostContainer_MouseEnter;
             Focusable = true;
         }
 
         /// <summary>
-        /// マウスが Excel 上に入ったらフォーカスを渡し、クリックなしでホイール可能にする。
-        /// </summary>
-        private void HostContainer_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (_session != null && _session.IsOpen)
-            {
-                _session.ActivateForInput();
-            }
-        }
-
-        /// <summary>
-        /// ペインサイズ変更時に Excel を追従させる。
-        /// </summary>
-        private void WorkbookPane_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (e.WidthChanged || e.HeightChanged)
-            {
-                _host.ResizeExcelToHost(force: true);
-            }
-        }
-
-        private void HostContainer_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (e.WidthChanged || e.HeightChanged)
-            {
-                _host.ResizeExcelToHost(force: true);
-            }
-        }
-
-        /// <summary>
-        /// 埋め込み Excel を強制リサイズ（親ウィンドウ拡大時用）。
+        /// 埋め込み Excel を強制リサイズ（互換 no-op。内容ビューはレイアウト自動追従）。
         /// </summary>
         public void ForceResizeHost()
         {
-            _host.ResizeExcelToHost(force: true);
+            // ContentPane は WPF レイアウトに従うため不要
         }
 
         /// <summary>
-        /// スクリーン座標が Excel ホスト上にあるか（DPI 対応の PointToScreen 矩形）。
+        /// スクリーン座標がホスト上にあるか。
         /// </summary>
         public bool ContainsScreenPoint(Point screenPoint)
         {
@@ -144,7 +120,7 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// ヒット矩形の中心 X（左右どちらに近いか判定用）。
+        /// ヒット矩形の中心 X。
         /// </summary>
         public double GetScreenCenterX()
         {
@@ -162,7 +138,7 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// ホイール 1 刻み分の縦スクロール（未フォーカスでも可）。
+        /// ホイール 1 刻み分の縦スクロール（内容ビューでは未対応）。
         /// </summary>
         public bool TryScrollByWheelDelta(int wheelDelta)
         {
@@ -170,122 +146,11 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// ホイール 1 刻み分スクロールする。
+        /// ホイール 1 刻み分スクロールする（内容ビューでは未対応）。
         /// </summary>
-        /// <param name="wheelDelta">Windows のホイール delta（通常 ±120）</param>
-        /// <param name="horizontal">true なら横（ScrollColumn）</param>
-        /// <returns>ペイン上で処理を試みたとき true</returns>
         public bool TryScrollByWheelDelta(int wheelDelta, bool horizontal)
         {
-            if (_session == null || !_session.IsOpen || wheelDelta == 0)
-            {
-                return false;
-            }
-
-            _session.ActivateForInput();
-
-            int notches = wheelDelta / 120;
-            if (notches == 0)
-            {
-                notches = wheelDelta > 0 ? 1 : -1;
-            }
-
-            // ホイール上 / チルト右 → 行・列番号を減らす／増やす
-            int step = -notches * (horizontal ? 2 : 3);
-
-            int curR = _lastKnownScrollRow;
-            int curC = _lastKnownScrollCol;
-            if (_session.TryGetScroll(out curR, out curC))
-            {
-                _lastKnownScrollRow = curR;
-                _lastKnownScrollCol = curC;
-            }
-
-            int nextR = curR;
-            int nextC = curC;
-            if (horizontal)
-            {
-                nextC = Math.Max(1, curC + step);
-            }
-            else
-            {
-                nextR = Math.Max(1, curR + step);
-            }
-
-            bool ok = _session.TrySetScroll(nextR, nextC);
-            if (!ok && !horizontal)
-            {
-                ok = _session.TryGotoRow(nextR);
-            }
-
-            // COM が弱いとき: Win32 の横／縦スクロールメッセージ
-            if (!ok || horizontal)
-            {
-                try
-                {
-                    IntPtr hwnd = _session.GetMainWindowHandle();
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        int code = horizontal
-                            ? (step > 0 ? Win32.SB_LINERIGHT : Win32.SB_LINELEFT)
-                            : (step > 0 ? Win32.SB_LINEDOWN : Win32.SB_LINEUP);
-                        int msg = horizontal ? Win32.WM_HSCROLL : Win32.WM_VSCROLL;
-                        int times = Math.Max(1, Math.Abs(notches) * (horizontal ? 2 : 3));
-                        for (int i = 0; i < times; i++)
-                        {
-                            Win32.SendMessage(hwnd, msg, (IntPtr)code, IntPtr.Zero);
-                        }
-
-                        ok = true;
-                    }
-                }
-                catch
-                {
-                    // ignore
-                }
-            }
-
-            // ネイティブ転送（横は HWHEEL、縦は WHEEL）
-            try
-            {
-                Win32.POINT pt;
-                if (Win32.GetCursorPos(out pt))
-                {
-                    if (horizontal)
-                    {
-                        _host.ForwardMouseHWheel(wheelDelta, pt.X, pt.Y);
-                    }
-                    else
-                    {
-                        _host.ForwardMouseWheel(wheelDelta, pt.X, pt.Y);
-                    }
-                }
-            }
-            catch
-            {
-                // ignore
-            }
-
-            _lastKnownScrollRow = nextR;
-            _lastKnownScrollCol = nextC;
-            int verifyR, verifyC;
-            if (_session.TryGetScroll(out verifyR, out verifyC))
-            {
-                _lastKnownScrollRow = verifyR;
-                _lastKnownScrollCol = verifyC;
-            }
-
-            // イベント駆動同期: 同一 UI スレッドで相手側へ即 Apply
-            try
-            {
-                ScrollInteracted?.Invoke(this, _lastKnownScrollRow, _lastKnownScrollCol, horizontal);
-            }
-            catch
-            {
-                // ignore subscriber errors
-            }
-
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -332,60 +197,11 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// 画面ピクセル移動量から縦横パンする（中ボタンドラッグ等）。
-        /// dy&gt;0 = 下へドラッグ = 内容を下へ（行番号減）、Excel 的には「掴んで動かす」。
+        /// 画面ピクセル移動量からパンする（内容ビューでは未対応）。
         /// </summary>
         public bool TryPanByPixels(double dx, double dy)
         {
-            if (_session == null || !_session.IsOpen)
-            {
-                return false;
-            }
-
-            if (Math.Abs(dx) < 0.5 && Math.Abs(dy) < 0.5)
-            {
-                return true;
-            }
-
-            _session.ActivateForInput();
-
-            int curR = _lastKnownScrollRow;
-            int curC = _lastKnownScrollCol;
-            if (_session.TryGetScroll(out curR, out curC))
-            {
-                _lastKnownScrollRow = curR;
-                _lastKnownScrollCol = curC;
-            }
-
-            // 感度: 縦 12px ≒ 1 行、横 16px ≒ 1 列（ドラッグで横も効きやすく）
-            int dRow = (int)Math.Round(-dy / 12.0);
-            int dCol = (int)Math.Round(-dx / 16.0);
-            if (dRow == 0 && Math.Abs(dy) >= 3)
-            {
-                dRow = dy > 0 ? -1 : 1;
-            }
-
-            if (dCol == 0 && Math.Abs(dx) >= 3)
-            {
-                dCol = dx > 0 ? -1 : 1;
-            }
-
-            int nextR = Math.Max(1, curR + dRow);
-            int nextC = Math.Max(1, curC + dCol);
-            bool ok = _session.TrySetScroll(nextR, nextC);
-            if (ok)
-            {
-                _lastKnownScrollRow = nextR;
-                _lastKnownScrollCol = nextC;
-                int vr, vc;
-                if (_session.TryGetScroll(out vr, out vc))
-                {
-                    _lastKnownScrollRow = vr;
-                    _lastKnownScrollCol = vc;
-                }
-            }
-
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -398,11 +214,11 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// ブックが開いているか。
+        /// ブックが開いているか（パス設定済み）。
         /// </summary>
         public bool IsOpen
         {
-            get { return _session != null && _session.IsOpen; }
+            get { return !string.IsNullOrEmpty(_filePath) && File.Exists(_filePath); }
         }
 
         /// <summary>
@@ -410,15 +226,31 @@ namespace DiffXL.VIEW.Controls
         /// </summary>
         public string FilePath
         {
-            get { return _session != null ? _session.FilePath : null; }
+            get { return _filePath; }
         }
 
         /// <summary>
-        /// 内部セッション（同期スクロール等で利用）。
+        /// 内部セッション（Excel 廃止のため常に null。互換 API）。
         /// </summary>
         public ExcelWorkbookSession Session
         {
-            get { return _session; }
+            get { return null; }
+        }
+
+        /// <summary>
+        /// 内容ホスト。
+        /// </summary>
+        public ContentPane ContentHostControl
+        {
+            get { return ContentHost; }
+        }
+
+        /// <summary>
+        /// 保持中のブック内容。
+        /// </summary>
+        public WorkbookContent Workbook
+        {
+            get { return _workbook; }
         }
 
         /// <summary>
@@ -435,6 +267,22 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// シート名一覧（内容モデルから）。
+        /// </summary>
+        public IReadOnlyList<string> GetSheetNames()
+        {
+            if (_workbook == null || _workbook.Sheets == null)
+            {
+                return Array.Empty<string>();
+            }
+
+            return _workbook.Sheets
+                .Where(s => s != null && !string.IsNullOrEmpty(s.Name))
+                .Select(s => s.Name)
+                .ToList();
+        }
+
+        /// <summary>
         /// オープン失敗時イベント。
         /// </summary>
         public event Action<string> OpenFailed;
@@ -445,12 +293,12 @@ namespace DiffXL.VIEW.Controls
         public event Action OpenSucceeded;
 
         /// <summary>
-        /// ユーザー操作でシートが切り替わった（プログラムからの TrySelectSheet では発火しない）。
+        /// ユーザー操作でシートが切り替わった。
         /// </summary>
         public event Action<string> SheetChangedByUser;
 
         /// <summary>
-        /// ファイルを読み取り専用で開いて埋め込む。
+        /// ファイルパスを設定する（Excel は起動しない。.xlsx の存在確認のみ）。
         /// </summary>
         /// <param name="path">xlsx パス</param>
         public void OpenFile(string path)
@@ -484,34 +332,14 @@ namespace DiffXL.VIEW.Controls
                 return;
             }
 
-            if (!ExcelAvailability.IsExcelInstalled())
-            {
-                RaiseOpenFailed(ExcelAvailability.GetDiagnosticMessage());
-                return;
-            }
-
             try
             {
                 CloseFile();
-
-                var session = new ExcelWorkbookSession();
-                session.OpenReadOnly(fullPath);
-                IntPtr hwnd = session.GetMainWindowHandle();
-                if (hwnd == IntPtr.Zero)
-                {
-                    session.Dispose();
-                    RaiseOpenFailed("Excel ウィンドウの埋め込みに失敗しました。ログを確認してください。");
-                    return;
-                }
-
-                // レイアウト確定後に Attach（ホスト HWND が必要なため）
-                _session = session;
+                _filePath = fullPath;
                 PathText.Text = fullPath;
                 PathText.SetResourceReference(TextBlock.ForegroundProperty, "Brush.Text");
-                AttachWhenReady(hwnd);
-                LoadSheets();
                 OpenSucceeded?.Invoke();
-                Log.Info(PaneTitle + " にファイルを表示: " + fullPath);
+                Log.Info(PaneTitle + " にファイルを設定（内容ビュー）: " + fullPath);
             }
             catch (Exception ex)
             {
@@ -522,31 +350,57 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// ファイルを閉じて埋め込みを解除する。
+        /// 比較結果のブック内容を読み込み、指定シートを ContentPane に表示する。
+        /// </summary>
+        /// <param name="workbook">ブック内容</param>
+        /// <param name="allDiffs">全差分</param>
+        /// <param name="isLeft">左ペインなら true</param>
+        /// <param name="preferredSheetName">表示したいシート名（null なら先頭）</param>
+        public void LoadWorkbookContent(
+            WorkbookContent workbook,
+            IList<DiffItem> allDiffs,
+            bool isLeft,
+            string preferredSheetName = null)
+        {
+            _workbook = workbook;
+            _allDiffs = allDiffs ?? new List<DiffItem>();
+            _isLeft = isLeft;
+
+            if (workbook != null && !string.IsNullOrEmpty(workbook.Path))
+            {
+                _filePath = workbook.Path;
+                PathText.Text = workbook.Path;
+                PathText.SetResourceReference(TextBlock.ForegroundProperty, "Brush.Text");
+            }
+
+            PopulateSheetCombo(preferredSheetName);
+            string sheetName = SelectedSheetName ?? preferredSheetName;
+            ShowSheet(sheetName);
+        }
+
+        /// <summary>
+        /// 単一シートを ContentPane に読み込む。
+        /// </summary>
+        public void LoadContent(SheetContent sheet, IList<DiffItem> sheetDiffs, bool isLeft)
+        {
+            _isLeft = isLeft;
+            if (ContentHost != null)
+            {
+                ContentHost.Load(sheet, sheetDiffs, isLeft);
+            }
+        }
+
+        /// <summary>
+        /// ファイル表示をクリアする。
         /// </summary>
         public void CloseFile()
         {
-            try
+            _filePath = null;
+            _workbook = null;
+            _allDiffs = new List<DiffItem>();
+            if (ContentHost != null)
             {
-                _host.Detach();
-            }
-            catch (Exception ex)
-            {
-                Log.Debug("Host.Detach: " + ex.Message);
-            }
-
-            if (_session != null)
-            {
-                try
-                {
-                    _session.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Log.Debug("Session.Dispose: " + ex.Message);
-                }
-
-                _session = null;
+                ContentHost.Load(null, null, _isLeft);
             }
 
             PathText.Text = "（未選択）";
@@ -564,96 +418,57 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// 表示メトリクスを取得する。
+        /// 表示メトリクスを取得する（Excel 廃止のため常に false）。
         /// </summary>
-        /// <param name="metrics">結果</param>
-        /// <returns>成功時 true</returns>
         public bool TryGetViewMetrics(out ExcelViewMetrics metrics)
         {
             metrics = null;
-            if (_session == null)
-            {
-                return false;
-            }
-
-            return _session.TryGetViewMetrics(out metrics);
-        }
-
-        /// <summary>
-        /// ホスト HWND 生成後に Attach する。
-        /// </summary>
-        /// <param name="hwnd">Excel HWND</param>
-        private void AttachWhenReady(IntPtr hwnd)
-        {
-            Action attach = () =>
-            {
-                try
-                {
-                    if (_session == null || !_session.IsOpen)
-                    {
-                        return;
-                    }
-
-                    _host.Attach(hwnd);
-                    if (_session != null)
-                    {
-                        _session.EnsureViewerChrome();
-                    }
-
-                    _host.ResizeExcelToHost(force: true);
-                    // 埋め込み直後はリボン再表示されることがあるので遅延でもう一度
-                    _host.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() =>
-                    {
-                        try
-                        {
-                            if (_session != null)
-                            {
-                                _session.EnsureViewerChrome();
-                            }
-
-                            _host.ResizeExcelToHost(force: true);
-                        }
-                        catch
-                        {
-                            // ignore
-                        }
-                    }));
-                }
-                catch (Exception ex)
-                {
-                    Log.Exception(ex);
-                    RaiseOpenFailed("Excel ウィンドウの埋め込みに失敗しました: " + ex.Message);
-                }
-            };
-
-            // HwndHost の BuildWindowCore 後に実行する
-            _host.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, attach);
+            return false;
         }
 
         /// <summary>
         /// シート一覧を ComboBox に載せる。
         /// </summary>
-        private void LoadSheets()
+        private void PopulateSheetCombo(string preferredSheetName)
         {
             _suppressSheetEvent = true;
             try
             {
                 SheetCombo.Items.Clear();
-                if (_session == null || !_session.IsOpen)
+                if (_workbook == null || _workbook.Sheets == null || _workbook.Sheets.Count == 0)
                 {
                     SheetCombo.IsEnabled = false;
                     return;
                 }
 
-                foreach (string name in _session.GetSheetNames())
+                foreach (SheetContent sheet in _workbook.Sheets)
                 {
-                    SheetCombo.Items.Add(name);
+                    if (sheet != null && !string.IsNullOrEmpty(sheet.Name))
+                    {
+                        SheetCombo.Items.Add(sheet.Name);
+                    }
                 }
 
                 SheetCombo.IsEnabled = SheetCombo.Items.Count > 0;
+                int index = 0;
+                if (!string.IsNullOrEmpty(preferredSheetName))
+                {
+                    for (int i = 0; i < SheetCombo.Items.Count; i++)
+                    {
+                        if (string.Equals(
+                            SheetCombo.Items[i] as string,
+                            preferredSheetName,
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+
                 if (SheetCombo.Items.Count > 0)
                 {
-                    SheetCombo.SelectedIndex = 0;
+                    SheetCombo.SelectedIndex = index;
                 }
             }
             catch (Exception ex)
@@ -665,6 +480,83 @@ namespace DiffXL.VIEW.Controls
             {
                 _suppressSheetEvent = false;
             }
+        }
+
+        /// <summary>
+        /// 指定シートを ContentPane に表示する。
+        /// </summary>
+        private void ShowSheet(string sheetName)
+        {
+            SheetContent sheet = FindSheet(sheetName);
+            IList<DiffItem> sheetDiffs = FilterDiffsForSheet(sheet);
+            if (ContentHost != null)
+            {
+                ContentHost.Load(sheet, sheetDiffs, _isLeft);
+            }
+        }
+
+        /// <summary>
+        /// シート名で SheetContent を探す。
+        /// </summary>
+        private SheetContent FindSheet(string sheetName)
+        {
+            if (_workbook == null || _workbook.Sheets == null)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrEmpty(sheetName))
+            {
+                foreach (SheetContent s in _workbook.Sheets)
+                {
+                    if (s != null && string.Equals(s.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return s;
+                    }
+                }
+            }
+
+            return _workbook.Sheets.FirstOrDefault(s => s != null);
+        }
+
+        /// <summary>
+        /// シートに関連する差分を抽出する。
+        /// </summary>
+        private IList<DiffItem> FilterDiffsForSheet(SheetContent sheet)
+        {
+            if (_allDiffs == null || _allDiffs.Count == 0)
+            {
+                return new List<DiffItem>();
+            }
+
+            string name = sheet != null ? sheet.Name : null;
+            if (string.IsNullOrEmpty(name))
+            {
+                return new List<DiffItem>();
+            }
+
+            var list = new List<DiffItem>();
+            foreach (DiffItem d in _allDiffs)
+            {
+                if (d == null)
+                {
+                    continue;
+                }
+
+                bool match = _isLeft
+                    ? string.Equals(d.SheetLeft, name, StringComparison.OrdinalIgnoreCase)
+                      || (string.IsNullOrEmpty(d.SheetLeft)
+                          && string.Equals(d.SheetRight, name, StringComparison.OrdinalIgnoreCase))
+                    : string.Equals(d.SheetRight, name, StringComparison.OrdinalIgnoreCase)
+                      || (string.IsNullOrEmpty(d.SheetRight)
+                          && string.Equals(d.SheetLeft, name, StringComparison.OrdinalIgnoreCase));
+                if (match)
+                {
+                    list.Add(d);
+                }
+            }
+
+            return list;
         }
 
         /// <summary>
@@ -688,31 +580,50 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// シートをアクティブ化し、ComboBox 表示も合わせる（MiniMap ジャンプ用）。
+        /// シートを選択し ContentPane を更新する。
         /// </summary>
         /// <param name="sheetName">シート名</param>
         /// <returns>成功時 true</returns>
         public bool TrySelectSheet(string sheetName)
         {
-            if (_session == null || !_session.IsOpen || string.IsNullOrWhiteSpace(sheetName))
+            if (string.IsNullOrWhiteSpace(sheetName))
             {
                 return false;
             }
 
             try
             {
-                _session.ActivateSheet(sheetName);
                 _suppressSheetEvent = true;
                 try
                 {
+                    bool found = false;
                     for (int i = 0; i < SheetCombo.Items.Count; i++)
                     {
                         string name = SheetCombo.Items[i] as string;
                         if (string.Equals(name, sheetName, StringComparison.OrdinalIgnoreCase))
                         {
                             SheetCombo.SelectedIndex = i;
+                            found = true;
                             break;
                         }
+                    }
+
+                    if (!found && _workbook != null)
+                    {
+                        // コンボに無いが内容にある場合は追加
+                        SheetContent s = FindSheet(sheetName);
+                        if (s != null)
+                        {
+                            SheetCombo.Items.Add(s.Name);
+                            SheetCombo.SelectedItem = s.Name;
+                            SheetCombo.IsEnabled = true;
+                            found = true;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        return false;
                     }
                 }
                 finally
@@ -720,6 +631,7 @@ namespace DiffXL.VIEW.Controls
                     _suppressSheetEvent = false;
                 }
 
+                ShowSheet(sheetName);
                 return true;
             }
             catch (Exception ex)
@@ -734,7 +646,7 @@ namespace DiffXL.VIEW.Controls
         /// </summary>
         private void SheetCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_suppressSheetEvent || _session == null || !_session.IsOpen)
+            if (_suppressSheetEvent)
             {
                 return;
             }
@@ -747,7 +659,7 @@ namespace DiffXL.VIEW.Controls
 
             try
             {
-                _session.ActivateSheet(name);
+                ShowSheet(name);
                 SheetChangedByUser?.Invoke(name);
             }
             catch (Exception ex)
@@ -762,7 +674,7 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// アンロード時に Excel を閉じる。
+        /// アンロード時にクリアする。
         /// </summary>
         private void WorkbookPane_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -772,7 +684,6 @@ namespace DiffXL.VIEW.Controls
         /// <summary>
         /// 失敗イベントを発火する。
         /// </summary>
-        /// <param name="message">メッセージ</param>
         private void RaiseOpenFailed(string message)
         {
             Log.Error(PaneTitle + " OpenFailed: " + message);
