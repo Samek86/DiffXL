@@ -523,11 +523,33 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// 相手側の優先シート名を更新し、現在シートを再表示する。
+        /// </summary>
+        /// <param name="partnerSheetName">相手シート名（null 可）</param>
+        public void SetPartnerPreferredSheet(string partnerSheetName)
+        {
+            _partnerPreferredSheetName = partnerSheetName;
+            if (!string.IsNullOrEmpty(SelectedSheetName))
+            {
+                ShowSheet(SelectedSheetName);
+            }
+        }
+
+        /// <summary>
+        /// 現在選択シートを再描画する（差分フィルタ・相手シート反映用）。
+        /// </summary>
+        public void RefreshCurrentSheetDisplay()
+        {
+            ShowSheet(SelectedSheetName);
+        }
+
+        /// <summary>
         /// 指定シートを ContentPane に表示する。
         /// </summary>
         private void ShowSheet(string sheetName)
         {
             SheetContent sheet = FindSheet(_workbook, sheetName);
+            // 片側のみ: 相手ブックに partner が無ければ null（Structure + 片側表示）
             SheetContent partner = ResolvePartnerSheet(sheet);
             IList<DiffItem> sheetDiffs = FilterDiffsForSheet(sheet);
             if (ContentHost != null)
@@ -537,7 +559,7 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// 相手側シートを解決する（優先名 → 同名 → 先頭）。
+        /// 相手側シートを解決する（優先名 → 同名。先頭フォールバックはしない＝片側表示を可能に）。
         /// </summary>
         private SheetContent ResolvePartnerSheet(SheetContent selfSheet)
         {
@@ -546,22 +568,45 @@ namespace DiffXL.VIEW.Controls
                 return null;
             }
 
-            SheetContent byPreferred = FindSheet(_partnerWorkbook, _partnerPreferredSheetName);
-            if (byPreferred != null)
+            if (!string.IsNullOrEmpty(_partnerPreferredSheetName))
             {
-                return byPreferred;
+                SheetContent byPreferred = FindSheetExact(_partnerWorkbook, _partnerPreferredSheetName);
+                if (byPreferred != null)
+                {
+                    return byPreferred;
+                }
+
+                // 明示指定があるのに見つからない → 片側
+                return null;
             }
 
             if (selfSheet != null && !string.IsNullOrEmpty(selfSheet.Name))
             {
-                SheetContent sameName = FindSheet(_partnerWorkbook, selfSheet.Name);
-                if (sameName != null)
+                return FindSheetExact(_partnerWorkbook, selfSheet.Name);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// シート名で厳密に探す（見つからなければ null。先頭フォールバックなし）。
+        /// </summary>
+        private static SheetContent FindSheetExact(WorkbookContent workbook, string sheetName)
+        {
+            if (workbook == null || workbook.Sheets == null || string.IsNullOrEmpty(sheetName))
+            {
+                return null;
+            }
+
+            foreach (SheetContent s in workbook.Sheets)
+            {
+                if (s != null && string.Equals(s.Name, sheetName, StringComparison.OrdinalIgnoreCase))
                 {
-                    return sameName;
+                    return s;
                 }
             }
 
-            return _partnerWorkbook.Sheets.FirstOrDefault(s => s != null);
+            return null;
         }
 
         /// <summary>

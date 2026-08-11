@@ -12,8 +12,8 @@ using DiffXL.LOGIC.Diff;
 namespace DiffXL.VIEW.Controls
 {
     /// <summary>
-    /// 差分全体俯瞰 MiniMap。
-    /// シート順は SheetPairs の順を最優先し、各帯内で ScrollRow を線形に配置する。
+    /// 現在シートの差分俯瞰 MiniMap（全シート横断はしない）。
+    /// 1 シート分の帯内で ScrollRow を線形に配置する。
     /// </summary>
     public partial class MiniMapControl : UserControl
     {
@@ -32,10 +32,10 @@ namespace DiffXL.VIEW.Controls
         private int _mapMaxLeft = DefaultMaxRow;
         private int _mapMaxRight = DefaultMaxRow;
 
-        /// <summary>各シート帯の上部をシート名ヘッダに使う比率。</summary>
-        private const double SheetHeaderRatio = 0.20;
+        /// <summary>シート帯の上部をシート名ヘッダに使う比率。</summary>
+        private const double SheetHeaderRatio = 0.12;
 
-        /// <summary>全シート共通の最低行スケール（ScrollRow との対応用）。</summary>
+        /// <summary>現在シートの最低行スケール（ScrollRow との対応用）。</summary>
         private const int DefaultMaxRow = 120;
 
         private sealed class SheetSegment
@@ -80,22 +80,69 @@ namespace DiffXL.VIEW.Controls
                 _items.AddRange(items.Where(i => i != null));
             }
 
+            // 呼び出し側が現在シート分だけ渡す前提。複数シート名が混在しても先頭 1 枚に縮約する。
+            CollapseToSingleSheet();
             RebuildSegments();
             UpdateHintText();
             ScheduleRebuild();
         }
 
         /// <summary>
-        /// シート表示順（比較の SheetPairs 左シート順）。必ずこれを先にまたは後に呼ぶ。
+        /// 現在シートのみを MiniMap に載せる（全シート横断は禁止）。
+        /// items は呼び出し側で現在ペア分に絞済みとみなし、そのまま載せる。
+        /// </summary>
+        /// <param name="sheetName">帯ラベル用シート名（左優先。片側のみは右名可）</param>
+        /// <param name="items">そのシート／ペア関連の差分</param>
+        public void SetCurrentSheet(string sheetName, IEnumerable<DiffItem> items)
+        {
+            string name = string.IsNullOrWhiteSpace(sheetName) ? string.Empty : sheetName.Trim();
+            _items.Clear();
+            if (items != null)
+            {
+                _items.AddRange(items.Where(i => i != null));
+            }
+
+            // ラベル: 指定名 → 差分から推定
+            if (string.IsNullOrEmpty(name))
+            {
+                foreach (DiffItem item in _items)
+                {
+                    string s = item.SheetLeft ?? item.SheetRight;
+                    if (!string.IsNullOrEmpty(s))
+                    {
+                        name = s;
+                        break;
+                    }
+                }
+            }
+
+            _forcedSheetOrder = string.IsNullOrEmpty(name)
+                ? new List<string>()
+                : new List<string> { name };
+            _viewportSheet = name;
+            RebuildSegments();
+            UpdateHintText();
+            ScheduleRebuild();
+        }
+
+        /// <summary>
+        /// シート表示（現在シート 1 枚のみ。複数指定されても先頭を採用）。
         /// </summary>
         public void SetSheetOrder(IEnumerable<string> sheetNames)
         {
-            _forcedSheetOrder = (sheetNames ?? Enumerable.Empty<string>())
+            string first = (sheetNames ?? Enumerable.Empty<string>())
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .Select(s => s.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
+                .FirstOrDefault();
+            _forcedSheetOrder = string.IsNullOrEmpty(first)
+                ? new List<string>()
+                : new List<string> { first };
+            if (!string.IsNullOrEmpty(first))
+            {
+                _viewportSheet = first;
+            }
 
+            CollapseToSingleSheet();
             RebuildSegments();
             ScheduleRebuild();
         }
@@ -111,13 +158,14 @@ namespace DiffXL.VIEW.Controls
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(alignment.LeftSheet))
+            string sheet = !string.IsNullOrWhiteSpace(alignment.LeftSheet)
+                ? alignment.LeftSheet.Trim()
+                : (alignment.RightSheet ?? string.Empty).Trim();
+            if (!string.IsNullOrEmpty(sheet))
             {
-                EnsureSheetInOrder(alignment.LeftSheet.Trim());
-            }
-            else if (!string.IsNullOrWhiteSpace(alignment.RightSheet))
-            {
-                EnsureSheetInOrder(alignment.RightSheet.Trim());
+                // 現在シート 1 枚に差し替え（追加しない）
+                _forcedSheetOrder = new List<string> { sheet };
+                _viewportSheet = sheet;
             }
 
             SetScrollMap(alignment.ScrollMap);
@@ -240,24 +288,111 @@ namespace DiffXL.VIEW.Controls
 
         private void EnsureSheetInOrder(string sheet)
         {
-            if (_forcedSheetOrder.Any(s => string.Equals(s, sheet, StringComparison.OrdinalIgnoreCase)))
+            if (string.IsNullOrWhiteSpace(sheet))
             {
                 return;
             }
 
-            _forcedSheetOrder.Add(sheet);
+            // 現在シートのみ: 常に 1 枚へ差し替え（スタックしない）
+            string name = sheet.Trim();
+            if (_forcedSheetOrder.Count == 1
+                && string.Equals(_forcedSheetOrder[0], name, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            _forcedSheetOrder = new List<string> { name };
+            _viewportSheet = name;
+        }
+
+        /// <summary>
+        /// 複数シート名が混ざった差分を、強制順 or 先頭出現の 1 シート分に縮約する。
+        /// </summary>
+        private void CollapseToSingleSheet()
+        {
+            string current = _forcedSheetOrder != null && _forcedSheetOrder.Count > 0
+                ? _forcedSheetOrder[0]
+                : null;
+            if (string.IsNullOrEmpty(current))
+            {
+                foreach (DiffItem item in _items)
+                {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+
+                    string s = item.SheetLeft ?? item.SheetRight;
+                    if (!string.IsNullOrEmpty(s))
+                    {
+                        current = s;
+                        break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(current))
+            {
+                _forcedSheetOrder = new List<string>();
+                return;
+            }
+
+            _forcedSheetOrder = new List<string> { current };
+            if (_items.Count > 0)
+            {
+                _items.RemoveAll(i => i == null || !ItemBelongsToSheet(i, current));
+            }
+        }
+
+        private static bool ItemBelongsToSheet(DiffItem item, string sheetName)
+        {
+            if (item == null || string.IsNullOrEmpty(sheetName))
+            {
+                return false;
+            }
+
+            if (string.Equals(item.SheetLeft, sheetName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (string.Equals(item.SheetRight, sheetName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            // 片側 Structure 等: 片方が空でももう一方が一致
+            if (string.IsNullOrEmpty(item.SheetLeft)
+                && string.Equals(item.SheetRight, sheetName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(item.SheetRight)
+                && string.Equals(item.SheetLeft, sheetName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void RebuildSegments()
         {
             List<string> names = ResolveSheetNameOrder();
+            // 現在シートのみ（2 枚以上は先頭のみ）
+            if (names.Count > 1)
+            {
+                names = new List<string> { names[0] };
+                _forcedSheetOrder = new List<string> { names[0] };
+            }
+
             if (names.Count == 0)
             {
                 _segments.Clear();
                 return;
             }
 
-            // 全シートで同じ MaxRow スケール（位置の一貫性）
             // ContentScrollMap の Lmax を優先し、差分行・既定値で下駄を履かせる
             int globalMax = Math.Max(DefaultMaxRow, Math.Max(_mapMaxLeft, _mapMaxRight));
             foreach (DiffItem item in _items)
@@ -272,19 +407,16 @@ namespace DiffXL.VIEW.Controls
             globalMax = Math.Max(DefaultMaxRow, globalMax + 20);
 
             _segments.Clear();
-            double hEach = 1.0 / names.Count;
-            for (int i = 0; i < names.Count; i++)
+            // 単一シートで全高を使う
+            _segments.Add(new SheetSegment
             {
-                _segments.Add(new SheetSegment
-                {
-                    Name = names[i],
-                    Top = i * hEach,
-                    Height = hEach,
-                    MinRow = 1,
-                    MaxRow = globalMax,
-                    Index = i
-                });
-            }
+                Name = names[0],
+                Top = 0,
+                Height = 1.0,
+                MinRow = 1,
+                MaxRow = globalMax,
+                Index = 0
+            });
         }
 
         /// <summary>
@@ -372,32 +504,30 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// シート順: 強制順（SheetPairs）→ なければ差分の初出順（OrderHint ではなくシート名の安定順）。
+        /// 現在シート名（強制 1 枚 → なければ差分の先頭シート）。
         /// </summary>
         private List<string> ResolveSheetNameOrder()
         {
             if (_forcedSheetOrder != null && _forcedSheetOrder.Count > 0)
             {
-                return new List<string>(_forcedSheetOrder);
+                return new List<string> { _forcedSheetOrder[0] };
             }
 
-            // 差分のシートを「初出順」ではなく、名前ソートではなく出現順（items は OrderHint 済み想定）
-            var ordered = new List<string>();
             foreach (DiffItem item in _items.OrderBy(i => i.OrderHint).ThenBy(i => i.SheetLeft ?? i.SheetRight ?? string.Empty))
             {
                 string s = item.SheetLeft ?? item.SheetRight ?? string.Empty;
-                if (string.IsNullOrEmpty(s))
+                if (!string.IsNullOrEmpty(s))
                 {
-                    continue;
-                }
-
-                if (!ordered.Any(x => string.Equals(x, s, StringComparison.OrdinalIgnoreCase)))
-                {
-                    ordered.Add(s);
+                    return new List<string> { s };
                 }
             }
 
-            return ordered;
+            if (!string.IsNullOrEmpty(_viewportSheet))
+            {
+                return new List<string> { _viewportSheet };
+            }
+
+            return new List<string>();
         }
 
         private static int GetItemRow(DiffItem item)
@@ -509,10 +639,10 @@ namespace DiffXL.VIEW.Controls
                     MapCanvas.Children.Add(sep);
                 }
 
-                // 番号 + シート名
+                // 現在シート名（単一）
                 var label = new TextBlock
                 {
-                    Text = (i + 1) + ". " + Truncate(seg.Name, 9),
+                    Text = Truncate(seg.Name, 10),
                     FontSize = 10,
                     FontWeight = FontWeights.Bold,
                     Foreground = new SolidColorBrush(Color.FromRgb(248, 250, 252)),
@@ -536,11 +666,10 @@ namespace DiffXL.VIEW.Controls
             double markLeft = 4;
             double markW = Math.Max(8, w - 8);
 
-            // 同一シート内は行順
+            // 現在帯内は行順（異名ペアでも単一帯に投影）
             foreach (DiffItem item in _items
-                .OrderBy(i => SegmentIndexOf(i))
-                .ThenBy(i => GetItemRow(i))
-                .ThenBy(i => i.AddressLeft ?? string.Empty))
+                .OrderBy(i => GetItemRow(i))
+                .ThenBy(i => i.AddressLeft ?? i.AddressRight ?? string.Empty))
             {
                 double ratio;
                 if (!TryMapItemToRatio(item, out ratio))
@@ -579,24 +708,20 @@ namespace DiffXL.VIEW.Controls
         private bool TryMapItemToRatio(DiffItem item, out double ratio)
         {
             ratio = 0;
-            if (item == null)
+            if (item == null || _segments.Count == 0)
             {
                 return false;
             }
 
-            string sheet = item.SheetLeft ?? item.SheetRight ?? string.Empty;
             int row = GetItemRow(item);
             if (row <= 0)
             {
                 row = 1;
             }
 
-            SheetSegment seg = FindSegment(sheet);
-            if (seg == null)
-            {
-                return false;
-            }
-
+            // 現在シート単一帯: シート名が異なっても同一帯へ投影（異名ペア）
+            string sheet = item.SheetLeft ?? item.SheetRight ?? string.Empty;
+            SheetSegment seg = FindSegment(sheet) ?? _segments[0];
             ratio = MapRowToRatio(seg, row);
             return true;
         }

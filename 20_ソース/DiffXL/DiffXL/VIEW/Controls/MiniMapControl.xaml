@@ -6,7 +6,7 @@
     MinWidth="88"
     Background="#FF111827"
     Focusable="True"
-    ToolTip="全体の差分俯瞰。黄=差分位置、青帯=いま表示中の範囲。クリックでジャンプ">
+    ToolTip="現在シートの差分。黄=差分位置、青帯=表示範囲。クリックでジャンプ">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -32,7 +32,7 @@
                 HorizontalAlignment="Center"
                 FontSize="10"
                 Foreground="#FFE5E7EB"
-                Text="全体俯瞰"
+                Text="現在シート"
                 TextAlignment="Center" />
         </StackPanel>
         <Border

@@ -27,23 +27,55 @@ namespace DiffXL.LOGIC.Diff
 
             if (manualOrNull != null && manualOrNull.Count > 0)
             {
+                var usedLeft = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var usedRight = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                 foreach (SheetPair pair in manualOrNull)
                 {
-                    if (pair == null || string.IsNullOrEmpty(pair.LeftSheet) || string.IsNullOrEmpty(pair.RightSheet))
+                    if (pair == null)
                     {
                         continue;
                     }
 
-                    result.Pairs.Add(new SheetPair
+                    bool hasLeft = !string.IsNullOrEmpty(pair.LeftSheet);
+                    bool hasRight = !string.IsNullOrEmpty(pair.RightSheet);
+
+                    // 両側あり → 比較ペア
+                    if (hasLeft && hasRight)
                     {
-                        LeftSheet = pair.LeftSheet,
-                        RightSheet = pair.RightSheet,
-                        IsManual = true
-                    });
+                        result.Pairs.Add(new SheetPair
+                        {
+                            LeftSheet = pair.LeftSheet,
+                            RightSheet = pair.RightSheet,
+                            IsManual = true
+                        });
+                        usedLeft.Add(pair.LeftSheet);
+                        usedRight.Add(pair.RightSheet);
+                        continue;
+                    }
+
+                    // 片側明示 → Structure 対象
+                    if (hasLeft && !hasRight)
+                    {
+                        if (!usedLeft.Contains(pair.LeftSheet))
+                        {
+                            result.LeftOnlySheets.Add(pair.LeftSheet);
+                            usedLeft.Add(pair.LeftSheet);
+                        }
+
+                        continue;
+                    }
+
+                    if (hasRight && !hasLeft)
+                    {
+                        if (!usedRight.Contains(pair.RightSheet))
+                        {
+                            result.RightOnlySheets.Add(pair.RightSheet);
+                            usedRight.Add(pair.RightSheet);
+                        }
+                    }
                 }
 
-                var usedLeft = new HashSet<string>(result.Pairs.Select(p => p.LeftSheet), StringComparer.OrdinalIgnoreCase);
-                var usedRight = new HashSet<string>(result.Pairs.Select(p => p.RightSheet), StringComparer.OrdinalIgnoreCase);
                 result.LeftOnlySheets.AddRange(left.Where(s => !usedLeft.Contains(s)));
                 result.RightOnlySheets.AddRange(right.Where(s => !usedRight.Contains(s)));
                 return result;

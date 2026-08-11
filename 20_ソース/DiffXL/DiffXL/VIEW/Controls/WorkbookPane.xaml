@@ -61,7 +61,7 @@
                     Margin="0,0,8,0"
                     VerticalAlignment="Center"
                     IsEnabled="False"
-                    ToolTip="シートを切り替えると、対応するもう一方のシートも同時に切り替わります"
+                    ToolTip="この側のシートを独立して切り替えます（相手は変わりません）。異名比較は「この組み合わせで比較」"
                     SelectionChanged="SheetCombo_SelectionChanged" />
 
                 <Button

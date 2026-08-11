@@ -165,6 +165,10 @@ namespace DiffXL
             {
                 // 画像ペアの枠・塗りも再比較なしで ON/OFF
                 ApplyImageHighlightVisible(visible);
+                if (visible)
+                {
+                    RefreshMiniMapForCurrentSheet();
+                }
 
                 if (_updatingHighlightToggle)
                 {
@@ -1317,12 +1321,70 @@ namespace DiffXL
                 return;
             }
 
-            var dialog = new SheetMapDialog(leftSheets.ToList(), rightSheets.ToList()) { Owner = this };
-            if (dialog.ShowDialog() == true && dialog.ResultPairs != null)
+            IList<SheetPair> existing = null;
+            if (_session.Options != null && _session.Options.ManualSheetPairs != null
+                && _session.Options.ManualSheetPairs.Count > 0)
             {
-                _session.Options.ManualSheetPairs = dialog.ResultPairs;
+                existing = _session.Options.ManualSheetPairs;
+            }
+            else if (_session.LastResult != null)
+            {
+                existing = GetActiveSheetPairs(_session.LastResult);
+            }
+
+            var dialog = new SheetMapDialog(leftSheets.ToList(), rightSheets.ToList(), existing) { Owner = this };
+            if (dialog.ShowDialog() == true)
+            {
+                if (dialog.ResetToSameName)
+                {
+                    _session.Options.ManualSheetPairs = null;
+                }
+                else if (dialog.ResultPairs != null)
+                {
+                    _session.Options.ManualSheetPairs = dialog.ResultPairs;
+                }
+
                 await RunCompareOnlyAsync();
             }
+        }
+
+        /// <summary>
+        /// 左右ペインの現在選択を ManualSheetPairs にして再比較する。
+        /// </summary>
+        private async void BtnCompareCurrentPair_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_session.HasBothPaths)
+            {
+                MessageBox.Show("比較対象ファイルがありません。", Common.AppDisplayName);
+                return;
+            }
+
+            string left = LeftPane != null ? LeftPane.SelectedSheetName : null;
+            string right = RightPane != null ? RightPane.SelectedSheetName : null;
+            if (string.IsNullOrEmpty(left) && string.IsNullOrEmpty(right))
+            {
+                MessageBox.Show("左右のどちらかのシートを選択してください。", Common.AppDisplayName);
+                return;
+            }
+
+            // 片側のみも許可（Structure + 片側表示）
+            _session.Options.ManualSheetPairs = new List<SheetPair>
+            {
+                new SheetPair
+                {
+                    LeftSheet = left,
+                    RightSheet = right,
+                    IsManual = true
+                }
+            };
+
+            StatusText.Text = string.Format(
+                CultureInfo.InvariantCulture,
+                "手動ペアで再比較: {0} ↔ {1}",
+                string.IsNullOrEmpty(left) ? "（なし）" : left,
+                string.IsNullOrEmpty(right) ? "（なし）" : right);
+            Log.Info("この組み合わせで比較 L=" + (left ?? "") + " R=" + (right ?? ""));
+            await RunCompareOnlyAsync();
         }
 
         /// <summary>
@@ -1639,9 +1701,14 @@ namespace DiffXL
                 bool on = BtnHighlightToggle.IsChecked == true;
                 _highlightController.SetVisible(on);
                 ApplyImageHighlightVisible(on);
+                if (on)
+                {
+                    RefreshMiniMapForCurrentSheet();
+                }
+
                 UpdateHighlightToggleCaption();
                 StatusText.Text = on
-                    ? "差分印: MiniMap / 画像ハイライト表示"
+                    ? "差分印: MiniMap（現在シート）/ 画像ハイライト表示"
                     : "差分印: 非表示（結果・画像は保持）";
             }
             finally
@@ -3085,10 +3152,10 @@ namespace DiffXL
                 }
             }
 
-            MiniMap.SetDiffs(result.Items);
             RebuildPairSheetCombo(result);
             BindContentPanes(result);
             ApplyContentScrollMaps(result);
+            RefreshMiniMapForCurrentSheet();
             // レイアウト確定後にもう一度
             Dispatcher.BeginInvoke(
                 System.Windows.Threading.DispatcherPriority.Loaded,
@@ -3099,10 +3166,10 @@ namespace DiffXL
                         _highlightController.Apply(result);
                     }
 
-                    MiniMap.SetDiffs(result.Items);
                     SyncPairComboSelectionFromPanes();
                     BindContentPanes(result);
                     ApplyContentScrollMaps(result);
+                    RefreshMiniMapForCurrentSheet();
                 }));
             UpdateDiffStatus(result);
             StatusText.Text = string.Format(
@@ -3305,7 +3372,8 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// 左ペインのシート変更 → 右も対応シートへ。
+        /// 左ペインのシート変更（独立。右は自動で変えない）。
+        /// MiniMap を現在シートの差分だけに再構築する。
         /// </summary>
         private void OnLeftSheetChangedByUser(string leftSheet)
         {
@@ -3314,24 +3382,43 @@ namespace DiffXL
                 return;
             }
 
-            string rightSheet = ResolvePairedSheet(leftSheet, fromLeft: true);
+            string rightSheet = RightPane != null ? RightPane.SelectedSheetName : null;
+            // 既知ペアがあればステータス用に解決（強制切替はしない）
+            string pairedRight = ResolvePairedSheet(leftSheet, fromLeft: true);
             _syncingSheets = true;
             try
             {
-                if (!string.IsNullOrEmpty(rightSheet) && RightPane.IsOpen)
+                // 相手ペインの partner を現在の右選択に合わせる（無ければ片側）
+                if (LeftPane != null)
                 {
-                    RightPane.TrySelectSheet(rightSheet);
-                    StatusText.Text = "シート切替: " + leftSheet + " ↔ " + rightSheet;
-                    Log.Info("シート同期 L→R: " + leftSheet + " → " + rightSheet);
+                    LeftPane.SetPartnerPreferredSheet(rightSheet);
                 }
-                else
+
+                if (RightPane != null)
                 {
-                    StatusText.Text = "シート切替: 左=" + leftSheet + "（右に対応シートなし）";
-                    Log.Debug("シート同期 L→R: 対応なし left=" + leftSheet);
+                    RightPane.SetPartnerPreferredSheet(leftSheet);
                 }
 
                 SyncPairComboSelectionFromPanes();
                 RefreshScrollSyncActiveSheets();
+                RefreshMiniMapForCurrentSheet();
+
+                if (!string.IsNullOrEmpty(pairedRight)
+                    && string.Equals(pairedRight, rightSheet, StringComparison.OrdinalIgnoreCase))
+                {
+                    StatusText.Text = "シート切替: " + leftSheet + " ↔ " + rightSheet;
+                }
+                else if (string.IsNullOrEmpty(rightSheet))
+                {
+                    StatusText.Text = "シート切替: 左=" + leftSheet + "（片側）· MiniMap 更新";
+                }
+                else
+                {
+                    StatusText.Text = "シート切替: 左=" + leftSheet + " / 右=" + rightSheet
+                        + "（未対応なら「この組み合わせで比較」）";
+                }
+
+                Log.Info("シート独立 L: " + leftSheet + " (R=" + (rightSheet ?? "") + ")");
             }
             finally
             {
@@ -3340,7 +3427,8 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// 右ペインのシート変更 → 左も対応シートへ。
+        /// 右ペインのシート変更（独立。左は自動で変えない）。
+        /// MiniMap を現在シートの差分だけに再構築する。
         /// </summary>
         private void OnRightSheetChangedByUser(string rightSheet)
         {
@@ -3349,24 +3437,41 @@ namespace DiffXL
                 return;
             }
 
-            string leftSheet = ResolvePairedSheet(rightSheet, fromLeft: false);
+            string leftSheet = LeftPane != null ? LeftPane.SelectedSheetName : null;
+            string pairedLeft = ResolvePairedSheet(rightSheet, fromLeft: false);
             _syncingSheets = true;
             try
             {
-                if (!string.IsNullOrEmpty(leftSheet) && LeftPane.IsOpen)
+                if (RightPane != null)
                 {
-                    LeftPane.TrySelectSheet(leftSheet);
-                    StatusText.Text = "シート切替: " + leftSheet + " ↔ " + rightSheet;
-                    Log.Info("シート同期 R→L: " + rightSheet + " → " + leftSheet);
+                    RightPane.SetPartnerPreferredSheet(leftSheet);
                 }
-                else
+
+                if (LeftPane != null)
                 {
-                    StatusText.Text = "シート切替: 右=" + rightSheet + "（左に対応シートなし）";
-                    Log.Debug("シート同期 R→L: 対応なし right=" + rightSheet);
+                    LeftPane.SetPartnerPreferredSheet(rightSheet);
                 }
 
                 SyncPairComboSelectionFromPanes();
                 RefreshScrollSyncActiveSheets();
+                RefreshMiniMapForCurrentSheet();
+
+                if (!string.IsNullOrEmpty(pairedLeft)
+                    && string.Equals(pairedLeft, leftSheet, StringComparison.OrdinalIgnoreCase))
+                {
+                    StatusText.Text = "シート切替: " + leftSheet + " ↔ " + rightSheet;
+                }
+                else if (string.IsNullOrEmpty(leftSheet))
+                {
+                    StatusText.Text = "シート切替: 右=" + rightSheet + "（片側）· MiniMap 更新";
+                }
+                else
+                {
+                    StatusText.Text = "シート切替: 左=" + (leftSheet ?? "—") + " / 右=" + rightSheet
+                        + "（未対応なら「この組み合わせで比較」）";
+                }
+
+                Log.Info("シート独立 R: " + rightSheet + " (L=" + (leftSheet ?? "") + ")");
             }
             finally
             {
@@ -3375,7 +3480,7 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// ツールバーの対応シートコンボ変更 → 左右まとめて切替。
+        /// ツールバーの対応シートコンボ変更 → 左右まとめて切替 → MiniMap をそのシートのみ再構築。
         /// </summary>
         private void PairSheetCombo_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -3403,9 +3508,21 @@ namespace DiffXL
                     RightPane.TrySelectSheet(item.RightSheet);
                 }
 
+                // 片側ペア: 片方だけ選択
+                if (LeftPane != null)
+                {
+                    LeftPane.SetPartnerPreferredSheet(item.RightSheet);
+                }
+
+                if (RightPane != null)
+                {
+                    RightPane.SetPartnerPreferredSheet(item.LeftSheet);
+                }
+
                 StatusText.Text = "シート切替: " + item.Display;
                 Log.Info("シート同期 ツールバー: " + item.Display);
                 RefreshScrollSyncActiveSheets();
+                RefreshMiniMapForCurrentSheet();
             }
             finally
             {
@@ -3414,7 +3531,87 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// 比較結果のシート対応からツールバーコンボを組み立てる。
+        /// MiniMap を現在の左右シートペアの差分だけに差し替える（全シート横断禁止）。
+        /// </summary>
+        private void RefreshMiniMapForCurrentSheet()
+        {
+            if (MiniMap == null)
+            {
+                return;
+            }
+
+            if (_highlightController != null && !_highlightController.IsVisible)
+            {
+                MiniMap.SetDiffs(Enumerable.Empty<DiffItem>());
+                return;
+            }
+
+            DiffResult result = _session != null ? _session.LastResult : null;
+            if (result == null || result.Items == null)
+            {
+                MiniMap.Clear();
+                return;
+            }
+
+            string leftSheet = LeftPane != null ? LeftPane.SelectedSheetName : null;
+            string rightSheet = RightPane != null ? RightPane.SelectedSheetName : null;
+            string displaySheet = !string.IsNullOrEmpty(leftSheet)
+                ? leftSheet
+                : (rightSheet ?? string.Empty);
+
+            var filtered = new List<DiffItem>();
+            foreach (DiffItem item in result.Items)
+            {
+                if (item != null && ItemMatchesCurrentSheets(item, leftSheet, rightSheet))
+                {
+                    filtered.Add(item);
+                }
+            }
+
+            MiniMap.SetCurrentSheet(displaySheet, filtered);
+            ApplyMiniMapAlignmentForSheets(leftSheet, rightSheet);
+            _lastMiniMapSheet = displaySheet ?? string.Empty;
+            _lastMiniMapLeftRow = -1;
+            _lastMiniMapRightRow = -1;
+        }
+
+        /// <summary>
+        /// 差分アイテムが現在表示中のシートペアに属するか。
+        /// </summary>
+        private static bool ItemMatchesCurrentSheets(DiffItem item, string leftSheet, string rightSheet)
+        {
+            if (item == null)
+            {
+                return false;
+            }
+
+            string sl = item.SheetLeft ?? string.Empty;
+            string sr = item.SheetRight ?? string.Empty;
+
+            if (!string.IsNullOrEmpty(leftSheet))
+            {
+                if (string.Equals(sl, leftSheet, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(sr, leftSheet, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(rightSheet))
+            {
+                if (string.Equals(sr, rightSheet, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(sl, rightSheet, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            // どちらも未選択なら何も出さない
+            return false;
+        }
+
+        /// <summary>
+        /// 比較結果のシート対応からツールバーコンボを組み立てる（片側 Structure も含む）。
         /// </summary>
         private void RebuildPairSheetCombo(DiffResult result)
         {
@@ -3422,6 +3619,9 @@ namespace DiffXL
             try
             {
                 PairSheetCombo.Items.Clear();
+                var seenLeft = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var seenRight = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                 IList<SheetPair> pairs = GetActiveSheetPairs(result);
                 foreach (SheetPair pair in pairs)
                 {
@@ -3438,6 +3638,40 @@ namespace DiffXL
                     }
 
                     PairSheetCombo.Items.Add(new SheetPairComboItem(left, right));
+                    if (!string.IsNullOrEmpty(left))
+                    {
+                        seenLeft.Add(left);
+                    }
+
+                    if (!string.IsNullOrEmpty(right))
+                    {
+                        seenRight.Add(right);
+                    }
+                }
+
+                // Structure（片側のみシート）をコンボへ
+                if (result != null && result.Items != null)
+                {
+                    foreach (DiffItem item in result.Items)
+                    {
+                        if (item == null || item.Kind != DiffKind.Structure)
+                        {
+                            continue;
+                        }
+
+                        if (!string.IsNullOrEmpty(item.SheetLeft) && string.IsNullOrEmpty(item.SheetRight)
+                            && !seenLeft.Contains(item.SheetLeft))
+                        {
+                            PairSheetCombo.Items.Add(new SheetPairComboItem(item.SheetLeft, string.Empty));
+                            seenLeft.Add(item.SheetLeft);
+                        }
+                        else if (!string.IsNullOrEmpty(item.SheetRight) && string.IsNullOrEmpty(item.SheetLeft)
+                            && !seenRight.Contains(item.SheetRight))
+                        {
+                            PairSheetCombo.Items.Add(new SheetPairComboItem(string.Empty, item.SheetRight));
+                            seenRight.Add(item.SheetRight);
+                        }
+                    }
                 }
 
                 PairSheetCombo.IsEnabled = PairSheetCombo.Items.Count > 0;

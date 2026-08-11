@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using DiffXL.COMMON;
 using DiffXL.VIEW.Controls;
@@ -95,6 +94,10 @@ namespace DiffXL.LOGIC.Diff
             }
         }
 
+        /// <summary>
+        /// MiniMap は現在シートのみを MainWindow 側で載せる。
+        /// ここは非表示時のクリアと結果保持のみ（全シート横断はしない）。
+        /// </summary>
         private void PushToMiniMap()
         {
             if (_miniMap == null)
@@ -102,87 +105,11 @@ namespace DiffXL.LOGIC.Diff
                 return;
             }
 
-            // シート順を先に確定（比較 SheetPairs の順 = ブック順）
-            IList<string> order = BuildSheetOrder(_result);
-            if (order.Count > 0)
-            {
-                _miniMap.SetSheetOrder(order);
-            }
-
-            if (!_isVisible || _result == null || _result.Items == null || _result.Items.Count == 0)
+            if (!_isVisible)
             {
                 _miniMap.SetDiffs(Enumerable.Empty<DiffItem>());
-                if (order.Count > 0)
-                {
-                    _miniMap.SetSheetOrder(order);
-                }
-
-                return;
             }
-
-            _miniMap.SetDiffs(_result.Items);
-            // SetDiffs が内部で帯を作り直すので、再度シート順を適用
-            if (order.Count > 0)
-            {
-                _miniMap.SetSheetOrder(order);
-            }
-        }
-
-        private static List<string> BuildSheetOrder(DiffResult result)
-        {
-            var order = new List<string>();
-            if (result == null)
-            {
-                return order;
-            }
-
-            if (result.SheetPairs != null)
-            {
-                foreach (SheetPair p in result.SheetPairs)
-                {
-                    if (p == null)
-                    {
-                        continue;
-                    }
-
-                    // 表示名は左を優先（左右同名が基本）
-                    string name = !string.IsNullOrEmpty(p.LeftSheet) ? p.LeftSheet : p.RightSheet;
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        continue;
-                    }
-
-                    if (!order.Any(s => string.Equals(s, name, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        order.Add(name);
-                    }
-                }
-            }
-
-            // 差分にあって pairs に無いシートを末尾に追加
-            if (result.Items != null)
-            {
-                foreach (DiffItem item in result.Items.OrderBy(i => i.OrderHint))
-                {
-                    if (item == null)
-                    {
-                        continue;
-                    }
-
-                    string name = item.SheetLeft ?? item.SheetRight;
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        continue;
-                    }
-
-                    if (!order.Any(s => string.Equals(s, name, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        order.Add(name);
-                    }
-                }
-            }
-
-            return order;
+            // 表示 ON 時は MainWindow.RefreshMiniMapForCurrentSheet が現在シート分をセットする
         }
     }
 }
