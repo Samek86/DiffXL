@@ -1,0 +1,40 @@
+﻿ContentScrollPerfectSmoke
+left=C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_left.xlsx
+right=C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_right.xlsx
+expected=C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_expected.json
+COMPARE_OK items=48 alignments=6 elapsedMs=259
+=== sheet SC_画像ギャップ ===
+ContentScrollMap SC_画像ギャップ ↔ SC_画像ギャップ content segs=4 | Equal L1-7 R1-7 hold=0 | RightOnly L7-7 R8-11 hold=7 | Equal L8-10 R12-14 hold=0 | Equal L11-536870911 R15-536870911 hold=0
+OK SC_画像ギャップ L5->R5
+OK SC_画像ギャップ R9->L7 <= 7
+OK SC_画像ギャップ L8->R12
+OK SC_画像ギャップ R12->L8
+OK SC_画像ギャップ imagePair L5↔R5 exact
+OK SC_画像ギャップ imagePair L8↔R12 exact
+OK SC_画像ギャップ rightOnly R8
+=== sheet SC_テキスト挿入 ===
+ContentScrollMap SC_テキスト挿入 ↔ SC_テキスト挿入 content segs=4 | Equal L1-7 R1-7 hold=0 | RightOnly L7-7 R8-9 hold=7 | Equal L8-15 R10-17 hold=0 | Equal L16-536870911 R18-536870911 hold=0
+OK SC_テキスト挿入 L10->R12 // S03 after 2 insert rows
+OK SC_テキスト挿入 R8->L7 <= 7 // insert zone holds left
+=== sheet SC_大画像span ===
+ContentScrollMap SC_大画像span ↔ SC_大画像span content segs=1 | Equal L1-536870911 R1-536870911 hold=0
+OK SC_大画像span L5->R5 // span start
+OK SC_大画像span L8->R8 // mid span holds pair
+OK SC_大画像span L12->R12 // tail image
+OK SC_大画像span imagePair L5↔R5 exact
+OK SC_大画像span imagePair L12↔R12 exact
+=== sheet SC_横同期 ===
+ContentScrollMap SC_横同期 ↔ SC_横同期 content segs=1 | Equal L1-536870911 R1-536870911 hold=0
+OK SC_横同期 L5->R5
+OK SC_横同期 L14->R14
+OK SC_横同期 L24->R24
+=== sheet SC_同順異内容 ===
+ContentScrollMap SC_同順異内容 ↔ SC_同順異内容 content segs=6 | Equal L1-10 R1-10 hold=0 | LeftOnly L11-11 R10-10 hold=10 | LeftOnly L12-13 R10-10 hold=10 | RightOnly L13-13 R11-11 hold=13 | RightOnly L13-13 R12-13 hold=13 | Equal L14-536870911 R14-536870911 hold=0
+OK SC_同順異内容 L5->R5
+OK SC_同順異内容 L8->R8
+OK SC_同順異内容 imagePair L5↔R5 exact
+OK SC_同順異内容 imagePair L8↔R8 modified dr=0.109
+OK SC_同順異内容 leftOnly L12
+OK SC_同順異内容 rightOnly R12
+PERFECT_SCROLL_PASS
+

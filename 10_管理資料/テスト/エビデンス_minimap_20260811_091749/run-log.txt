@@ -1,0 +1,215 @@
+
+[09:20:40] launched pid=6212
+[09:20:49] compare clicked
+[09:20:58] compare ready
+[09:21:00] DiffXL ready for orca MiniMap tests
+[09:21:02] list-apps saved
+[09:21:10] screenshot=C:\Users\Jun\AppData\Local\Temp\orca-computer-use\bc5c0dc3-bb27-4373-bcd7-46ff18a67f70-screenshot.png
+[09:24:01] click 11_longlist at 1320,350
+[09:24:16] shot click_11_longlist
+[09:24:16] STATUS HAS MiniMap navigate
+[09:24:16]   tree: \t\t15 텍스트 差分強調 ON
+[09:24:16]   tree: \t20 텍스트 MiniMap → 長い一覧!行 79 / テキスト差分 C79: 「サンプル品目 075」→「サンプル品目 075★」 (L:OK R:OK)
+[09:24:16]   tree: \t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+[09:24:16]   tree: \t\t\t\t\t\t\t56 [シート] タブ 表紙, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t\t57 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t\t58 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t\t59 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t64 창 シート 表紙, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t65 창 シート 売上サマリ, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t66 창 シート 製品カタログ, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t67 창 シート 長い一覧, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t\t\t118 항목 A86, Value: 検証: 行3・40・41・75 付近の差分が MiniMap に現れ、クリックでジャンプできること。, Secondary Actions: SetValue, Select
+[09:24:16]   tree: \t\t\t\t\t\t\t315 [シート] タブ 表紙, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t\t316 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t\t317 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t\t318 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t323 창 シート 表紙, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t324 창 シート 売上サマリ, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t325 창 シート 製品カタログ, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t326 창 シート 長い一覧, Secondary Actions: Select
+[09:24:16]   tree: \t\t\t\t\t\t\t\t377 항목 A86, Value: 検証: 行3・40・41・75 付近の差分が MiniMap に現れ、クリックでジャンプできること。, Secondary Actions: SetValue, Select
+[09:24:16]   tree: \t543 사용자 지정 MiniMap
+[09:24:16]   tree: \t\t544 텍스트 MiniMap
+[09:24:16]   tree: \t\t546 텍스트 1. 表紙
+[09:24:16]   tree: \t\t547 텍스트 2. 売上サマリ
+[09:24:16]   tree: \t\t548 텍스트 3. 製品カタログ
+[09:24:16]   tree: \t\t549 텍스트 4. 長い一覧
+[09:24:16]   tree: \t\t556 텍스트 長い一覧 · 行63
+[09:24:16]   tree: \t\t557 텍스트 差分 69 件 長い一覧 行63 クリックで移動
+[09:24:17] click 13_sales at 1320,160
+[09:24:29] shot click_13_sales
+[09:24:29] STATUS HAS MiniMap navigate
+[09:24:29]   tree: \t\t15 텍스트 差分強調 ON
+[09:24:29]   tree: \t20 텍스트 MiniMap → 表紙!行 9 / テキスト差分 C9: 「初版（基準）」→「画像差分・行挿入・文言改訂を反映」 (L:OK R:OK)
+[09:24:29]   tree: \t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+[09:24:29]   tree: \t\t\t\t\t\t\t56 [シート] タブ 表紙, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t57 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t58 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t59 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t64 창 シート 表紙, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t88 항목 B13, Value: 表紙, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t92 항목 B14, Value: 売上サマリ, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t96 항목 B15, Value: 製品カタログ, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t100 항목 B16, Value: 長い一覧, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t101 항목 C16, Value: 同期スクロール・MiniMap, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t202 창 シート 売上サマリ, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t203 창 シート 製品カタログ, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t204 창 シート 長い一覧, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t241 [シート] タブ 表紙, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t242 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t243 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t244 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t249 창 シート 表紙, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t273 항목 B13, Value: 表紙, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t277 항목 B14, Value: 売上サマリ, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t281 항목 B15, Value: 製品カタログ, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t285 항목 B16, Value: 長い一覧, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t\t\t286 항목 C16, Value: 同期スクロール・MiniMap, Secondary Actions: SetValue, Select
+[09:24:29]   tree: \t\t\t\t\t\t387 창 シート 売上サマリ, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t388 창 シート 製品カタログ, Secondary Actions: Select
+[09:24:29]   tree: \t\t\t\t\t\t389 창 シート 長い一覧, Secondary Actions: Select
+[09:24:29]   tree: \t395 사용자 지정 MiniMap
+[09:24:29]   tree: \t\t396 텍스트 MiniMap
+[09:24:29]   tree: \t\t398 텍스트 1. 表紙
+[09:24:29]   tree: \t\t399 텍스트 2. 売上サマリ
+[09:24:29]   tree: \t\t400 텍스트 3. 製品カタログ
+[09:24:29]   tree: \t\t401 텍스트 4. 長い一覧
+[09:24:29]   tree: \t\t408 텍스트 表紙 · 行25
+[09:24:29]   tree: \t\t409 텍스트 差分 69 件 表紙 行25 クリックで移動
+[09:24:30] click 13_catalog at 1320,230
+[09:24:45] shot click_13_catalog
+[09:24:45] STATUS HAS MiniMap navigate
+[09:24:45]   tree: \t\t15 텍스트 差分強調 ON
+[09:24:45]   tree: \t20 텍스트 MiniMap → 売上サマリ!行 17 / テキスト差分 B17: 「」→「右側だけに追記」 (L:OK R:OK)
+[09:24:45]   tree: \t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+[09:24:45]   tree: \t\t\t\t\t\t\t56 [シート] タブ 表紙, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t\t57 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t\t58 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t\t59 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t64 창 シート 表紙, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t65 창 シート 売上サマリ, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t319 창 シート 製品カタログ, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t320 창 シート 長い一覧, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t\t357 [シート] タブ 表紙, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t\t358 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t\t359 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t\t360 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t365 창 シート 表紙, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t366 창 シート 売上サマリ, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t620 창 シート 製品カタログ, Secondary Actions: Select
+[09:24:45]   tree: \t\t\t\t\t\t621 창 シート 長い一覧, Secondary Actions: Select
+[09:24:46]   tree: \t627 사용자 지정 MiniMap
+[09:24:46]   tree: \t\t628 텍스트 MiniMap
+[09:24:46]   tree: \t\t630 텍스트 1. 表紙
+[09:24:46]   tree: \t\t631 텍스트 2. 売上サマリ
+[09:24:46]   tree: \t\t632 텍스트 3. 製品カタログ
+[09:24:46]   tree: \t\t633 텍스트 4. 長い一覧
+[09:24:46]   tree: \t\t640 텍스트 売上サマリ · 行58
+[09:24:46]   tree: \t\t641 텍스트 差分 69 件 売上サマリ 行58 クリックで移動
+[09:24:47] click 13_cover at 1320,100
+[09:24:57] shot click_13_cover
+[09:24:57] STATUS HAS MiniMap navigate
+[09:24:57]   tree: \t\t15 텍스트 差分強調 ON
+[09:24:57]   tree: \t20 텍스트 MiniMap → 表紙!行 3 / テキスト差分 B3: 「左 (Left / 基準) ブック」→「右 (Right / 比較対象) ブック」 (L:OK R:OK)
+[09:24:57]   tree: \t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+[09:24:57]   tree: \t\t\t\t\t\t\t56 [シート] タブ 表紙, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t57 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t58 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t59 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t64 창 シート 表紙, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t112 항목 B13, Value: 表紙, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t116 항목 B14, Value: 売上サマリ, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t120 항목 B15, Value: 製品カタログ, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t124 항목 B16, Value: 長い一覧, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t125 항목 C16, Value: 同期スクロール・MiniMap, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t194 창 シート 売上サマリ, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t195 창 シート 製品カタログ, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t196 창 シート 長い一覧, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t233 [シート] タブ 表紙, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t234 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t235 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t236 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t241 창 シート 表紙, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t289 항목 B13, Value: 表紙, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t293 항목 B14, Value: 売上サマリ, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t297 항목 B15, Value: 製品カタログ, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t301 항목 B16, Value: 長い一覧, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t\t\t302 항목 C16, Value: 同期スクロール・MiniMap, Secondary Actions: SetValue, Select
+[09:24:57]   tree: \t\t\t\t\t\t371 창 シート 売上サマリ, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t372 창 シート 製品カタログ, Secondary Actions: Select
+[09:24:57]   tree: \t\t\t\t\t\t373 창 シート 長い一覧, Secondary Actions: Select
+[09:24:57]   tree: \t379 사용자 지정 MiniMap
+[09:24:57]   tree: \t\t380 텍스트 MiniMap
+[09:24:57]   tree: \t\t382 텍스트 1. 表紙
+[09:24:57]   tree: \t\t383 텍스트 2. 売上サマリ
+[09:24:57]   tree: \t\t384 텍스트 3. 製品カタログ
+[09:24:57]   tree: \t\t385 텍스트 4. 長い一覧
+[09:24:57]   tree: \t\t392 텍스트 表紙 · 行1
+[09:24:57]   tree: \t\t393 텍스트 差分 69 件 表紙 行1 クリックで移動
+[09:24:58] click 10_marker_deep at 1320,400
+[09:25:14] shot click_10_marker_deep
+[09:25:14] STATUS HAS MiniMap navigate
+[09:25:14]   tree: \t\t15 텍스트 差分強調 ON
+[09:25:14]   tree: \t20 텍스트 MiniMap → レイアウト確認!行 12 / テキスト差分 B12: 「」→「right-only layout note」 (L:OK R:OK)
+[09:25:14]   tree: \t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+[09:25:14]   tree: \t\t\t\t\t\t\t56 [シート] タブ 表紙, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t\t57 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t\t58 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t\t59 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t64 창 シート 表紙, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t65 창 シート 売上サマリ, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t66 창 シート 製品カタログ, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t67 창 シート 長い一覧, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t\t321 [シート] タブ 表紙, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t\t322 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t\t323 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t\t324 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t329 창 シート 表紙, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t330 창 シート 売上サマリ, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t331 창 シート 製品カタログ, Secondary Actions: Select
+[09:25:14]   tree: \t\t\t\t\t\t332 창 シート 長い一覧, Secondary Actions: Select
+[09:25:14]   tree: \t555 사용자 지정 MiniMap
+[09:25:14]   tree: \t\t556 텍스트 MiniMap
+[09:25:14]   tree: \t\t558 텍스트 1. 表紙
+[09:25:14]   tree: \t\t559 텍스트 2. 売上サマリ
+[09:25:14]   tree: \t\t560 텍스트 3. 製品カタログ
+[09:25:14]   tree: \t\t561 텍스트 4. 長い一覧
+[09:25:14]   tree: \t\t568 텍스트 レイアウト確認 · 行56
+[09:25:14]   tree: \t\t569 텍스트 差分 69 件 レイアウト確認 行56 クリックで移動
+[09:25:29] final: \t\t15 텍스트 差分強調 ON
+[09:25:29] final: \t20 텍스트 MiniMap → レイアウト確認!行 12 / テキスト差分 B12: 「」→「right-only layout note」 (L:OK R:OK)
+[09:25:29] final: \t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+[09:25:29] final: \t\t\t\t\t\t\t56 [シート] タブ 表紙, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t\t57 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t\t58 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t\t59 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t64 창 シート 表紙, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t65 창 シート 売上サマリ, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t66 창 シート 製品カタログ, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t67 창 シート 長い一覧, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t\t321 [シート] タブ 表紙, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t\t322 [シート] タブ 売上サマリ, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t\t323 [シート] タブ 製品カタログ, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t\t324 [シート] タブ 長い一覧, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t329 창 シート 表紙, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t330 창 シート 売上サマリ, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t331 창 シート 製品カタログ, Secondary Actions: Select
+[09:25:29] final: \t\t\t\t\t\t332 창 シート 長い一覧, Secondary Actions: Select
+[09:25:29] final: \t555 사용자 지정 MiniMap
+[09:25:29] final: \t\t556 텍스트 MiniMap
+[09:25:29] final: \t\t558 텍스트 1. 表紙
+[09:25:29] final: \t\t559 텍스트 2. 売上サマリ
+[09:25:29] final: \t\t560 텍스트 3. 製品カタログ
+[09:25:29] final: \t\t561 텍스트 4. 長い一覧
+[09:25:29] final: \t\t568 텍스트 レイアウト確認 · 行56
+[09:25:29] final: \t\t569 텍스트 差分 69 件 レイアウト確認 行56 クリックで移動
+[09:25:29] toggle highlight OFF
+[09:25:57] highlight text present
+[09:25:57] HL OFF ok
+[09:25:57] toggle highlight ON
+[09:26:26] HL ON ok
+[09:26:26] scroll left pane down
+[09:26:45] scroll-view: \t\t568 텍스트 レイアウト確認 · 行56
+[09:26:45] scroll-view: \t\t569 텍스트 差分 69 件 レイアウト確認 行56 クリックで移動
+[09:26:45] DONE minimap orca sequence

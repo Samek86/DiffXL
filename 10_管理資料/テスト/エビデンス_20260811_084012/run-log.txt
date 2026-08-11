@@ -1,0 +1,82 @@
+﻿
+[08:59:59.739] === DiffXL Full UI Test BEGIN ===
+[08:59:59.783] Evidence: C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012
+[08:59:59.783] Exe: C:\JUN\WORK\DiffXL\40_リリース\DiffXL.exe
+[09:00:00.330] --- TC-21 auto-live-test ---
+[09:00:16.591] RESULT TC-21 PASS | exit=0
+[09:00:19.695] RESULT TC-22 PASS | DiffXL_20260811.log
+[09:00:19.695] --- Interactive launch ---
+[09:00:21.081] RESULT TC-01 PASS | pid=22156
+[09:00:22.376] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\01_01_startup.png (2576x1410)
+[09:00:22.580] RESULT TC-01b PASS | startup panel visible
+[09:00:22.595] --- TC-02 file pick ---
+[09:00:22.670] 参照 targets=2
+[09:00:23.772] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\02_02a_left_dialog.png (2576x1410)
+[09:00:24.322] OpenFileDialog found: '左の Excel ファイルを選択' for file=full_feature_left.xlsx
+[09:00:24.384] ListItem hit: full_feature_left.xlsx
+[09:00:26.922] RESULT TC-02a PASS | C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx
+[09:00:28.003] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\03_02a_after_left.png (2576x1410)
+[09:00:28.065] 参照 targets after left=2
+[09:00:29.250] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\04_02b_right_dialog.png (2576x1410)
+[09:00:29.706] OpenFileDialog found: '右の Excel ファイルを選択' for file=full_feature_right.xlsx
+[09:00:29.753] ListItem hit: full_feature_right.xlsx
+[09:00:32.205] RESULT TC-02b PASS | C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_right.xlsx
+[09:00:33.706] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\05_02_both_selected.png (2576x1410)
+[09:00:34.190] pathShown=True unselected=0 startEnabled=True
+[09:00:34.190] RESULT TC-02 PASS | paths selected startEnabled=True
+[09:00:34.190] --- TC-03 compare ---
+[09:00:47.124] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\06_03_compare_result.png (2576x1410)
+[09:00:47.945] RESULT TC-03 PASS | result UI ready; ControlType.Text|差分 69 件
+表紙 行1
+クリックで移動|Enabled=True
+[09:00:47.961] --- TC-04 MiniMap click ---
+[09:00:50.988] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\07_04_minimap_click.png (2576x1410)
+[09:00:52.098] RESULT TC-04 PASS | click + status/log feedback
+[09:00:52.098] --- TC-07 highlight ---
+[09:00:53.789] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\08_05_hl_off.png (2576x1410)
+[09:00:55.269] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\09_05_hl_on.png (2576x1410)
+[09:00:55.269] RESULT TC-07 PASS | toggled ON/OFF
+[09:00:55.269] --- TC-08/09 settings ---
+[09:00:57.304] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\10_06_settings_open.png (2576x1410)
+[09:00:58.707] RESULT TC-08 PASS | dialog='設定'
+[09:00:59.233] RESULT TC-09 PASS | cancelled
+[09:00:59.768] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\11_06_settings_closed.png (2576x1410)
+[09:00:59.768] --- TC-10 recompare ---
+[09:01:04.920] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\12_07_recompare.png (2576x1410)
+[09:01:04.920] RESULT TC-10 PASS | recompare clicked
+[09:01:04.920] --- TC-11 sheet map ---
+[09:01:06.833] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\13_08_sheetmap.png (2576x1410)
+[09:01:07.324] RESULT TC-11 PASS | dialog open/close
+[09:01:07.324] --- TC-12 anchor ---
+[09:01:09.218] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\14_09_anchor.png (2576x1410)
+[09:01:09.689] RESULT TC-12 PASS | dialog open/close
+[09:01:09.689] --- TC-13/14 replace ---
+[09:01:11.420] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\15_10_replace_left_dialog.png (2576x1410)
+[09:01:11.885] RESULT TC-13 PASS | dialog shown and cancelled
+[09:01:13.678] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\16_11_replace_right_dialog.png (2576x1410)
+[09:01:14.131] RESULT TC-14 PASS | dialog shown and cancelled
+[09:01:14.131] --- TC-05/06 sheet combo ---
+[09:01:15.878] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\17_12_sheet_combo.png (2576x1410)
+[09:01:17.466] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\18_12_sheet_changed.png (2576x1410)
+[09:01:17.466] RESULT TC-05 PASS | pair sheet combo interacted
+[09:01:17.466] RESULT TC-06 PASS | sheet change issued (auto-live SHEET_SYNC_OK also)
+[09:01:17.466] --- TC-15/16 wheel ---
+[09:01:18.865] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\19_13_wheel_left.png (2576x1410)
+[09:01:18.865] RESULT TC-15 PASS | scroll sent left
+[09:01:20.248] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\20_14_wheel_right.png (2576x1410)
+[09:01:20.263] RESULT TC-16 PASS | scroll sent right
+[09:01:21.327] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\21_15_hscroll.png (2576x1410)
+[09:01:21.327] RESULT TC-17 PASS | Shift+wheel sent
+[09:01:23.372] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\22_16_pan.png (2576x1410)
+[09:01:23.372] RESULT TC-18 PASS | mid/right drag pan
+[09:01:23.372] --- TC-19 resize ---
+[09:01:25.116] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\23_17_resize_normal.png (1100x700)
+[09:01:26.482] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\24_18_resize_max.png (2576x1410)
+[09:01:26.482] RESULT TC-19 PASS | normal+maximize (auto-live hostAttached)
+[09:01:26.482] --- TC-20 back ---
+[09:01:29.985] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\25_19_back_to_start.png (2576x1410)
+[09:01:30.561] RESULT TC-20 PASS | startup panel restored
+[09:01:31.101] SHOT C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\screenshots\26_20_final.png (2576x1410)
+[09:01:31.101] Closing DiffXL...
+[09:01:37.261] === SUMMARY PASS=25 FAIL=0 BLOCKED=0 TOTAL=25 ===
+[09:01:37.261] Results: C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_20260811_084012\test-results.md

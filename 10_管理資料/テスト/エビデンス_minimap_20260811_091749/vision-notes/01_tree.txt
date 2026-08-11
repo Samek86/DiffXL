@@ -1,0 +1,115 @@
+App=devenv (pid 6180)
+Window: "DiffXL - Microsoft Visual Studio", App: devenv.
+
+0 window DiffXL - Microsoft Visual Studio
+	1 title bar DiffXL - Microsoft Visual Studio
+		2 menu bar MenuBar
+			3 menu item File
+			4 menu item Edit
+			5 menu item View
+			6 menu item Git
+			7 menu item Project
+			8 menu item Build
+			9 menu item Debug
+			10 menu item Test
+			11 menu item Analyze
+			12 menu item Tools
+			13 menu item Extensions
+			14 menu item Window
+			15 menu item Help
+		16 edit Search Visual Studio Text Box, Secondary Actions: SetValue, Scroll
+		17 custom Connected User Information
+			18 image ErrorImage
+			19 button Show Connected User Information Card
+		20 button Minimize
+		21 button Maximize
+		22 button Close
+	23 pane Visual Studio Live Share
+		24 tool bar LiveShareToolbar
+			25 button Visual Studio Live Share
+	26 custom Button_1
+		27 button Feedback
+	28 custom Information
+	29 pane ToolBarDockTop
+		30 tool bar Standard
+			31 split button Navigate Backward
+			32 button Navigate &Forward
+			33 split button New Project
+			34 button &Open File...
+			35 button &Save App.xaml.cs
+			36 button Save A&ll
+			37 split button Undo, Secondary Actions: SetValue
+				38 button Undo
+			39 split button Redo, Secondary Actions: SetValue
+				40 button Redo
+			41 combo box Solution Configurations
+			42 combo box Solution Platforms
+			43 split button Debug Target
+		44 tool bar Text Editor
+			45 button &Quick Info
+			46 button Switch between automatic and &tab-only IntelliSense completion
+			47 button Co&mment Selection
+			48 button Uncomm&ent Selection
+			49 button &Toggle Bookmark
+			50 button &Previous Bookmark
+			51 button Next &Bookmark
+			52 button &Clear Bookmarks
+			53 button Toolbar Options, Secondary Actions: Toggle
+	54 pane ToolBarDockLeft
+	55 pane
+		56 pane Solution Explorer
+			57 title bar Solution Explorer
+				58 title bar TabGroup, Children = 15, VisibleChildren = 3, DockedWidth = 348, DockedHeight = 644
+					59 text Solution Explorer
+					60 button Window Menu
+					61 button Auto Hide
+					62 button Close
+			63 tab TabGroup|ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}|ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}|ST:0:0:{131369f2-062d-44a2-8671-91ff31efb4f4}
+				64 tab item Solution Explorer, Secondary Actions: Select
+				65 tab item Git Changes - FastRawSelector, Secondary Actions: Select
+				66 tab item Team Explorer - Home, Secondary Actions: Select
+		67 tab
+			68 tab item App.xaml.cs, Secondary Actions: Select
+		69 pane Properties
+			70 title bar Properties
+				71 title bar Properties
+					72 text Properties
+					73 button Window Menu
+					74 button Auto Hide
+					75 button Close
+			76 pane Properties
+				77 pane Property Browser
+					78 콤보 상자 Components, Secondary Actions: SetValue
+						79 텍스트 Components
+						80 단추 Open
+					81 pane PropertyGrid
+						82 도구 모음 Property Grid
+							83 단추 Categorized
+							84 단추 Alphabetical
+							85 구분 기호
+							86 단추 Property Pages
+						87 TABLE Properties Window
+						88 창 Description
+							89 텍스트 1968004
+							90 텍스트 984966
+	91 button Toolbox
+	92 button Diagnostic Tools
+	93 button C# Interactive
+	94 button Error List
+	95 button Output
+	96 button Find Symbol Results
+	97 pane ToolBarDockRight
+	98 pane ToolBarDockBottom
+	99 text LiveUserNotificationIndicator
+	100 status bar SccStatusBar
+		101 custom PublishCompartment
+			102 image SccItemImage
+	103 custom TaskStatusCenter
+		104 image TaskStatusImage
+	105 text Ready
+	106 status bar StatusBarContainer
+		107 text Ready
+		108 text LineColumnCharacterCompartment
+		109 text XYWidthHeightCompartment
+		110 text SelectionModeCompartment
+		111 text InsertionModeCompartment

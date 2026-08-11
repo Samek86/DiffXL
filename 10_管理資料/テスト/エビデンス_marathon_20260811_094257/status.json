@@ -1,0 +1,13 @@
+﻿{
+    "lastFull":  true,
+    "round":  108,
+    "fail":  0,
+    "start":  "2026-08-11T09:42:58.1926887+09:00",
+    "pass":  216,
+    "lastLarge":  true,
+    "lastLargeSec":  17,
+    "lastLargeCount":  -1,
+    "deadline":  "2026-08-11T12:47:58.1926887+09:00",
+    "now":  "2026-08-11T12:13:59.4355871+09:00",
+    "lastLargeImage":  -1
+}

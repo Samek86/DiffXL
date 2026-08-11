@@ -1,0 +1,41 @@
+﻿13:14:49.932 BEGIN auto-live-test
+13:14:49.935 COMPARE start
+13:14:59.458 COMPARE_OK count=48 text=44 image=1 imageOnlyL=1 imageOnlyR=2 structure=0 elapsedMs=264
+13:14:59.458 IMAGE_DIFFS_OK related=4
+13:14:59.458 HIGHLIGHT before=True off=False on=True
+13:14:59.458 HIGHLIGHT_OK
+13:14:59.458 SAMPLE_MODE content_scroll
+13:14:59.490 SHEET 表紙 pre-activated (to verify MiniMap sheet switch)
+13:14:59.662 MINIMAP targetSheet=表紙 targetRow=6 Lsheet=表紙 Rsheet=表紙 Lsr=6 Rsr=6 status=MiniMap → 表紙!行 6 / テキスト差分 C6: 「CS-L1.0」→「CS-R1.0」 (L:OK R:OK)
+13:14:59.662 MINIMAP_OK
+13:14:59.916 MINIMAP_MULTI sheet=SC_画像ギャップ row=2 Lsheet=SC_画像ギャップ Rsheet=SC_画像ギャップ Lsr=2 Rsr=2 ok=True
+13:15:00.106 MINIMAP_MULTI sheet=SC_テキスト挿入 row=2 Lsheet=SC_テキスト挿入 Rsheet=SC_テキスト挿入 Lsr=2 Rsr=2 ok=True
+13:15:00.293 MINIMAP_MULTI sheet=SC_大画像span row=15 Lsheet=SC_大画像span Rsheet=SC_大画像span Lsr=15 Rsr=15 ok=True
+13:15:00.519 MINIMAP_MULTI sheet=SC_同順異内容 row=2 Lsheet=SC_同順異内容 Rsheet=SC_同順異内容 Lsr=2 Rsr=2 ok=True
+13:15:00.675 MINIMAP_MULTI sheet=表紙 row=3 Lsheet=表紙 Rsheet=表紙 Lsr=3 Rsr=3 ok=True
+13:15:00.675 MINIMAP_MULTI_SUMMARY ok=5/5
+13:15:00.675 MINIMAP_MULTI_OK
+13:15:00.722 SHEET_SYNC after L→SC_画像ギャップ Lsheet=SC_画像ギャップ Rsheet=SC_画像ギャップ
+13:15:00.722 SHEET_SYNC_OK
+13:15:00.722 PAIR_COMBO count=6
+13:15:01.310 RECOMPARE_OK count=48
+13:15:01.325 SETTINGS_OPEN_OK constructed SettingsWindow
+13:15:01.685 SETTINGS_DIALOG_SAVE saved=True
+13:15:01.685 SETTINGS_DIALOG result=True SavedProp=True
+13:15:01.700 SETTINGS_SAVE_OK=True color=#FFCC00 via=SettingsWindow.ShowDialog
+13:15:01.700 SETTINGS_OPEN_OK
+13:15:02.032 SETTINGS_RESTORED color=#FFFF00
+13:15:02.447 RESIZE leftH0=727.04 leftH1=727.04 hostAttachedL=True
+13:15:02.447 CONTENT_SCROLL_PERFECT maps=6 alignments=6
+13:15:02.806 GAP_MAP ContentScrollMap SC_画像ギャップ ↔ SC_画像ギャップ content segs=4 | Equal L1-7 R1-7 hold=0 | RightOnly L7-7 R8-11 hold=7 | Equal L8-10 R12-14 hold=0 | Equal L11-536870911 R15-536870911 hold=0
+13:15:02.806 GAP_MAP_POINTS L5→R5 R9→L7 L8→R12 R12→L8
+13:15:02.806 GAP_IMAGES p5=True p8_12=True onlyR8=True
+13:15:03.450 GAP_SCROLL_RIGHT_ONLY Lsr=7 Rsr=8 mappedL=7 lok=True rok=True
+13:15:03.450 GAP_RIGHT_ONLY_SCROLL_OK
+13:15:03.887 GAP_SCROLL_SAME_B Lsr=8 Rsr=12 mappedL=8
+13:15:03.887 GAP_SAME_B_SCROLL_OK
+13:15:04.764 HSCROLL L=5,5 R=5,5 mappedR=5
+13:15:04.764 HSCROLL_OK
+13:15:04.764 CONTENT_SCROLL_PERFECT_OK
+13:15:04.764 FAILURES=0
+13:15:04.764 AUTO_LIVE_PASS

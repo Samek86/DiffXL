@@ -1,0 +1,46 @@
+﻿19:25:40.394 BEGIN auto-live-test
+19:25:40.394 COMPARE start
+19:25:53.322 COMPARE_OK count=48 text=44 image=1 imageOnlyL=1 imageOnlyR=2 structure=0 elapsedMs=308
+19:25:53.322 IMAGE_DIFFS_OK related=4
+19:25:53.322 HIGHLIGHT before=True off=False on=True
+19:25:53.322 HIGHLIGHT_OK
+19:25:53.322 SAMPLE_MODE content_scroll
+19:25:53.369 SHEET 表紙 pre-activated (to verify MiniMap sheet switch)
+19:25:53.541 MINIMAP targetSheet=表紙 targetL=6 targetR=6 Lsheet=表紙 Rsheet=表紙 Lsr=6 Rsr=6 mapR=6 status=MiniMap → 表紙!L6 · R6 / テキスト差分 C6: 「CS-L1.0」→「CS-R1.0」 (L:OK R:OK)
+19:25:53.541 MINIMAP_MAP_ALIGN ok |MapL2R(Lsr)-Rsr|=0
+19:25:53.557 MINIMAP_OK
+19:25:53.763 MINIMAP_MULTI sheet=SC_画像ギャップ expectL=2 expectR=2 Lsheet=SC_画像ギャップ Rsheet=SC_画像ギャップ Lsr=2 Rsr=2 ok=True
+19:25:53.966 MINIMAP_MULTI sheet=SC_テキスト挿入 expectL=2 expectR=2 Lsheet=SC_テキスト挿入 Rsheet=SC_テキスト挿入 Lsr=2 Rsr=2 ok=True
+19:25:54.169 MINIMAP_MULTI sheet=SC_大画像span expectL=15 expectR=15 Lsheet=SC_大画像span Rsheet=SC_大画像span Lsr=15 Rsr=15 ok=True
+19:25:54.372 MINIMAP_MULTI sheet=SC_同順異内容 expectL=2 expectR=2 Lsheet=SC_同順異内容 Rsheet=SC_同順異内容 Lsr=2 Rsr=2 ok=True
+19:25:54.558 MINIMAP_MULTI sheet=表紙 expectL=3 expectR=3 Lsheet=表紙 Rsheet=表紙 Lsr=3 Rsr=3 ok=True
+19:25:54.558 MINIMAP_MULTI_SUMMARY ok=5/5
+19:25:54.558 MINIMAP_MULTI_OK
+19:25:54.605 SHEET_SYNC after L→SC_画像ギャップ Lsheet=SC_画像ギャップ Rsheet=SC_画像ギャップ
+19:25:54.605 SHEET_SYNC_OK
+19:25:54.621 PAIR_COMBO count=6
+19:25:55.747 RECOMPARE_OK count=48
+19:25:55.769 SETTINGS_OPEN_OK constructed SettingsWindow
+19:25:56.338 SETTINGS_DIALOG_SAVE saved=True
+19:25:56.355 SETTINGS_DIALOG result=True SavedProp=True
+19:25:56.355 SETTINGS_SAVE_OK=True color=#FFCC00 via=SettingsWindow.ShowDialog
+19:25:56.371 SETTINGS_OPEN_OK
+19:25:56.743 SETTINGS_RESTORED color=#FFFF00
+19:25:57.167 RESIZE leftH0=727.04 leftH1=727.04 hostAttachedL=True
+19:25:57.182 CONTENT_SCROLL_PERFECT maps=6 alignments=6
+19:25:57.555 GAP_MAP ContentScrollMap SC_画像ギャップ ↔ SC_画像ギャップ content segs=4 | Equal L1-7 R1-7 hold=0 | RightOnly L7-7 R8-11 hold=7 | Equal L8-10 R12-14 hold=0 | Equal L11-536870911 R15-536870911 hold=0
+19:25:57.555 GAP_MAP_POINTS L5→R5 R9→L7 L8→R12 R12→L8
+19:25:57.555 GAP_IMAGES p5=True p8_12=True onlyR8=True
+19:25:58.216 GAP_SCROLL_RIGHT_ONLY Lsr=7 Rsr=8 mappedL=7 lok=True rok=True
+19:25:58.216 GAP_RIGHT_ONLY_SCROLL_OK
+19:25:58.646 GAP_SCROLL_SAME_B Lsr=8 Rsr=12 mappedL=8
+19:25:58.646 GAP_SAME_B_SCROLL_OK
+19:25:59.214 STATUS_LINE_GAP 同期ON · 内容対応 · L8 ↔ R12
+19:25:59.214 STATUS_LINE_OK
+19:25:59.289 JUMP_HINT_PATH JumpHint=(null) Status=同期ON · 内容対応 · L8 ↔ R12 Kind=Equal
+19:25:59.289 JUMP_HINT_PATH_OK status_nonempty
+19:26:00.174 HSCROLL L=5,5 R=5,5 mappedR=5
+19:26:00.174 HSCROLL_OK
+19:26:00.174 CONTENT_SCROLL_PERFECT_OK
+19:26:00.174 FAILURES=0
+19:26:00.174 AUTO_LIVE_PASS

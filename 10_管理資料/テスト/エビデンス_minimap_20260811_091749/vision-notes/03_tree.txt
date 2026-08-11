@@ -1,0 +1,389 @@
+App=DiffXL (pid 6212)
+Window: "DiffXL", App: DiffXL.
+
+0 창 DiffXL
+	1 텍스트 DiffXL
+	2 텍스트 シート
+	3 콤보 상자 PairSheetCombo
+	4 단추 BtnRecompare
+		5 텍스트 再比較
+	6 단추 BtnSheetMap
+		7 텍스트 シート対応
+	8 단추 BtnAnchor
+		9 텍스트 アンカー
+	10 단추 BtnReplaceLeft
+		11 텍스트 左差し替え
+	12 단추 BtnReplaceRight
+		13 텍스트 右差し替え
+	14 단추 BtnHighlightToggle, Secondary Actions: Toggle
+		15 텍스트 差分強調 ON
+	16 단추 BtnSettings
+		17 텍스트 設定
+	18 단추 BtnBackToStart
+		19 텍스트 最初から
+	20 텍스트 比較完了 1008 ms / 強調:ON / 同期:ON
+	21 상태 표시줄
+		22 텍스트 左:開 / 右:開
+		23 구분 기호
+		24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+	25 사용자 지정 LeftPane
+		26 텍스트 左
+		27 텍스트 C:\\JUN\\WORK\\DiffXL\\30_参考資料\\samples\\full_feature_left.xlsx
+		28 콤보 상자 SheetCombo
+		29 단추 OpenButton
+			30 텍스트 開く
+		31 창
+			32 pane full_feature_left.xlsx [読み取り専用] - Excel
+				33 pane
+					34 창 垂直方向
+						35 ウィンドウ枠
+							36 スクロール バー
+								37 ボタン カーソルを 1 行上へ移動, Secondary Actions: SetValue
+								38 ボタン 1 画面分上へ移動, Secondary Actions: SetValue
+								39 サムネイル 位置
+								40 ボタン 1 画面分下へ移動, Secondary Actions: SetValue
+								41 ボタン カーソルを 1 行下へ移動, Secondary Actions: SetValue
+					42 창 水平方向
+						43 ウィンドウ枠
+							44 スクロール バー
+								45 ボタン 1 列分左へ移動, Secondary Actions: SetValue
+								46 ボタン 1 画面分左へ移動, Secondary Actions: SetValue
+								47 サムネイル 位置
+								48 ボタン 1 画面分右へ移動, Secondary Actions: SetValue
+								49 ボタン 1 列分右へ移動, Secondary Actions: SetValue
+					50 pane 7
+					51 창 full_feature_left
+						52 Tab full_feature_left
+							53 단추 左スクロール
+							54 단추 右スクロール
+							55 단추 シートの追加
+							56 [シート] タブ 表紙, Secondary Actions: Select
+							57 [シート] タブ 売上サマリ, Secondary Actions: Select
+							58 [シート] タブ 製品カタログ, Secondary Actions: Select
+							59 [シート] タブ 長い一覧, Secondary Actions: Select
+							60 [シート] タブ レイアウト確認, Secondary Actions: Select
+							61 [シート] タブ 仕様メモ_旧, Secondary Actions: Select
+							62 [シート] タブ 左のみメモ, Secondary Actions: Select
+							63 [シート] タブ ずれ試験, Secondary Actions: Select
+						64 창 シート 表紙, Secondary Actions: Select
+							65 데이터 그리드 グリッド
+								66 머리글 항목 すべて選択
+								67 列見出し A
+								68 列見出し B
+								69 列見出し C
+								70 行見出し 1
+								71 항목 A1, Secondary Actions: SetValue, Select
+								72 항목 B1, Secondary Actions: SetValue, Select
+								73 항목 C1, Secondary Actions: SetValue, Select
+								74 行見出し 2
+								75 항목 A2, Secondary Actions: SetValue, Select
+								76 항목 B2, Value: DiffXL 機能検証サンプル, Secondary Actions: SetValue, Select
+								77 항목 C2, Secondary Actions: SetValue, Select
+								78 行見出し 3
+								79 항목 A3, Secondary Actions: SetValue, Select
+								80 항목 B3, Value: 左 (Left / 基準) ブック, Secondary Actions: SetValue, Select
+								81 항목 C3, Secondary Actions: SetValue, Select
+								82 行見出し 4
+								83 항목 A4, Secondary Actions: SetValue, Select
+								84 항목 B4, Secondary Actions: SetValue, Select
+								85 항목 C4, Secondary Actions: SetValue, Select
+								86 行見出し 5
+								87 항목 A5, Secondary Actions: SetValue, Select
+								88 항목 B5, Value: ファイル役割, Secondary Actions: SetValue, Select
+								89 항목 C5, Value: 比較の左ペイン, Secondary Actions: SetValue, Select
+								90 行見出し 6
+								91 항목 A6, Secondary Actions: SetValue, Select
+								92 항목 B6, Value: サンプル版, Secondary Actions: SetValue, Select
+								93 항목 C6, Value: 1.0.0, Secondary Actions: SetValue, Select
+								94 行見出し 7
+								95 항목 A7, Secondary Actions: SetValue, Select
+								96 항목 B7, Value: 対象アプリ, Secondary Actions: SetValue, Select
+								97 항목 C7, Value: DiffXL (.xlsx 比較), Secondary Actions: SetValue, Select
+								98 行見出し 8
+								99 항목 A8, Secondary Actions: SetValue, Select
+								100 항목 B8, Value: 想定用途, Secondary Actions: SetValue, Select
+								101 항목 C8, Value: テキスト／画像／シート構成／手動対応／アンカー等の一括確認, Secondary Actions: SetValue, Select
+								102 行見出し 9
+								103 항목 A9, Secondary Actions: SetValue, Select
+								104 항목 B9, Value: 改訂メモ, Secondary Actions: SetValue, Select
+								105 항목 C9, Value: 初版（基準）, Secondary Actions: SetValue, Select
+								106 行見出し 10
+								107 항목 A10, Secondary Actions: SetValue, Select
+								108 항목 B10, Secondary Actions: SetValue, Select
+								109 항목 C10, Secondary Actions: SetValue, Select
+								110 行見出し 11
+								111 항목 A11, Secondary Actions: SetValue, Select
+								112 항목 B11, Value: シート一覧と検証ポイント, Secondary Actions: SetValue, Select
+								113 항목 C11, Secondary Actions: SetValue, Select
+								114 行見出し 12
+								115 항목 A12, Secondary Actions: SetValue, Select
+								116 항목 B12, Value: シート名, Secondary Actions: SetValue, Select
+								117 항목 C12, Value: 主な検証内容, Secondary Actions: SetValue, Select
+								118 行見出し 13
+								119 항목 A13, Secondary Actions: SetValue, Select
+								120 항목 B13, Value: 表紙, Secondary Actions: SetValue, Select
+								121 항목 C13, Value: 起動後の表示・基本情報, Secondary Actions: SetValue, Select
+								122 行見出し 14
+								123 항목 A14, Secondary Actions: SetValue, Select
+								124 항목 B14, Value: 売上サマリ, Secondary Actions: SetValue, Select
+								125 항목 C14, Value: テキスト差分（数値・文言）, Secondary Actions: SetValue, Select
+								126 行見出し 15
+								127 항목 A15, Secondary Actions: SetValue, Select
+								128 항목 B15, Value: 製品カタログ, Secondary Actions: SetValue, Select
+								129 항목 C15, Value: 埋め込み画像の比較, Secondary Actions: SetValue, Select
+								130 行見出し 16
+								131 항목 A16, Secondary Actions: SetValue, Select
+								132 항목 B16, Value: 長い一覧, Secondary Actions: SetValue, Select
+								133 항목 C16, Value: 同期スクロール・MiniMap, Secondary Actions: SetValue, Select
+								134 行見出し 17
+								135 항목 A17, Secondary Actions: SetValue, Select
+								136 항목 B17, Value: レイアウト確認, Secondary Actions: SetValue, Select
+								137 항목 C17, Value: 行高・列幅・フォント再現, Secondary Actions: SetValue, Select
+								138 行見出し 18
+								139 항목 A18, Secondary Actions: SetValue, Select
+								140 항목 B18, Value: 仕様メモ_*, Secondary Actions: SetValue, Select
+								141 항목 C18, Value: 手動シート対応付け, Secondary Actions: SetValue, Select
+								142 行見出し 19
+								143 항목 A19, Secondary Actions: SetValue, Select
+								144 항목 B19, Value: *_のみメモ, Secondary Actions: SetValue, Select
+								145 항목 C19, Value: シート構成差分, Secondary Actions: SetValue, Select
+								146 行見出し 20
+								147 항목 A20, Secondary Actions: SetValue, Select
+								148 항목 B20, Value: ずれ試験, Secondary Actions: SetValue, Select
+								149 항목 C20, Value: 行挿入による比較ずれ／アンカー, Secondary Actions: SetValue, Select
+								150 行見出し 21
+								151 항목 A21, Secondary Actions: SetValue, Select
+								152 항목 B21, Secondary Actions: SetValue, Select
+								153 항목 C21, Secondary Actions: SetValue, Select
+								154 行見出し 22
+								155 항목 A22, Secondary Actions: SetValue, Select
+								156 항목 B22, Value: ※ オレンジ系ハイライトのセルは「意図的な差分」の目印です（比較結果そのものではありません）。, Secondary Actions: SetValue, Select
+								157 항목 C22, Secondary Actions: SetValue, Select
+								158 行見出し 23
+								159 항목 A23, Secondary Actions: SetValue, Select
+								160 항목 B23, Secondary Actions: SetValue, Select
+								161 항목 C23, Secondary Actions: SetValue, Select
+								162 行見出し 24
+								163 항목 A24, Secondary Actions: SetValue, Select
+								164 항목 B24, Secondary Actions: SetValue, Select
+								165 항목 C24, Secondary Actions: SetValue, Select
+								166 行見出し 25
+								167 항목 A25, Secondary Actions: SetValue, Select
+								168 항목 B25, Secondary Actions: SetValue, Select
+								169 항목 C25, Secondary Actions: SetValue, Select
+								170 行見出し 26
+								171 항목 A26, Secondary Actions: SetValue, Select
+								172 항목 B26, Secondary Actions: SetValue, Select
+								173 항목 C26, Secondary Actions: SetValue, Select
+								174 行見出し 27
+								175 항목 A27, Secondary Actions: SetValue, Select
+								176 항목 B27, Secondary Actions: SetValue, Select
+								177 항목 C27, Secondary Actions: SetValue, Select
+								178 行見出し 28
+								179 항목 A28, Secondary Actions: SetValue, Select
+								180 항목 B28, Secondary Actions: SetValue, Select
+								181 항목 C28, Secondary Actions: SetValue, Select
+								182 行見出し 29
+								183 항목 A29, Secondary Actions: SetValue, Select
+								184 항목 B29, Secondary Actions: SetValue, Select
+								185 항목 C29, Secondary Actions: SetValue, Select
+								186 行見出し 30
+								187 항목 A30, Secondary Actions: SetValue, Select
+								188 항목 B30, Secondary Actions: SetValue, Select
+								189 항목 C30, Secondary Actions: SetValue, Select
+						190 창 シート 売上サマリ, Secondary Actions: Select
+						191 창 シート 製品カタログ, Secondary Actions: Select
+						192 창 シート 長い一覧, Secondary Actions: Select
+						193 창 シート レイアウト確認, Secondary Actions: Select
+						194 창 シート 仕様メモ_旧, Secondary Actions: Select
+						195 창 シート 左のみメモ, Secondary Actions: Select
+						196 창 シート ずれ試験, Secondary Actions: Select
+	197 엄지
+	198 사용자 지정 RightPane
+		199 텍스트 右
+		200 텍스트 C:\\JUN\\WORK\\DiffXL\\30_参考資料\\samples\\full_feature_right.xlsx
+		201 콤보 상자 SheetCombo
+		202 단추 OpenButton
+			203 텍스트 開く
+		204 창
+			205 pane full_feature_right.xlsx [読み取り専用] - Excel
+				206 pane
+					207 창 垂直方向
+						208 ウィンドウ枠
+							209 スクロール バー
+								210 ボタン カーソルを 1 行上へ移動, Secondary Actions: SetValue
+								211 ボタン 1 画面分上へ移動, Secondary Actions: SetValue
+								212 サムネイル 位置
+								213 ボタン 1 画面分下へ移動, Secondary Actions: SetValue
+								214 ボタン カーソルを 1 行下へ移動, Secondary Actions: SetValue
+					215 창 水平方向
+						216 ウィンドウ枠
+							217 スクロール バー
+								218 ボタン 1 列分左へ移動, Secondary Actions: SetValue
+								219 ボタン 1 画面分左へ移動, Secondary Actions: SetValue
+								220 サムネイル 位置
+								221 ボタン 1 画面分右へ移動, Secondary Actions: SetValue
+								222 ボタン 1 列分右へ移動, Secondary Actions: SetValue
+					223 pane 7
+					224 창 full_feature_right
+						225 Tab full_feature_right
+							226 단추 左スクロール
+							227 단추 右スクロール
+							228 단추 シートの追加
+							229 [シート] タブ 表紙, Secondary Actions: Select
+							230 [シート] タブ 売上サマリ, Secondary Actions: Select
+							231 [シート] タブ 製品カタログ, Secondary Actions: Select
+							232 [シート] タブ 長い一覧, Secondary Actions: Select
+							233 [シート] タブ レイアウト確認, Secondary Actions: Select
+							234 [シート] タブ 仕様メモ_新, Secondary Actions: Select
+							235 [シート] タブ 右のみメモ, Secondary Actions: Select
+							236 [シート] タブ ずれ試験, Secondary Actions: Select
+						237 창 シート 表紙, Secondary Actions: Select
+							238 데이터 그리드 グリッド
+								239 머리글 항목 すべて選択
+								240 列見出し A
+								241 列見出し B
+								242 列見出し C
+								243 行見出し 1
+								244 항목 A1, Secondary Actions: SetValue, Select
+								245 항목 B1, Secondary Actions: SetValue, Select
+								246 항목 C1, Secondary Actions: SetValue, Select
+								247 行見出し 2
+								248 항목 A2, Secondary Actions: SetValue, Select
+								249 항목 B2, Value: DiffXL 機能検証サンプル, Secondary Actions: SetValue, Select
+								250 항목 C2, Secondary Actions: SetValue, Select
+								251 行見出し 3
+								252 항목 A3, Secondary Actions: SetValue, Select
+								253 항목 B3, Value: 右 (Right / 比較対象) ブック, Secondary Actions: SetValue, Select
+								254 항목 C3, Secondary Actions: SetValue, Select
+								255 行見出し 4
+								256 항목 A4, Secondary Actions: SetValue, Select
+								257 항목 B4, Secondary Actions: SetValue, Select
+								258 항목 C4, Secondary Actions: SetValue, Select
+								259 行見出し 5
+								260 항목 A5, Secondary Actions: SetValue, Select
+								261 항목 B5, Value: ファイル役割, Secondary Actions: SetValue, Select
+								262 항목 C5, Value: 比較の右ペイン, Secondary Actions: SetValue, Select
+								263 行見出し 6
+								264 항목 A6, Secondary Actions: SetValue, Select
+								265 항목 B6, Value: サンプル版, Secondary Actions: SetValue, Select
+								266 항목 C6, Value: 1.1.0, Secondary Actions: SetValue, Select
+								267 行見出し 7
+								268 항목 A7, Secondary Actions: SetValue, Select
+								269 항목 B7, Value: 対象アプリ, Secondary Actions: SetValue, Select
+								270 항목 C7, Value: DiffXL (.xlsx 比較), Secondary Actions: SetValue, Select
+								271 行見出し 8
+								272 항목 A8, Secondary Actions: SetValue, Select
+								273 항목 B8, Value: 想定用途, Secondary Actions: SetValue, Select
+								274 항목 C8, Value: テキスト／画像／シート構成／手動対応／アンカー等の一括確認, Secondary Actions: SetValue, Select
+								275 行見出し 9
+								276 항목 A9, Secondary Actions: SetValue, Select
+								277 항목 B9, Value: 改訂メモ, Secondary Actions: SetValue, Select
+								278 항목 C9, Value: 画像差分・行挿入・文言改訂を反映, Secondary Actions: SetValue, Select
+								279 行見出し 10
+								280 항목 A10, Secondary Actions: SetValue, Select
+								281 항목 B10, Secondary Actions: SetValue, Select
+								282 항목 C10, Secondary Actions: SetValue, Select
+								283 行見出し 11
+								284 항목 A11, Secondary Actions: SetValue, Select
+								285 항목 B11, Value: シート一覧と検証ポイント, Secondary Actions: SetValue, Select
+								286 항목 C11, Secondary Actions: SetValue, Select
+								287 行見出し 12
+								288 항목 A12, Secondary Actions: SetValue, Select
+								289 항목 B12, Value: シート名, Secondary Actions: SetValue, Select
+								290 항목 C12, Value: 主な検証内容, Secondary Actions: SetValue, Select
+								291 行見出し 13
+								292 항목 A13, Secondary Actions: SetValue, Select
+								293 항목 B13, Value: 表紙, Secondary Actions: SetValue, Select
+								294 항목 C13, Value: 起動後の表示・基本情報, Secondary Actions: SetValue, Select
+								295 行見出し 14
+								296 항목 A14, Secondary Actions: SetValue, Select
+								297 항목 B14, Value: 売上サマリ, Secondary Actions: SetValue, Select
+								298 항목 C14, Value: テキスト差分（数値・文言）, Secondary Actions: SetValue, Select
+								299 行見出し 15
+								300 항목 A15, Secondary Actions: SetValue, Select
+								301 항목 B15, Value: 製品カタログ, Secondary Actions: SetValue, Select
+								302 항목 C15, Value: 埋め込み画像の比較, Secondary Actions: SetValue, Select
+								303 行見出し 16
+								304 항목 A16, Secondary Actions: SetValue, Select
+								305 항목 B16, Value: 長い一覧, Secondary Actions: SetValue, Select
+								306 항목 C16, Value: 同期スクロール・MiniMap, Secondary Actions: SetValue, Select
+								307 行見出し 17
+								308 항목 A17, Secondary Actions: SetValue, Select
+								309 항목 B17, Value: レイアウト確認, Secondary Actions: SetValue, Select
+								310 항목 C17, Value: 行高・列幅・フォント再現, Secondary Actions: SetValue, Select
+								311 行見出し 18
+								312 항목 A18, Secondary Actions: SetValue, Select
+								313 항목 B18, Value: 仕様メモ_*, Secondary Actions: SetValue, Select
+								314 항목 C18, Value: 手動シート対応付け, Secondary Actions: SetValue, Select
+								315 行見出し 19
+								316 항목 A19, Secondary Actions: SetValue, Select
+								317 항목 B19, Value: *_のみメモ, Secondary Actions: SetValue, Select
+								318 항목 C19, Value: シート構成差分, Secondary Actions: SetValue, Select
+								319 行見出し 20
+								320 항목 A20, Secondary Actions: SetValue, Select
+								321 항목 B20, Value: ずれ試験, Secondary Actions: SetValue, Select
+								322 항목 C20, Value: 行挿入による比較ずれ／アンカー, Secondary Actions: SetValue, Select
+								323 行見出し 21
+								324 항목 A21, Secondary Actions: SetValue, Select
+								325 항목 B21, Secondary Actions: SetValue, Select
+								326 항목 C21, Secondary Actions: SetValue, Select
+								327 行見出し 22
+								328 항목 A22, Secondary Actions: SetValue, Select
+								329 항목 B22, Value: ※ オレンジ系ハイライトのセルは「意図的な差分」の目印です（比較結果そのものではありません）。, Secondary Actions: SetValue, Select
+								330 항목 C22, Secondary Actions: SetValue, Select
+								331 行見出し 23
+								332 항목 A23, Secondary Actions: SetValue, Select
+								333 항목 B23, Secondary Actions: SetValue, Select
+								334 항목 C23, Secondary Actions: SetValue, Select
+								335 行見出し 24
+								336 항목 A24, Secondary Actions: SetValue, Select
+								337 항목 B24, Secondary Actions: SetValue, Select
+								338 항목 C24, Secondary Actions: SetValue, Select
+								339 行見出し 25
+								340 항목 A25, Secondary Actions: SetValue, Select
+								341 항목 B25, Secondary Actions: SetValue, Select
+								342 항목 C25, Secondary Actions: SetValue, Select
+								343 行見出し 26
+								344 항목 A26, Secondary Actions: SetValue, Select
+								345 항목 B26, Secondary Actions: SetValue, Select
+								346 항목 C26, Secondary Actions: SetValue, Select
+								347 行見出し 27
+								348 항목 A27, Secondary Actions: SetValue, Select
+								349 항목 B27, Secondary Actions: SetValue, Select
+								350 항목 C27, Secondary Actions: SetValue, Select
+								351 行見出し 28
+								352 항목 A28, Secondary Actions: SetValue, Select
+								353 항목 B28, Secondary Actions: SetValue, Select
+								354 항목 C28, Secondary Actions: SetValue, Select
+								355 行見出し 29
+								356 항목 A29, Secondary Actions: SetValue, Select
+								357 항목 B29, Secondary Actions: SetValue, Select
+								358 항목 C29, Secondary Actions: SetValue, Select
+								359 行見出し 30
+								360 항목 A30, Secondary Actions: SetValue, Select
+								361 항목 B30, Secondary Actions: SetValue, Select
+								362 항목 C30, Secondary Actions: SetValue, Select
+						363 창 シート 売上サマリ, Secondary Actions: Select
+						364 창 シート 製品カタログ, Secondary Actions: Select
+						365 창 シート 長い一覧, Secondary Actions: Select
+						366 창 シート レイアウト確認, Secondary Actions: Select
+						367 창 シート 仕様メモ_新, Secondary Actions: Select
+						368 창 シート 右のみメモ, Secondary Actions: Select
+						369 창 シート ずれ試験, Secondary Actions: Select
+	370 엄지
+	371 사용자 지정 MiniMap
+		372 텍스트 MiniMap
+		373 텍스트 全体俯瞰
+		374 텍스트 1. 表紙
+		375 텍스트 2. 売上サマリ
+		376 텍스트 3. 製品カタログ
+		377 텍스트 4. 長い一覧
+		378 텍스트 5. レイアウト確認
+		379 텍스트 6. ずれ試験
+		380 텍스트 7. 仕様メモ_旧
+		381 텍스트 8. 左のみメモ
+		382 텍스트 9. 仕様メモ_新
+		383 텍스트 10. 右のみメモ
+		384 텍스트 表紙 · 行1
+		385 텍스트 差分 69 件 表紙 行1 クリックで移動

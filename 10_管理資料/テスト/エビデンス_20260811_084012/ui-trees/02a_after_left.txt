@@ -1,0 +1,10 @@
+﻿ControlType.Window|DiffXL|Enabled=True
+ControlType.Text|比較開始|Enabled=False
+ControlType.Text|（未選択）|Enabled=True
+ControlType.Text|参照...|Enabled=True
+ControlType.Text|右ファイル|Enabled=True
+ControlType.Text|C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx|Enabled=True
+ControlType.Text|参照...|Enabled=True
+ControlType.Text|左ファイル|Enabled=True
+ControlType.Text|比較する 2 つの Excel ファイル（.xlsx）を選択してください。|Enabled=True
+ControlType.Text|DiffXL|Enabled=True

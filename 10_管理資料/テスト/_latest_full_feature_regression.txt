@@ -1,0 +1,44 @@
+﻿13:14:16.842 BEGIN auto-live-test
+13:14:16.842 COMPARE start
+13:14:27.055 COMPARE_OK count=70 text=63 image=1 imageOnlyL=1 imageOnlyR=1 structure=4 elapsedMs=279
+13:14:27.055 IMAGE_DIFFS_OK related=3
+13:14:27.055 HIGHLIGHT before=True off=False on=True
+13:14:27.055 HIGHLIGHT_OK
+13:14:27.055 SAMPLE_MODE full_feature
+13:14:27.086 SHEET 表紙 pre-activated (to verify MiniMap sheet switch)
+13:14:27.360 MINIMAP targetSheet=長い一覧 targetRow=44 Lsheet=長い一覧 Rsheet=長い一覧 Lsr=44 Rsr=44 status=MiniMap → 長い一覧!行 44 / テキスト差分 E44: 「2480」→「2980」 (L:OK R:OK)
+13:14:27.360 MINIMAP_OK
+13:14:27.642 MINIMAP_MULTI sheet=売上サマリ row=5 Lsheet=売上サマリ Rsheet=売上サマリ Lsr=5 Rsr=5 ok=True
+13:14:27.854 MINIMAP_MULTI sheet=製品カタログ row=5 Lsheet=製品カタログ Rsheet=製品カタログ Lsr=5 Rsr=5 ok=True
+13:14:28.058 MINIMAP_MULTI sheet=長い一覧 row=7 Lsheet=長い一覧 Rsheet=長い一覧 Lsr=7 Rsr=7 ok=True
+13:14:28.198 MINIMAP_MULTI sheet=表紙 row=3 Lsheet=表紙 Rsheet=表紙 Lsr=3 Rsr=3 ok=True
+13:14:28.198 MINIMAP_MULTI_SUMMARY ok=4/4
+13:14:28.214 MINIMAP_MULTI_OK
+13:14:28.268 SHEET_SYNC after L→長い一覧 Lsheet=長い一覧 Rsheet=長い一覧
+13:14:28.268 SHEET_SYNC_OK
+13:14:28.268 PAIR_COMBO count=6
+13:14:29.077 RECOMPARE_OK count=70
+13:14:29.092 SETTINGS_OPEN_OK constructed SettingsWindow
+13:14:29.462 SETTINGS_DIALOG_SAVE saved=True
+13:14:29.462 SETTINGS_DIALOG result=True SavedProp=True
+13:14:29.478 SETTINGS_SAVE_OK=True color=#FFCC00 via=SettingsWindow.ShowDialog
+13:14:29.478 SETTINGS_OPEN_OK
+13:14:29.805 SETTINGS_RESTORED color=#FFFF00
+13:14:30.227 RESIZE leftH0=727.04 leftH1=727.04 hostAttachedL=True
+13:14:30.227 CONTENT_SCROLL maps=6 alignments=6
+13:14:30.582 CATALOG_MAP ContentScrollMap 製品カタログ ↔ 製品カタログ content segs=4 | Equal L1-6 R1-6 hold=0 | RightOnly L6-6 R7-7 hold=6 | LeftOnly L7-7 R7-7 hold=7 | Equal L8-536870911 R8-536870911 hold=0
+13:14:30.582 CATALOG_MAP_POINTS L4→R4 L8→R8 R4→L4 R8→L8
+13:14:30.582 CATALOG_RIGHT_ONLY R7→L6
+13:14:30.582 CATALOG_LEFT_ONLY L6→R6
+13:14:31.217 CATALOG_SCROLL_RIGHT_ONLY Lsr=6 Rsr=7 mappedL=6 lok=True rok=True
+13:14:31.217 CATALOG_RIGHT_ONLY_SCROLL_OK
+13:14:31.656 CATALOG_SCROLL_MATCH Lsr=8 Rsr=8 mappedL=8
+13:14:31.656 CATALOG_MATCH_SCROLL_OK
+13:14:32.024 SHIFT_MAP ContentScrollMap ずれ試験 ↔ ずれ試験 content segs=4 | Equal L1-7 R1-7 hold=0 | RightOnly L7-7 R8-9 hold=7 | Equal L8-19 R10-21 hold=0 | Equal L20-536870911 R22-536870911 hold=0
+13:14:32.024 SHIFT_MAP_POINTS L14→R16 R16→L14 R8→L7
+13:14:32.024 SHIFT_MAP_OK
+13:14:32.944 HSCROLL L=10,5 R=10,5 mappedR=10
+13:14:32.944 HSCROLL_OK
+13:14:32.944 CONTENT_SCROLL_OK
+13:14:32.944 FAILURES=0
+13:14:32.944 AUTO_LIVE_PASS

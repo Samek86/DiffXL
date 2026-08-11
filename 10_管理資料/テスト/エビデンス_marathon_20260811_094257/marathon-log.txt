@@ -1,0 +1,548 @@
+﻿[2026-08-11 09:42:58] Marathon BEGIN minMinutes=185 deadline=08/11/2026 12:47:58
+[2026-08-11 09:42:58] Exe=C:\JUN\WORK\DiffXL\40_リリース\DiffXL.exe
+[2026-08-11 09:42:58] Evidence=C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_marathon_20260811_094257
+[2026-08-11 09:42:58] === ROUND 1 elapsed=0m remaining=185m ===
+[2026-08-11 09:43:01] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:43:16] END full_feature exit=0 pass=True dur=15s count=69 image=2
+[2026-08-11 09:43:43] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:44:00] END large_image exit=0 pass=True dur=17s count=30 image=4
+[2026-08-11 09:44:23] === ROUND 2 elapsed=1m remaining=184m ===
+[2026-08-11 09:44:26] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:44:42] END full_feature exit=0 pass=True dur=15s count=69 image=2
+[2026-08-11 09:45:08] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:45:25] END large_image exit=0 pass=True dur=17s count=30 image=4
+[2026-08-11 09:45:48] === ROUND 3 elapsed=3m remaining=182m ===
+[2026-08-11 09:45:51] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:46:07] END full_feature exit=0 pass=True dur=16s count=69 image=2
+[2026-08-11 09:46:34] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:46:51] END large_image exit=0 pass=True dur=18s count=-1 image=-1
+[2026-08-11 09:47:14] === ROUND 4 elapsed=4m remaining=181m ===
+[2026-08-11 09:47:17] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:47:33] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:48:00] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:48:16] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:48:39] === ROUND 5 elapsed=6m remaining=179m ===
+[2026-08-11 09:48:42] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:48:57] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 09:49:23] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:49:41] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 09:50:04] === ROUND 6 elapsed=7m remaining=178m ===
+[2026-08-11 09:50:07] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:50:23] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:50:49] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:51:05] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:51:28] === ROUND 7 elapsed=9m remaining=176m ===
+[2026-08-11 09:51:31] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:51:46] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 09:52:12] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:52:28] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:52:51] === ROUND 8 elapsed=10m remaining=175m ===
+[2026-08-11 09:52:54] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:53:09] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 09:53:35] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:53:51] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:54:14] === ROUND 9 elapsed=11m remaining=174m ===
+[2026-08-11 09:54:17] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:54:32] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 09:54:58] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:55:14] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:55:37] === ROUND 10 elapsed=13m remaining=172m ===
+[2026-08-11 09:55:40] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:55:55] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 09:56:21] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:56:37] END large_image exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 09:57:00] === ROUND 11 elapsed=14m remaining=171m ===
+[2026-08-11 09:57:03] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:57:18] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 09:57:44] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:58:00] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:58:23] === ROUND 12 elapsed=15m remaining=170m ===
+[2026-08-11 09:58:26] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 09:58:41] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 09:59:08] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 09:59:23] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 09:59:46] === ROUND 13 elapsed=17m remaining=168m ===
+[2026-08-11 09:59:50] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:00:04] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:00:31] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:00:46] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:01:10] === ROUND 14 elapsed=18m remaining=167m ===
+[2026-08-11 10:01:13] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:01:28] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:01:54] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:02:09] END large_image exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:02:32] === ROUND 15 elapsed=20m remaining=165m ===
+[2026-08-11 10:02:35] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:02:50] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:03:16] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:03:32] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:03:55] === ROUND 16 elapsed=21m remaining=164m ===
+[2026-08-11 10:03:58] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:04:13] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:04:39] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:04:55] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:05:18] === ROUND 17 elapsed=22m remaining=163m ===
+[2026-08-11 10:05:21] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:05:36] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:06:03] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:06:18] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:06:41] === ROUND 18 elapsed=24m remaining=161m ===
+[2026-08-11 10:06:44] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:06:59] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:07:25] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:07:41] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:08:04] === ROUND 19 elapsed=25m remaining=160m ===
+[2026-08-11 10:08:07] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:08:23] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:08:49] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:09:05] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:09:28] === ROUND 20 elapsed=27m remaining=158m ===
+[2026-08-11 10:09:31] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:09:46] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:10:12] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:10:28] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:10:51] === ROUND 21 elapsed=28m remaining=157m ===
+[2026-08-11 10:10:54] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:11:09] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:11:36] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:11:51] END large_image exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:12:14] === ROUND 22 elapsed=29m remaining=156m ===
+[2026-08-11 10:12:17] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:12:32] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:12:58] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:13:14] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:13:38] === ROUND 23 elapsed=31m remaining=154m ===
+[2026-08-11 10:13:41] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:13:56] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:14:22] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:14:38] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:15:01] === ROUND 24 elapsed=32m remaining=153m ===
+[2026-08-11 10:15:04] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:15:19] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:15:45] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:16:01] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:16:24] === ROUND 25 elapsed=33m remaining=152m ===
+[2026-08-11 10:16:27] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:16:42] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:17:09] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:17:24] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:17:48] === ROUND 26 elapsed=35m remaining=150m ===
+[2026-08-11 10:17:51] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:18:05] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:18:32] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:18:48] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:19:11] === ROUND 27 elapsed=36m remaining=149m ===
+[2026-08-11 10:19:14] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:19:29] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:19:55] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:20:12] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:20:35] === ROUND 28 elapsed=38m remaining=147m ===
+[2026-08-11 10:20:38] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:20:53] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:21:19] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:21:36] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:21:59] === ROUND 29 elapsed=39m remaining=146m ===
+[2026-08-11 10:22:02] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:22:17] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:22:43] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:22:59] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:23:22] === ROUND 30 elapsed=40m remaining=145m ===
+[2026-08-11 10:23:25] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:23:40] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:24:06] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:24:22] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:24:45] === ROUND 31 elapsed=42m remaining=143m ===
+[2026-08-11 10:24:48] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:25:03] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:25:29] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:25:45] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:26:08] === ROUND 32 elapsed=43m remaining=142m ===
+[2026-08-11 10:26:11] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:26:26] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:26:53] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:27:08] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:27:32] === ROUND 33 elapsed=45m remaining=140m ===
+[2026-08-11 10:27:35] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:27:50] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:28:16] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:28:32] END large_image exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:28:55] === ROUND 34 elapsed=46m remaining=139m ===
+[2026-08-11 10:28:58] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:29:13] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:29:39] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:29:55] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:30:18] === ROUND 35 elapsed=47m remaining=138m ===
+[2026-08-11 10:30:21] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:30:36] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:31:03] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:31:19] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:31:42] === ROUND 36 elapsed=49m remaining=136m ===
+[2026-08-11 10:31:45] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:32:00] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:32:26] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:32:42] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:33:05] === ROUND 37 elapsed=50m remaining=135m ===
+[2026-08-11 10:33:08] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:33:23] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:33:49] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:34:05] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:34:28] === ROUND 38 elapsed=52m remaining=133m ===
+[2026-08-11 10:34:31] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:34:46] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:35:12] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:35:29] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:35:52] === ROUND 39 elapsed=53m remaining=132m ===
+[2026-08-11 10:35:55] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:36:10] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:36:36] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:36:52] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:37:15] === ROUND 40 elapsed=54m remaining=131m ===
+[2026-08-11 10:37:18] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:37:33] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:37:59] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:38:15] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:38:38] === ROUND 41 elapsed=56m remaining=129m ===
+[2026-08-11 10:38:41] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:38:56] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:39:23] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:39:39] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:40:02] === ROUND 42 elapsed=57m remaining=128m ===
+[2026-08-11 10:40:05] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:40:20] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:40:46] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:41:02] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:41:26] === ROUND 43 elapsed=58m remaining=127m ===
+[2026-08-11 10:41:29] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:41:44] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:42:10] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:42:27] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 10:42:50] === ROUND 44 elapsed=60m remaining=125m ===
+[2026-08-11 10:42:53] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:43:08] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:43:34] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:43:51] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:44:14] === ROUND 45 elapsed=61m remaining=124m ===
+[2026-08-11 10:44:17] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:44:32] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:44:58] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:45:15] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:45:38] === ROUND 46 elapsed=63m remaining=122m ===
+[2026-08-11 10:45:41] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:45:56] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:46:22] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:46:38] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:47:01] === ROUND 47 elapsed=64m remaining=121m ===
+[2026-08-11 10:47:04] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:47:20] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:47:46] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:48:02] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:48:25] === ROUND 48 elapsed=65m remaining=120m ===
+[2026-08-11 10:48:28] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:48:43] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:49:10] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:49:26] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:49:49] === ROUND 49 elapsed=67m remaining=118m ===
+[2026-08-11 10:49:52] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:50:07] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:50:34] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:50:50] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 10:51:14] === ROUND 50 elapsed=68m remaining=117m ===
+[2026-08-11 10:51:17] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:51:32] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:51:58] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:52:14] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:52:37] === ROUND 51 elapsed=70m remaining=115m ===
+[2026-08-11 10:52:40] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:52:55] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:53:21] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:53:37] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:54:01] === ROUND 52 elapsed=71m remaining=114m ===
+[2026-08-11 10:54:04] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:54:19] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:54:45] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:55:01] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:55:25] === ROUND 53 elapsed=72m remaining=113m ===
+[2026-08-11 10:55:28] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:55:43] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:56:09] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:56:25] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:56:48] === ROUND 54 elapsed=74m remaining=111m ===
+[2026-08-11 10:56:51] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:57:06] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:57:33] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:57:49] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:58:12] === ROUND 55 elapsed=75m remaining=110m ===
+[2026-08-11 10:58:15] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:58:31] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 10:58:57] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 10:59:13] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 10:59:36] === ROUND 56 elapsed=77m remaining=108m ===
+[2026-08-11 10:59:39] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 10:59:55] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:00:21] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:00:37] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:01:00] === ROUND 57 elapsed=78m remaining=107m ===
+[2026-08-11 11:01:03] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:01:19] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:01:45] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:02:01] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:02:24] === ROUND 58 elapsed=79m remaining=106m ===
+[2026-08-11 11:02:27] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:02:43] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:03:09] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:03:25] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:03:48] === ROUND 59 elapsed=81m remaining=104m ===
+[2026-08-11 11:03:51] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:04:07] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:04:33] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:04:49] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:05:12] === ROUND 60 elapsed=82m remaining=103m ===
+[2026-08-11 11:05:15] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:05:31] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:05:57] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:06:13] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:06:36] === ROUND 61 elapsed=84m remaining=101m ===
+[2026-08-11 11:06:39] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:06:54] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:07:21] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:07:37] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:08:00] === ROUND 62 elapsed=85m remaining=100m ===
+[2026-08-11 11:08:03] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:08:18] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:08:45] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:09:01] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:09:24] === ROUND 63 elapsed=86m remaining=99m ===
+[2026-08-11 11:09:27] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:09:43] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:10:09] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:10:25] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:10:48] === ROUND 64 elapsed=88m remaining=97m ===
+[2026-08-11 11:10:51] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:11:07] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:11:33] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:11:50] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:12:13] === ROUND 65 elapsed=89m remaining=96m ===
+[2026-08-11 11:12:16] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:12:31] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:12:57] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:13:14] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:13:37] === ROUND 66 elapsed=91m remaining=94m ===
+[2026-08-11 11:13:40] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:13:55] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:14:22] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:14:38] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:15:01] === ROUND 67 elapsed=92m remaining=93m ===
+[2026-08-11 11:15:04] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:15:19] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:15:45] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:16:02] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:16:25] === ROUND 68 elapsed=93m remaining=92m ===
+[2026-08-11 11:16:28] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:16:43] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:17:09] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:17:26] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:17:49] === ROUND 69 elapsed=95m remaining=90m ===
+[2026-08-11 11:17:52] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:18:08] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:18:34] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:18:50] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:19:13] === ROUND 70 elapsed=96m remaining=89m ===
+[2026-08-11 11:19:16] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:19:32] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:19:58] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:20:14] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:20:38] === ROUND 71 elapsed=98m remaining=87m ===
+[2026-08-11 11:20:41] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:20:56] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:21:22] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:21:39] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:22:02] === ROUND 72 elapsed=99m remaining=86m ===
+[2026-08-11 11:22:05] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:22:21] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:22:47] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:23:03] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:23:27] === ROUND 73 elapsed=100m remaining=85m ===
+[2026-08-11 11:23:30] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:23:45] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:24:11] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:24:28] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:24:51] === ROUND 74 elapsed=102m remaining=83m ===
+[2026-08-11 11:24:54] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:25:09] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:25:36] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:25:52] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:26:15] === ROUND 75 elapsed=103m remaining=82m ===
+[2026-08-11 11:26:18] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:26:34] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:27:00] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:27:16] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:27:40] === ROUND 76 elapsed=105m remaining=80m ===
+[2026-08-11 11:27:43] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:27:58] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:28:24] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:28:41] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:29:04] === ROUND 77 elapsed=106m remaining=79m ===
+[2026-08-11 11:29:07] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:29:22] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:29:48] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:30:05] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:30:28] === ROUND 78 elapsed=108m remaining=77m ===
+[2026-08-11 11:30:31] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:30:47] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:31:13] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:31:29] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:31:52] === ROUND 79 elapsed=109m remaining=76m ===
+[2026-08-11 11:31:55] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:32:11] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:32:37] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:32:53] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:33:17] === ROUND 80 elapsed=110m remaining=75m ===
+[2026-08-11 11:33:20] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:33:35] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:34:01] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:34:18] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:34:41] === ROUND 81 elapsed=112m remaining=73m ===
+[2026-08-11 11:34:44] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:34:59] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:35:26] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:35:42] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:36:05] === ROUND 82 elapsed=113m remaining=72m ===
+[2026-08-11 11:36:08] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:36:24] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:36:50] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:37:07] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:37:30] === ROUND 83 elapsed=115m remaining=70m ===
+[2026-08-11 11:37:33] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:37:48] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:38:14] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:38:31] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:38:54] === ROUND 84 elapsed=116m remaining=69m ===
+[2026-08-11 11:38:57] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:39:13] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:39:39] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:39:55] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:40:18] === ROUND 85 elapsed=117m remaining=68m ===
+[2026-08-11 11:40:21] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:40:37] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:41:04] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:41:20] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:41:43] === ROUND 86 elapsed=119m remaining=66m ===
+[2026-08-11 11:41:46] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:42:02] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:42:28] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:42:45] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:43:08] === ROUND 87 elapsed=120m remaining=65m ===
+[2026-08-11 11:43:11] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:43:27] END full_feature exit=0 pass=True dur=15s count=-1 image=-1
+[2026-08-11 11:43:53] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:44:09] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:44:32] === ROUND 88 elapsed=122m remaining=63m ===
+[2026-08-11 11:44:35] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:44:51] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:45:17] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:45:34] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:45:57] === ROUND 89 elapsed=123m remaining=62m ===
+[2026-08-11 11:46:00] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:46:16] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:46:42] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:46:58] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:47:21] === ROUND 90 elapsed=124m remaining=61m ===
+[2026-08-11 11:47:24] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:47:40] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:48:06] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:48:23] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:48:46] === ROUND 91 elapsed=126m remaining=59m ===
+[2026-08-11 11:48:49] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:49:05] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:49:31] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:49:48] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:50:11] === ROUND 92 elapsed=127m remaining=58m ===
+[2026-08-11 11:50:14] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:50:30] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:50:56] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:51:13] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:51:36] === ROUND 93 elapsed=129m remaining=56m ===
+[2026-08-11 11:51:39] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:51:55] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:52:21] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:52:37] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:53:00] === ROUND 94 elapsed=130m remaining=55m ===
+[2026-08-11 11:53:03] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:53:19] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:53:46] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:54:02] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:54:25] === ROUND 95 elapsed=131m remaining=54m ===
+[2026-08-11 11:54:28] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:54:44] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:55:10] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:55:27] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:55:50] === ROUND 96 elapsed=133m remaining=52m ===
+[2026-08-11 11:55:53] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:56:09] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:56:35] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:56:52] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:57:15] === ROUND 97 elapsed=134m remaining=51m ===
+[2026-08-11 11:57:18] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:57:34] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:58:00] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:58:17] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 11:58:40] === ROUND 98 elapsed=136m remaining=49m ===
+[2026-08-11 11:58:43] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 11:58:59] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 11:59:25] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 11:59:41] END large_image exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:00:05] === ROUND 99 elapsed=137m remaining=48m ===
+[2026-08-11 12:00:08] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:00:24] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:00:50] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:01:07] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:01:30] === ROUND 100 elapsed=139m remaining=46m ===
+[2026-08-11 12:01:33] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:01:49] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:02:15] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:02:32] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:02:55] === ROUND 101 elapsed=140m remaining=45m ===
+[2026-08-11 12:02:58] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:03:13] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:03:40] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:03:56] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:04:20] === ROUND 102 elapsed=141m remaining=44m ===
+[2026-08-11 12:04:23] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:04:38] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:05:05] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:05:21] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:05:44] === ROUND 103 elapsed=143m remaining=42m ===
+[2026-08-11 12:05:47] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:06:03] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:06:29] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:06:46] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:07:09] === ROUND 104 elapsed=144m remaining=41m ===
+[2026-08-11 12:07:12] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:07:28] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:07:54] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:08:11] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:08:34] === ROUND 105 elapsed=146m remaining=39m ===
+[2026-08-11 12:08:37] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:08:53] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:09:19] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:09:37] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:10:00] === ROUND 106 elapsed=147m remaining=38m ===
+[2026-08-11 12:10:03] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:10:18] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:10:45] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:11:03] END large_image exit=0 pass=True dur=18s count=-1 image=-1
+[2026-08-11 12:11:26] === ROUND 107 elapsed=148m remaining=37m ===
+[2026-08-11 12:11:29] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:11:46] END full_feature exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:12:12] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:12:30] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:12:53] === ROUND 108 elapsed=150m remaining=35m ===
+[2026-08-11 12:12:56] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:13:12] END full_feature exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:13:39] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:13:56] END large_image exit=0 pass=True dur=17s count=-1 image=-1
+[2026-08-11 12:14:19] === ROUND 109 elapsed=151m remaining=34m ===
+[2026-08-11 12:14:22] START full_feature timeout=240s left=full_feature_left.xlsx
+[2026-08-11 12:14:38] END full_feature exit=0 pass=True dur=16s count=-1 image=-1
+[2026-08-11 12:15:04] START large_image timeout=600s left=large_image_left.xlsx
+[2026-08-11 12:15:12] END large_image exit=-1 pass=False dur=7s count=-1 image=-1

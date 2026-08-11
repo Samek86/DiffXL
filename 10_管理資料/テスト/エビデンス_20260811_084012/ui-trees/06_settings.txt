@@ -1,0 +1,14 @@
+﻿ControlType.Window|設定|Enabled=True
+ControlType.Text|設定は %AppData%\Roaming\DiffXL\settings.yaml に保存されます。既定の差分色は黄色・不透明度 50% です。|Enabled=True
+ControlType.CheckBox|左右ビューを同期スクロールする|Enabled=True
+ControlType.Text|左右ビューを同期スクロールする|Enabled=True
+ControlType.Text|表示・操作|Enabled=True
+ControlType.CheckBox|起動時に差分強調を表示する|Enabled=True
+ControlType.Text|起動時に差分強調を表示する|Enabled=True
+ControlType.Text|プレビュー|Enabled=True
+ControlType.Text|50%|Enabled=True
+ControlType.Text|不透明度|Enabled=True
+ControlType.Text|差分色 (#RRGGBB)|Enabled=True
+ControlType.Text|差分強調|Enabled=True
+ControlType.Text|保存|Enabled=True
+ControlType.Text|キャンセル|Enabled=True

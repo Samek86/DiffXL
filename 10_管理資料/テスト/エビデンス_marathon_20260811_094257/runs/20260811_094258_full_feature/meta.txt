@@ -1,0 +1,6 @@
+﻿Label=full_feature
+ExitCode=0
+Pass=True
+DurationSec=15
+TotalCount=69
+ImageCount=2

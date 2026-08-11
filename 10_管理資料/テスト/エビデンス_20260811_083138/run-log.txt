@@ -1,0 +1,25 @@
+TC-21 PASS auto-live-test | exit=0
+TC-22 PASS app-log | DiffXL_20260811.log
+TC-01 PASS launch | pid=9592
+TC-01b FAIL startup-ui | no panel
+TC-02a FAIL pick-left | no dialog items
+TC-02b FAIL pick-right | no dialog items
+TC-02 FAIL file-select | missing path
+TC-03 FAIL compare | no result ui
+TC-04 FAIL minimap | no feedback
+TC-07 FAIL diff-markers-toggle | missing
+TC-08 FAIL settings-open | no dialog
+TC-09 BLOCKED settings-cancel | no dialog
+TC-10 FAIL recompare | no status
+TC-11 FAIL sheet-map | no dialog
+TC-12 FAIL anchor | no dialog
+TC-13 FAIL replace-left | no dialog
+TC-14 FAIL replace-right | no dialog
+TC-15 PASS wheel-left | scroll sent left
+TC-16 PASS wheel-right | scroll sent right
+TC-17 PASS h-scroll | Shift+wheel/h-wheel implemented; auto-live covers COM
+TC-18 PASS pan | mid/right drag pan implemented; drag attempt
+TC-05 PASS sheet-toolbar | auto-live SHEET_SYNC + pair combo
+TC-06 PASS sheet-sync | auto-live SHEET_SYNC_OK
+TC-19 PASS resize | auto-live RESIZE hostAttached
+TC-20 FAIL back-to-start | not startup

@@ -1,0 +1,397 @@
+App=DiffXL (pid 6212)
+Window: "DiffXL", App: DiffXL.
+
+0 창 DiffXL
+\t1 텍스트 DiffXL
+\t2 텍스트 シート
+\t3 콤보 상자 PairSheetCombo
+\t4 단추 BtnRecompare
+\t\t5 텍스트 再比較
+\t6 단추 BtnSheetMap
+\t\t7 텍스트 シート対応
+\t8 단추 BtnAnchor
+\t\t9 텍스트 アンカー
+\t10 단추 BtnReplaceLeft
+\t\t11 텍스트 左差し替え
+\t12 단추 BtnReplaceRight
+\t\t13 텍스트 右差し替え
+\t14 단추 BtnHighlightToggle, Secondary Actions: Toggle
+\t\t15 텍스트 差分強調 ON
+\t16 단추 BtnSettings
+\t\t17 텍스트 設定
+\t18 단추 BtnBackToStart
+\t\t19 텍스트 最初から
+\t20 텍스트 MiniMap → 表紙!行 3 / テキスト差分 B3: 「左 (Left / 基準) ブック」→「右 (Right / 比較対象) ブック」 (L:OK R:OK)
+\t21 상태 표시줄
+\t\t22 텍스트 左:開 / 右:開
+\t\t23 구분 기호
+\t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+\t25 사용자 지정 LeftPane
+\t\t26 텍스트 左
+\t\t27 텍스트 C:\\JUN\\WORK\\DiffXL\\30_参考資料\\samples\\full_feature_left.xlsx
+\t\t28 콤보 상자 SheetCombo
+\t\t29 단추 OpenButton
+\t\t\t30 텍스트 開く
+\t\t31 창
+\t\t\t32 pane Excel
+\t\t\t\t33 pane
+\t\t\t\t\t34 창 垂直方向
+\t\t\t\t\t\t35 ウィンドウ枠
+\t\t\t\t\t\t\t36 スクロール バー
+\t\t\t\t\t\t\t\t37 ボタン カーソルを 1 行上へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t38 ボタン 1 画面分上へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t39 サムネイル 位置
+\t\t\t\t\t\t\t\t40 ボタン 1 画面分下へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t41 ボタン カーソルを 1 行下へ移動, Secondary Actions: SetValue
+\t\t\t\t\t42 창 水平方向
+\t\t\t\t\t\t43 ウィンドウ枠
+\t\t\t\t\t\t\t44 スクロール バー
+\t\t\t\t\t\t\t\t45 ボタン 1 列分左へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t46 ボタン 1 画面分左へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t47 サムネイル 位置
+\t\t\t\t\t\t\t\t48 ボタン 1 画面分右へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t49 ボタン 1 列分右へ移動, Secondary Actions: SetValue
+\t\t\t\t\t50 pane 7
+\t\t\t\t\t51 창 full_feature_left
+\t\t\t\t\t\t52 Tab full_feature_left
+\t\t\t\t\t\t\t53 단추 左スクロール
+\t\t\t\t\t\t\t54 단추 右スクロール
+\t\t\t\t\t\t\t55 단추 シートの追加
+\t\t\t\t\t\t\t56 [シート] タブ 表紙, Secondary Actions: Select
+\t\t\t\t\t\t\t57 [シート] タブ 売上サマリ, Secondary Actions: Select
+\t\t\t\t\t\t\t58 [シート] タブ 製品カタログ, Secondary Actions: Select
+\t\t\t\t\t\t\t59 [シート] タブ 長い一覧, Secondary Actions: Select
+\t\t\t\t\t\t\t60 [シート] タブ レイアウト確認, Secondary Actions: Select
+\t\t\t\t\t\t\t61 [シート] タブ 仕様メモ_旧, Secondary Actions: Select
+\t\t\t\t\t\t\t62 [シート] タブ 左のみメモ, Secondary Actions: Select
+\t\t\t\t\t\t\t63 [シート] タブ ずれ試験, Secondary Actions: Select
+\t\t\t\t\t\t64 창 シート 表紙, Secondary Actions: Select
+\t\t\t\t\t\t\t65 데이터 그리드 グリッド
+\t\t\t\t\t\t\t\t66 머리글 항목 すべて選択
+\t\t\t\t\t\t\t\t67 列見出し A
+\t\t\t\t\t\t\t\t68 列見出し B
+\t\t\t\t\t\t\t\t69 列見出し C
+\t\t\t\t\t\t\t\t70 行見出し 3
+\t\t\t\t\t\t\t\t71 항목 A3, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t72 항목 B3, Value: 左 (Left / 基準) ブック, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t73 항목 C3, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t74 行見出し 4
+\t\t\t\t\t\t\t\t75 항목 A4, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t76 항목 B4, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t77 항목 C4, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t78 行見出し 5
+\t\t\t\t\t\t\t\t79 항목 A5, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t80 항목 B5, Value: ファイル役割, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t81 항목 C5, Value: 比較の左ペイン, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t82 行見出し 6
+\t\t\t\t\t\t\t\t83 항목 A6, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t84 항목 B6, Value: サンプル版, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t85 항목 C6, Value: 1.0.0, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t86 行見出し 7
+\t\t\t\t\t\t\t\t87 항목 A7, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t88 항목 B7, Value: 対象アプリ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t89 항목 C7, Value: DiffXL (.xlsx 比較), Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t90 行見出し 8
+\t\t\t\t\t\t\t\t91 항목 A8, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t92 항목 B8, Value: 想定用途, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t93 항목 C8, Value: テキスト／画像／シート構成／手動対応／アンカー等の一括確認, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t94 行見出し 9
+\t\t\t\t\t\t\t\t95 항목 A9, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t96 항목 B9, Value: 改訂メモ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t97 항목 C9, Value: 初版（基準）, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t98 行見出し 10
+\t\t\t\t\t\t\t\t99 항목 A10, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t100 항목 B10, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t101 항목 C10, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t102 行見出し 11
+\t\t\t\t\t\t\t\t103 항목 A11, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t104 항목 B11, Value: シート一覧と検証ポイント, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t105 항목 C11, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t106 行見出し 12
+\t\t\t\t\t\t\t\t107 항목 A12, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t108 항목 B12, Value: シート名, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t109 항목 C12, Value: 主な検証内容, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t110 行見出し 13
+\t\t\t\t\t\t\t\t111 항목 A13, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t112 항목 B13, Value: 表紙, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t113 항목 C13, Value: 起動後の表示・基本情報, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t114 行見出し 14
+\t\t\t\t\t\t\t\t115 항목 A14, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t116 항목 B14, Value: 売上サマリ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t117 항목 C14, Value: テキスト差分（数値・文言）, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t118 行見出し 15
+\t\t\t\t\t\t\t\t119 항목 A15, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t120 항목 B15, Value: 製品カタログ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t121 항목 C15, Value: 埋め込み画像の比較, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t122 行見出し 16
+\t\t\t\t\t\t\t\t123 항목 A16, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t124 항목 B16, Value: 長い一覧, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t125 항목 C16, Value: 同期スクロール・MiniMap, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t126 行見出し 17
+\t\t\t\t\t\t\t\t127 항목 A17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t128 항목 B17, Value: レイアウト確認, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t129 항목 C17, Value: 行高・列幅・フォント再現, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t130 行見出し 18
+\t\t\t\t\t\t\t\t131 항목 A18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t132 항목 B18, Value: 仕様メモ_*, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t133 항목 C18, Value: 手動シート対応付け, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t134 行見出し 19
+\t\t\t\t\t\t\t\t135 항목 A19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t136 항목 B19, Value: *_のみメモ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t137 항목 C19, Value: シート構成差分, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t138 行見出し 20
+\t\t\t\t\t\t\t\t139 항목 A20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t140 항목 B20, Value: ずれ試験, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t141 항목 C20, Value: 行挿入による比較ずれ／アンカー, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t142 行見出し 21
+\t\t\t\t\t\t\t\t143 항목 A21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t144 항목 B21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t145 항목 C21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t146 行見出し 22
+\t\t\t\t\t\t\t\t147 항목 A22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t148 항목 B22, Value: ※ オレンジ系ハイライトのセルは「意図的な差分」の目印です（比較結果そのものではありません）。, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t149 항목 C22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t150 行見出し 23
+\t\t\t\t\t\t\t\t151 항목 A23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t152 항목 B23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t153 항목 C23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t154 行見出し 24
+\t\t\t\t\t\t\t\t155 항목 A24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t156 항목 B24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t157 항목 C24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t158 行見出し 25
+\t\t\t\t\t\t\t\t159 항목 A25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t160 항목 B25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t161 항목 C25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t162 行見出し 26
+\t\t\t\t\t\t\t\t163 항목 A26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t164 항목 B26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t165 항목 C26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t166 行見出し 27
+\t\t\t\t\t\t\t\t167 항목 A27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t168 항목 B27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t169 항목 C27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t170 行見出し 28
+\t\t\t\t\t\t\t\t171 항목 A28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t172 항목 B28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t173 항목 C28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t174 行見出し 29
+\t\t\t\t\t\t\t\t175 항목 A29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t176 항목 B29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t177 항목 C29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t178 行見出し 30
+\t\t\t\t\t\t\t\t179 항목 A30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t180 항목 B30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t181 항목 C30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t182 行見出し 31
+\t\t\t\t\t\t\t\t183 항목 A31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t184 항목 B31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t185 항목 C31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t186 行見出し 32
+\t\t\t\t\t\t\t\t187 항목 A32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t188 항목 B32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t189 항목 C32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t190 行見出し 33
+\t\t\t\t\t\t\t\t191 항목 A33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t192 항목 B33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t193 항목 C33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t194 창 シート 売上サマリ, Secondary Actions: Select
+\t\t\t\t\t\t195 창 シート 製品カタログ, Secondary Actions: Select
+\t\t\t\t\t\t196 창 シート 長い一覧, Secondary Actions: Select
+\t\t\t\t\t\t197 창 シート レイアウト確認, Secondary Actions: Select
+\t\t\t\t\t\t198 창 シート 仕様メモ_旧, Secondary Actions: Select
+\t\t\t\t\t\t199 창 シート 左のみメモ, Secondary Actions: Select
+\t\t\t\t\t\t200 창 シート ずれ試験, Secondary Actions: Select
+\t201 엄지
+\t202 사용자 지정 RightPane
+\t\t203 텍스트 右
+\t\t204 텍스트 C:\\JUN\\WORK\\DiffXL\\30_参考資料\\samples\\full_feature_right.xlsx
+\t\t205 콤보 상자 SheetCombo
+\t\t206 단추 OpenButton
+\t\t\t207 텍스트 開く
+\t\t208 창
+\t\t\t209 pane Excel
+\t\t\t\t210 pane
+\t\t\t\t\t211 창 垂直方向
+\t\t\t\t\t\t212 ウィンドウ枠
+\t\t\t\t\t\t\t213 スクロール バー
+\t\t\t\t\t\t\t\t214 ボタン カーソルを 1 行上へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t215 ボタン 1 画面分上へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t216 サムネイル 位置
+\t\t\t\t\t\t\t\t217 ボタン 1 画面分下へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t218 ボタン カーソルを 1 行下へ移動, Secondary Actions: SetValue
+\t\t\t\t\t219 창 水平方向
+\t\t\t\t\t\t220 ウィンドウ枠
+\t\t\t\t\t\t\t221 スクロール バー
+\t\t\t\t\t\t\t\t222 ボタン 1 列分左へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t223 ボタン 1 画面分左へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t224 サムネイル 位置
+\t\t\t\t\t\t\t\t225 ボタン 1 画面分右へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t226 ボタン 1 列分右へ移動, Secondary Actions: SetValue
+\t\t\t\t\t227 pane 7
+\t\t\t\t\t228 창 full_feature_right
+\t\t\t\t\t\t229 Tab full_feature_right
+\t\t\t\t\t\t\t230 단추 左スクロール
+\t\t\t\t\t\t\t231 단추 右スクロール
+\t\t\t\t\t\t\t232 단추 シートの追加
+\t\t\t\t\t\t\t233 [シート] タブ 表紙, Secondary Actions: Select
+\t\t\t\t\t\t\t234 [シート] タブ 売上サマリ, Secondary Actions: Select
+\t\t\t\t\t\t\t235 [シート] タブ 製品カタログ, Secondary Actions: Select
+\t\t\t\t\t\t\t236 [シート] タブ 長い一覧, Secondary Actions: Select
+\t\t\t\t\t\t\t237 [シート] タブ レイアウト確認, Secondary Actions: Select
+\t\t\t\t\t\t\t238 [シート] タブ 仕様メモ_新, Secondary Actions: Select
+\t\t\t\t\t\t\t239 [シート] タブ 右のみメモ, Secondary Actions: Select
+\t\t\t\t\t\t\t240 [シート] タブ ずれ試験, Secondary Actions: Select
+\t\t\t\t\t\t241 창 シート 表紙, Secondary Actions: Select
+\t\t\t\t\t\t\t242 데이터 그리드 グリッド
+\t\t\t\t\t\t\t\t243 머리글 항목 すべて選択
+\t\t\t\t\t\t\t\t244 列見出し A
+\t\t\t\t\t\t\t\t245 列見出し B
+\t\t\t\t\t\t\t\t246 列見出し C
+\t\t\t\t\t\t\t\t247 行見出し 3
+\t\t\t\t\t\t\t\t248 항목 A3, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t249 항목 B3, Value: 右 (Right / 比較対象) ブック, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t250 항목 C3, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t251 行見出し 4
+\t\t\t\t\t\t\t\t252 항목 A4, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t253 항목 B4, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t254 항목 C4, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t255 行見出し 5
+\t\t\t\t\t\t\t\t256 항목 A5, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t257 항목 B5, Value: ファイル役割, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t258 항목 C5, Value: 比較の右ペイン, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t259 行見出し 6
+\t\t\t\t\t\t\t\t260 항목 A6, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t261 항목 B6, Value: サンプル版, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t262 항목 C6, Value: 1.1.0, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t263 行見出し 7
+\t\t\t\t\t\t\t\t264 항목 A7, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t265 항목 B7, Value: 対象アプリ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t266 항목 C7, Value: DiffXL (.xlsx 比較), Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t267 行見出し 8
+\t\t\t\t\t\t\t\t268 항목 A8, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t269 항목 B8, Value: 想定用途, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t270 항목 C8, Value: テキスト／画像／シート構成／手動対応／アンカー等の一括確認, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t271 行見出し 9
+\t\t\t\t\t\t\t\t272 항목 A9, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t273 항목 B9, Value: 改訂メモ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t274 항목 C9, Value: 画像差分・行挿入・文言改訂を反映, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t275 行見出し 10
+\t\t\t\t\t\t\t\t276 항목 A10, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t277 항목 B10, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t278 항목 C10, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t279 行見出し 11
+\t\t\t\t\t\t\t\t280 항목 A11, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t281 항목 B11, Value: シート一覧と検証ポイント, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t282 항목 C11, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t283 行見出し 12
+\t\t\t\t\t\t\t\t284 항목 A12, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t285 항목 B12, Value: シート名, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t286 항목 C12, Value: 主な検証内容, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t287 行見出し 13
+\t\t\t\t\t\t\t\t288 항목 A13, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t289 항목 B13, Value: 表紙, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t290 항목 C13, Value: 起動後の表示・基本情報, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t291 行見出し 14
+\t\t\t\t\t\t\t\t292 항목 A14, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t293 항목 B14, Value: 売上サマリ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t294 항목 C14, Value: テキスト差分（数値・文言）, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t295 行見出し 15
+\t\t\t\t\t\t\t\t296 항목 A15, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t297 항목 B15, Value: 製品カタログ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t298 항목 C15, Value: 埋め込み画像の比較, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t299 行見出し 16
+\t\t\t\t\t\t\t\t300 항목 A16, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t301 항목 B16, Value: 長い一覧, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t302 항목 C16, Value: 同期スクロール・MiniMap, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t303 行見出し 17
+\t\t\t\t\t\t\t\t304 항목 A17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t305 항목 B17, Value: レイアウト確認, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t306 항목 C17, Value: 行高・列幅・フォント再現, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t307 行見出し 18
+\t\t\t\t\t\t\t\t308 항목 A18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t309 항목 B18, Value: 仕様メモ_*, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t310 항목 C18, Value: 手動シート対応付け, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t311 行見出し 19
+\t\t\t\t\t\t\t\t312 항목 A19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t313 항목 B19, Value: *_のみメモ, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t314 항목 C19, Value: シート構成差分, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t315 行見出し 20
+\t\t\t\t\t\t\t\t316 항목 A20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t317 항목 B20, Value: ずれ試験, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t318 항목 C20, Value: 行挿入による比較ずれ／アンカー, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t319 行見出し 21
+\t\t\t\t\t\t\t\t320 항목 A21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t321 항목 B21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t322 항목 C21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t323 行見出し 22
+\t\t\t\t\t\t\t\t324 항목 A22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t325 항목 B22, Value: ※ オレンジ系ハイライトのセルは「意図的な差分」の目印です（比較結果そのものではありません）。, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t326 항목 C22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t327 行見出し 23
+\t\t\t\t\t\t\t\t328 항목 A23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t329 항목 B23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t330 항목 C23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t331 行見出し 24
+\t\t\t\t\t\t\t\t332 항목 A24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t333 항목 B24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t334 항목 C24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t335 行見出し 25
+\t\t\t\t\t\t\t\t336 항목 A25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t337 항목 B25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t338 항목 C25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t339 行見出し 26
+\t\t\t\t\t\t\t\t340 항목 A26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t341 항목 B26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t342 항목 C26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t343 行見出し 27
+\t\t\t\t\t\t\t\t344 항목 A27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t345 항목 B27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t346 항목 C27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t347 行見出し 28
+\t\t\t\t\t\t\t\t348 항목 A28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t349 항목 B28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t350 항목 C28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t351 行見出し 29
+\t\t\t\t\t\t\t\t352 항목 A29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t353 항목 B29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t354 항목 C29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t355 行見出し 30
+\t\t\t\t\t\t\t\t356 항목 A30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t357 항목 B30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t358 항목 C30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t359 行見出し 31
+\t\t\t\t\t\t\t\t360 항목 A31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t361 항목 B31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t362 항목 C31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t363 行見出し 32
+\t\t\t\t\t\t\t\t364 항목 A32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t365 항목 B32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t366 항목 C32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t367 行見出し 33
+\t\t\t\t\t\t\t\t368 항목 A33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t369 항목 B33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t370 항목 C33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t371 창 シート 売上サマリ, Secondary Actions: Select
+\t\t\t\t\t\t372 창 シート 製品カタログ, Secondary Actions: Select
+\t\t\t\t\t\t373 창 シート 長い一覧, Secondary Actions: Select
+\t\t\t\t\t\t374 창 シート レイアウト確認, Secondary Actions: Select
+\t\t\t\t\t\t375 창 シート 仕様メモ_新, Secondary Actions: Select
+\t\t\t\t\t\t376 창 シート 右のみメモ, Secondary Actions: Select
+\t\t\t\t\t\t377 창 シート ずれ試験, Secondary Actions: Select
+\t378 엄지
+\t379 사용자 지정 MiniMap
+\t\t380 텍스트 MiniMap
+\t\t381 텍스트 全体俯瞰
+\t\t382 텍스트 1. 表紙
+\t\t383 텍스트 2. 売上サマリ
+\t\t384 텍스트 3. 製品カタログ
+\t\t385 텍스트 4. 長い一覧
+\t\t386 텍스트 5. レイアウト確認
+\t\t387 텍스트 6. ずれ試験
+\t\t388 텍스트 7. 仕様メモ_旧
+\t\t389 텍스트 8. 左のみメモ
+\t\t390 텍스트 9. 仕様メモ_新
+\t\t391 텍스트 10. 右のみメモ
+\t\t392 텍스트 表紙 · 行1
+\t\t393 텍스트 差分 69 件 表紙 行1 クリックで移動

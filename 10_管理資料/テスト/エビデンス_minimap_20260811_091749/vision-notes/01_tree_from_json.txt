@@ -1,0 +1,115 @@
+App=devenv (pid 6180)
+Window: "DiffXL - Microsoft Visual Studio", App: devenv.
+
+0 window DiffXL - Microsoft Visual Studio
+\t1 title bar DiffXL - Microsoft Visual Studio
+\t\t2 menu bar MenuBar
+\t\t\t3 menu item File
+\t\t\t4 menu item Edit
+\t\t\t5 menu item View
+\t\t\t6 menu item Git
+\t\t\t7 menu item Project
+\t\t\t8 menu item Build
+\t\t\t9 menu item Debug
+\t\t\t10 menu item Test
+\t\t\t11 menu item Analyze
+\t\t\t12 menu item Tools
+\t\t\t13 menu item Extensions
+\t\t\t14 menu item Window
+\t\t\t15 menu item Help
+\t\t16 edit Search Visual Studio Text Box, Secondary Actions: SetValue, Scroll
+\t\t17 custom Connected User Information
+\t\t\t18 image ErrorImage
+\t\t\t19 button Show Connected User Information Card
+\t\t20 button Minimize
+\t\t21 button Maximize
+\t\t22 button Close
+\t23 pane Visual Studio Live Share
+\t\t24 tool bar LiveShareToolbar
+\t\t\t25 button Visual Studio Live Share
+\t26 custom Button_1
+\t\t27 button Feedback
+\t28 custom Information
+\t29 pane ToolBarDockTop
+\t\t30 tool bar Standard
+\t\t\t31 split button Navigate Backward
+\t\t\t32 button Navigate &Forward
+\t\t\t33 split button New Project
+\t\t\t34 button &Open File...
+\t\t\t35 button &Save App.xaml.cs
+\t\t\t36 button Save A&ll
+\t\t\t37 split button Undo, Secondary Actions: SetValue
+\t\t\t\t38 button Undo
+\t\t\t39 split button Redo, Secondary Actions: SetValue
+\t\t\t\t40 button Redo
+\t\t\t41 combo box Solution Configurations
+\t\t\t42 combo box Solution Platforms
+\t\t\t43 split button Debug Target
+\t\t44 tool bar Text Editor
+\t\t\t45 button &Quick Info
+\t\t\t46 button Switch between automatic and &tab-only IntelliSense completion
+\t\t\t47 button Co&mment Selection
+\t\t\t48 button Uncomm&ent Selection
+\t\t\t49 button &Toggle Bookmark
+\t\t\t50 button &Previous Bookmark
+\t\t\t51 button Next &Bookmark
+\t\t\t52 button &Clear Bookmarks
+\t\t\t53 button Toolbar Options, Secondary Actions: Toggle
+\t54 pane ToolBarDockLeft
+\t55 pane
+\t\t56 pane Solution Explorer
+\t\t\t57 title bar Solution Explorer
+\t\t\t\t58 title bar TabGroup, Children = 15, VisibleChildren = 3, DockedWidth = 348, DockedHeight = 644
+\t\t\t\t\t59 text Solution Explorer
+\t\t\t\t\t60 button Window Menu
+\t\t\t\t\t61 button Auto Hide
+\t\t\t\t\t62 button Close
+\t\t\t63 tab TabGroup|ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}|ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}|ST:0:0:{131369f2-062d-44a2-8671-91ff31efb4f4}
+\t\t\t\t64 tab item Solution Explorer, Secondary Actions: Select
+\t\t\t\t65 tab item Git Changes - FastRawSelector, Secondary Actions: Select
+\t\t\t\t66 tab item Team Explorer - Home, Secondary Actions: Select
+\t\t67 tab
+\t\t\t68 tab item App.xaml.cs, Secondary Actions: Select
+\t\t69 pane Properties
+\t\t\t70 title bar Properties
+\t\t\t\t71 title bar Properties
+\t\t\t\t\t72 text Properties
+\t\t\t\t\t73 button Window Menu
+\t\t\t\t\t74 button Auto Hide
+\t\t\t\t\t75 button Close
+\t\t\t76 pane Properties
+\t\t\t\t77 pane Property Browser
+\t\t\t\t\t78 콤보 상자 Components, Secondary Actions: SetValue
+\t\t\t\t\t\t79 텍스트 Components
+\t\t\t\t\t\t80 단추 Open
+\t\t\t\t\t81 pane PropertyGrid
+\t\t\t\t\t\t82 도구 모음 Property Grid
+\t\t\t\t\t\t\t83 단추 Categorized
+\t\t\t\t\t\t\t84 단추 Alphabetical
+\t\t\t\t\t\t\t85 구분 기호
+\t\t\t\t\t\t\t86 단추 Property Pages
+\t\t\t\t\t\t87 TABLE Properties Window
+\t\t\t\t\t\t88 창 Description
+\t\t\t\t\t\t\t89 텍스트 1968004
+\t\t\t\t\t\t\t90 텍스트 984966
+\t91 button Toolbox
+\t92 button Diagnostic Tools
+\t93 button C# Interactive
+\t94 button Error List
+\t95 button Output
+\t96 button Find Symbol Results
+\t97 pane ToolBarDockRight
+\t98 pane ToolBarDockBottom
+\t99 text LiveUserNotificationIndicator
+\t100 status bar SccStatusBar
+\t\t101 custom PublishCompartment
+\t\t\t102 image SccItemImage
+\t103 custom TaskStatusCenter
+\t\t104 image TaskStatusImage
+\t105 text Ready
+\t106 status bar StatusBarContainer
+\t\t107 text Ready
+\t\t108 text LineColumnCharacterCompartment
+\t\t109 text XYWidthHeightCompartment
+\t\t110 text SelectionModeCompartment
+\t\t111 text InsertionModeCompartment

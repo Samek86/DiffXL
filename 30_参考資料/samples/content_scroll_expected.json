@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "description": "DiffXL content-scroll perfect samples expected map",
+  "files": {
+    "left": "content_scroll_left.xlsx",
+    "right": "content_scroll_right.xlsx"
+  },
+  "sheets": {
+    "SC_画像ギャップ": {
+      "imagePairs": [
+        {
+          "leftRowStart": 5,
+          "rightRowStart": 5,
+          "kind": "exact"
+        },
+        {
+          "leftRowStart": 8,
+          "rightRowStart": 12,
+          "kind": "exact"
+        }
+      ],
+      "leftOnly": [],
+      "rightOnly": [
+        {
+          "rightRowStart": 8,
+          "kind": "rightOnly"
+        }
+      ],
+      "scrollSamples": [
+        {
+          "from": "L",
+          "row": 5,
+          "expectOther": 5
+        },
+        {
+          "from": "R",
+          "row": 9,
+          "expectOtherMax": 7
+        },
+        {
+          "from": "L",
+          "row": 8,
+          "expectOther": 12
+        },
+        {
+          "from": "R",
+          "row": 12,
+          "expectOther": 8
+        }
+      ]
+    },
+    "SC_テキスト挿入": {
+      "textLandmarks": [
+        {
+          "id": "S01",
+          "leftRow": 5,
+          "rightRow": 5
+        },
+        {
+          "id": "S02",
+          "leftRow": 7,
+          "rightRow": 7
+        },
+        {
+          "id": "S03",
+          "leftRow": 10,
+          "rightRow": 12
+        },
+        {
+          "id": "S04",
+          "leftRow": 12,
+          "rightRow": 14
+        },
+        {
+          "id": "S05",
+          "leftRow": 14,
+          "rightRow": 16
+        }
+      ],
+      "scrollSamples": [
+        {
+          "from": "L",
+          "row": 10,
+          "expectOther": 12,
+          "note": "S03 after 2 insert rows"
+        },
+        {
+          "from": "R",
+          "row": 8,
+          "expectOtherMax": 7,
+          "note": "insert zone holds left"
+        }
+      ]
+    },
+    "SC_大画像span": {
+      "imagePairs": [
+        {
+          "leftRowStart": 5,
+          "leftRowEnd": 10,
+          "rightRowStart": 5,
+          "rightRowEnd": 10,
+          "kind": "exact"
+        },
+        {
+          "leftRowStart": 12,
+          "leftRowEnd": 13,
+          "rightRowStart": 12,
+          "rightRowEnd": 13,
+          "kind": "exact"
+        }
+      ],
+      "scrollSamples": [
+        {
+          "from": "L",
+          "row": 5,
+          "expectOther": 5,
+          "note": "span start"
+        },
+        {
+          "from": "L",
+          "row": 8,
+          "expectOther": 8,
+          "note": "mid span holds pair"
+        },
+        {
+          "from": "L",
+          "row": 12,
+          "expectOther": 12,
+          "note": "tail image"
+        }
+      ]
+    },
+    "SC_横同期": {
+      "horizontal": {
+        "mode": "oneToOne",
+        "note": "columns always 1:1"
+      },
+      "scrollSamples": [
+        {
+          "from": "L",
+          "row": 5,
+          "expectOther": 5
+        },
+        {
+          "from": "L",
+          "row": 14,
+          "expectOther": 14
+        },
+        {
+          "from": "L",
+          "row": 24,
+          "expectOther": 24
+        }
+      ]
+    },
+    "SC_同順異内容": {
+      "imagePairs": [
+        {
+          "leftRowStart": 5,
+          "rightRowStart": 5,
+          "kind": "exact"
+        },
+        {
+          "leftRowStart": 8,
+          "rightRowStart": 8,
+          "kind": "modified"
+        }
+      ],
+      "leftOnly": [
+        {
+          "leftRowStart": 12,
+          "kind": "leftOnly"
+        }
+      ],
+      "rightOnly": [
+        {
+          "rightRowStart": 12,
+          "kind": "rightOnly"
+        }
+      ],
+      "scrollSamples": [
+        {
+          "from": "L",
+          "row": 5,
+          "expectOther": 5
+        },
+        {
+          "from": "L",
+          "row": 8,
+          "expectOther": 8
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,44 @@
+﻿19:26:05.949 BEGIN auto-live-test
+19:26:05.965 COMPARE start
+19:26:19.036 COMPARE_OK count=70 text=63 image=1 imageOnlyL=1 imageOnlyR=1 structure=4 elapsedMs=279
+19:26:19.036 IMAGE_DIFFS_OK related=3
+19:26:19.036 HIGHLIGHT before=True off=False on=True
+19:26:19.036 HIGHLIGHT_OK
+19:26:19.036 SAMPLE_MODE full_feature
+19:26:19.072 SHEET 表紙 pre-activated (to verify MiniMap sheet switch)
+19:26:19.393 MINIMAP targetSheet=長い一覧 targetL=44 targetR=44 Lsheet=長い一覧 Rsheet=長い一覧 Lsr=44 Rsr=44 mapR=44 status=MiniMap → 長い一覧!L44 · R44 / テキスト差分 E44: 「2480」→「2980」 (L:OK R:OK)
+19:26:19.393 MINIMAP_OK
+19:26:19.856 MINIMAP_MULTI sheet=売上サマリ expectL=5 expectR=5 Lsheet=売上サマリ Rsheet=売上サマリ Lsr=5 Rsr=5 ok=True
+19:26:20.156 MINIMAP_MULTI sheet=製品カタログ expectL=5 expectR=5 Lsheet=製品カタログ Rsheet=製品カタログ Lsr=5 Rsr=5 ok=True
+19:26:20.375 MINIMAP_MULTI sheet=長い一覧 expectL=7 expectR=7 Lsheet=長い一覧 Rsheet=長い一覧 Lsr=7 Rsr=7 ok=True
+19:26:20.612 MINIMAP_MULTI sheet=表紙 expectL=3 expectR=3 Lsheet=表紙 Rsheet=表紙 Lsr=3 Rsr=3 ok=True
+19:26:20.612 MINIMAP_MULTI_SUMMARY ok=4/4
+19:26:20.612 MINIMAP_MULTI_OK
+19:26:20.674 SHEET_SYNC after L→長い一覧 Lsheet=長い一覧 Rsheet=長い一覧
+19:26:20.674 SHEET_SYNC_OK
+19:26:20.674 PAIR_COMBO count=6
+19:26:22.191 RECOMPARE_OK count=70
+19:26:22.206 SETTINGS_OPEN_OK constructed SettingsWindow
+19:26:22.731 SETTINGS_DIALOG_SAVE saved=True
+19:26:22.731 SETTINGS_DIALOG result=True SavedProp=True
+19:26:22.747 SETTINGS_SAVE_OK=True color=#FFCC00 via=SettingsWindow.ShowDialog
+19:26:22.747 SETTINGS_OPEN_OK
+19:26:23.189 SETTINGS_RESTORED color=#FFFF00
+19:26:23.643 RESIZE leftH0=727.04 leftH1=727.04 hostAttachedL=True
+19:26:23.658 CONTENT_SCROLL maps=6 alignments=6
+19:26:24.018 CATALOG_MAP ContentScrollMap 製品カタログ ↔ 製品カタログ content segs=4 | Equal L1-6 R1-6 hold=0 | RightOnly L6-6 R7-7 hold=6 | LeftOnly L7-7 R7-7 hold=7 | Equal L8-536870911 R8-536870911 hold=0
+19:26:24.018 CATALOG_MAP_POINTS L4→R4 L8→R8 R4→L4 R8→L8
+19:26:24.018 CATALOG_RIGHT_ONLY R7→L6
+19:26:24.018 CATALOG_LEFT_ONLY L6→R6
+19:26:24.668 CATALOG_SCROLL_RIGHT_ONLY Lsr=6 Rsr=7 mappedL=6 lok=True rok=True
+19:26:24.668 CATALOG_RIGHT_ONLY_SCROLL_OK
+19:26:25.105 CATALOG_SCROLL_MATCH Lsr=8 Rsr=8 mappedL=8
+19:26:25.105 CATALOG_MATCH_SCROLL_OK
+19:26:25.464 SHIFT_MAP ContentScrollMap ずれ試験 ↔ ずれ試験 content segs=4 | Equal L1-7 R1-7 hold=0 | RightOnly L7-7 R8-9 hold=7 | Equal L8-19 R10-21 hold=0 | Equal L20-536870911 R22-536870911 hold=0
+19:26:25.464 SHIFT_MAP_POINTS L14→R16 R16→L14 R8→L7
+19:26:25.464 SHIFT_MAP_OK
+19:26:26.356 HSCROLL L=10,5 R=10,5 mappedR=10
+19:26:26.356 HSCROLL_OK
+19:26:26.356 CONTENT_SCROLL_OK
+19:26:26.356 FAILURES=0
+19:26:26.356 AUTO_LIVE_PASS

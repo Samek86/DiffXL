@@ -1,0 +1,55 @@
+{
+  "id": "bc5c0dc3-bb27-4373-bcd7-46ff18a67f70",
+  "ok": true,
+  "result": {
+    "snapshot": {
+      "id": "3f5bab2d-3dc6-44fd-8dec-73aac0bd6ee3",
+      "app": {
+        "name": "devenv",
+        "bundleId": "devenv",
+        "pid": 6180
+      },
+      "window": {
+        "title": "DiffXL - Microsoft Visual Studio",
+        "id": 1376880,
+        "index": null,
+        "x": -32000,
+        "y": -32000,
+        "width": 160,
+        "height": 28,
+        "isMinimized": null,
+        "isOffscreen": null,
+        "screenIndex": null
+      },
+      "coordinateSpace": "window",
+      "treeText": "App=devenv (pid 6180)\nWindow: \"DiffXL - Microsoft Visual Studio\", App: devenv.\n\n0 window DiffXL - Microsoft Visual Studio\n\t1 title bar DiffXL - Microsoft Visual Studio\n\t\t2 menu bar MenuBar\n\t\t\t3 menu item File\n\t\t\t4 menu item Edit\n\t\t\t5 menu item View\n\t\t\t6 menu item Git\n\t\t\t7 menu item Project\n\t\t\t8 menu item Build\n\t\t\t9 menu item Debug\n\t\t\t10 menu item Test\n\t\t\t11 menu item Analyze\n\t\t\t12 menu item Tools\n\t\t\t13 menu item Extensions\n\t\t\t14 menu item Window\n\t\t\t15 menu item Help\n\t\t16 edit Search Visual Studio Text Box, Secondary Actions: SetValue, Scroll\n\t\t17 custom Connected User Information\n\t\t\t18 image ErrorImage\n\t\t\t19 button Show Connected User Information Card\n\t\t20 button Minimize\n\t\t21 button Maximize\n\t\t22 button Close\n\t23 pane Visual Studio Live Share\n\t\t24 tool bar LiveShareToolbar\n\t\t\t25 button Visual Studio Live Share\n\t26 custom Button_1\n\t\t27 button Feedback\n\t28 custom Information\n\t29 pane ToolBarDockTop\n\t\t30 tool bar Standard\n\t\t\t31 split button Navigate Backward\n\t\t\t32 button Navigate &Forward\n\t\t\t33 split button New Project\n\t\t\t34 button &Open File...\n\t\t\t35 button &Save App.xaml.cs\n\t\t\t36 button Save A&ll\n\t\t\t37 split button Undo, Secondary Actions: SetValue\n\t\t\t\t38 button Undo\n\t\t\t39 split button Redo, Secondary Actions: SetValue\n\t\t\t\t40 button Redo\n\t\t\t41 combo box Solution Configurations\n\t\t\t42 combo box Solution Platforms\n\t\t\t43 split button Debug Target\n\t\t44 tool bar Text Editor\n\t\t\t45 button &Quick Info\n\t\t\t46 button Switch between automatic and &tab-only IntelliSense completion\n\t\t\t47 button Co&mment Selection\n\t\t\t48 button Uncomm&ent Selection\n\t\t\t49 button &Toggle Bookmark\n\t\t\t50 button &Previous Bookmark\n\t\t\t51 button Next &Bookmark\n\t\t\t52 button &Clear Bookmarks\n\t\t\t53 button Toolbar Options, Secondary Actions: Toggle\n\t54 pane ToolBarDockLeft\n\t55 pane\n\t\t56 pane Solution Explorer\n\t\t\t57 title bar Solution Explorer\n\t\t\t\t58 title bar TabGroup, Children = 15, VisibleChildren = 3, DockedWidth = 348, DockedHeight = 644\n\t\t\t\t\t59 text Solution Explorer\n\t\t\t\t\t60 button Window Menu\n\t\t\t\t\t61 button Auto Hide\n\t\t\t\t\t62 button Close\n\t\t\t63 tab TabGroup|ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}|ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}|ST:0:0:{131369f2-062d-44a2-8671-91ff31efb4f4}\n\t\t\t\t64 tab item Solution Explorer, Secondary Actions: Select\n\t\t\t\t65 tab item Git Changes - FastRawSelector, Secondary Actions: Select\n\t\t\t\t66 tab item Team Explorer - Home, Secondary Actions: Select\n\t\t67 tab\n\t\t\t68 tab item App.xaml.cs, Secondary Actions: Select\n\t\t69 pane Properties\n\t\t\t70 title bar Properties\n\t\t\t\t71 title bar Properties\n\t\t\t\t\t72 text Properties\n\t\t\t\t\t73 button Window Menu\n\t\t\t\t\t74 button Auto Hide\n\t\t\t\t\t75 button Close\n\t\t\t76 pane Properties\n\t\t\t\t77 pane Property Browser\n\t\t\t\t\t78 콤보 상자 Components, Secondary Actions: SetValue\n\t\t\t\t\t\t79 텍스트 Components\n\t\t\t\t\t\t80 단추 Open\n\t\t\t\t\t81 pane PropertyGrid\n\t\t\t\t\t\t82 도구 모음 Property Grid\n\t\t\t\t\t\t\t83 단추 Categorized\n\t\t\t\t\t\t\t84 단추 Alphabetical\n\t\t\t\t\t\t\t85 구분 기호\n\t\t\t\t\t\t\t86 단추 Property Pages\n\t\t\t\t\t\t87 TABLE Properties Window\n\t\t\t\t\t\t88 창 Description\n\t\t\t\t\t\t\t89 텍스트 1968004\n\t\t\t\t\t\t\t90 텍스트 984966\n\t91 button Toolbox\n\t92 button Diagnostic Tools\n\t93 button C# Interactive\n\t94 button Error List\n\t95 button Output\n\t96 button Find Symbol Results\n\t97 pane ToolBarDockRight\n\t98 pane ToolBarDockBottom\n\t99 text LiveUserNotificationIndicator\n\t100 status bar SccStatusBar\n\t\t101 custom PublishCompartment\n\t\t\t102 image SccItemImage\n\t103 custom TaskStatusCenter\n\t\t104 image TaskStatusImage\n\t105 text Ready\n\t106 status bar StatusBarContainer\n\t\t107 text Ready\n\t\t108 text LineColumnCharacterCompartment\n\t\t109 text XYWidthHeightCompartment\n\t\t110 text SelectionModeCompartment\n\t\t111 text InsertionModeCompartment",
+      "elementCount": 112,
+      "focusedElementId": null,
+      "truncation": {
+        "truncated": false,
+        "maxNodes": 1200,
+        "maxDepth": 64,
+        "maxDepthReached": false
+      }
+    },
+    "screenshot": {
+      "format": "png",
+      "width": 160,
+      "height": 28,
+      "scale": 1,
+      "path": "C:\\Users\\Jun\\AppData\\Local\\Temp\\orca-computer-use\\bc5c0dc3-bb27-4373-bcd7-46ff18a67f70-screenshot.png",
+      "dataOmitted": true,
+      "expiresAt": "2026-08-12T00:21:10.792Z"
+    },
+    "screenshotStatus": {
+      "state": "captured",
+      "metadata": {
+        "engine": "unknown",
+        "windowId": 1376880
+      }
+    }
+  },
+  "_meta": {
+    "runtimeId": "589ecb9e-6006-4fbf-ad49-b13a62b3fc0b"
+  }
+}

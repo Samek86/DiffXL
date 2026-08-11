@@ -1,0 +1,28 @@
+﻿11:53:05.406 BEGIN auto-live-test
+11:53:05.423 COMPARE start
+11:53:14.861 COMPARE_OK count=69 text=63 image=2 imageOnlyL=0 imageOnlyR=0 structure=4 elapsedMs=211
+11:53:14.861 IMAGE_DIFFS_OK related=2
+11:53:14.861 HIGHLIGHT before=True off=False on=True
+11:53:14.861 HIGHLIGHT_OK
+11:53:14.892 SHEET 表紙 pre-activated (to verify MiniMap sheet switch)
+11:53:15.236 MINIMAP targetSheet=長い一覧 targetRow=44 Lsheet=長い一覧 Rsheet=長い一覧 Lsr=44 Rsr=44 status=MiniMap → 長い一覧!行 44 / テキスト差分 E44: 「2480」→「2980」 (L:OK R:OK)
+11:53:15.236 MINIMAP_OK
+11:53:15.564 MINIMAP_MULTI sheet=売上サマリ row=5 Lsheet=売上サマリ Rsheet=売上サマリ Lsr=5 Rsr=5 ok=True
+11:53:15.822 MINIMAP_MULTI sheet=製品カタログ row=5 Lsheet=製品カタログ Rsheet=製品カタログ Lsr=5 Rsr=5 ok=True
+11:53:16.027 MINIMAP_MULTI sheet=長い一覧 row=7 Lsheet=長い一覧 Rsheet=長い一覧 Lsr=7 Rsr=7 ok=True
+11:53:16.165 MINIMAP_MULTI sheet=表紙 row=3 Lsheet=表紙 Rsheet=表紙 Lsr=3 Rsr=3 ok=True
+11:53:16.165 MINIMAP_MULTI_SUMMARY ok=4/4
+11:53:16.165 MINIMAP_MULTI_OK
+11:53:16.212 SHEET_SYNC after L→長い一覧 Lsheet=長い一覧 Rsheet=長い一覧
+11:53:16.212 SHEET_SYNC_OK
+11:53:16.212 PAIR_COMBO count=6
+11:53:16.923 RECOMPARE_OK count=69
+11:53:16.955 SETTINGS_OPEN_OK constructed SettingsWindow
+11:53:17.311 SETTINGS_DIALOG_SAVE saved=True
+11:53:17.311 SETTINGS_DIALOG result=True SavedProp=True
+11:53:17.326 SETTINGS_SAVE_OK=True color=#FFCC00 via=SettingsWindow.ShowDialog
+11:53:17.326 SETTINGS_OPEN_OK
+11:53:17.655 SETTINGS_RESTORED color=#FFFF00
+11:53:18.077 RESIZE leftH0=727.04 leftH1=727.04 hostAttachedL=True
+11:53:18.077 FAILURES=0
+11:53:18.077 AUTO_LIVE_PASS

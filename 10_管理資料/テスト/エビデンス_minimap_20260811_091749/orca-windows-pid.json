@@ -1,0 +1,37 @@
+{
+  "id": "0e0a5e40-b775-4a69-83f2-41c18ce32dab",
+  "ok": true,
+  "result": {
+    "app": {
+      "name": "DiffXL",
+      "bundleId": "DiffXL",
+      "pid": 6212
+    },
+    "windows": [
+      {
+        "index": 0,
+        "app": {
+          "name": "DiffXL",
+          "bundleId": "DiffXL",
+          "pid": 6212
+        },
+        "id": 3869352,
+        "title": "DiffXL",
+        "x": -8,
+        "y": -8,
+        "width": 2576,
+        "height": 1410,
+        "isMinimized": false,
+        "isOffscreen": false,
+        "screenIndex": null,
+        "platform": {
+          "backend": "uia",
+          "nativeWindowHandle": 3869352
+        }
+      }
+    ]
+  },
+  "_meta": {
+    "runtimeId": "589ecb9e-6006-4fbf-ad49-b13a62b3fc0b"
+  }
+}

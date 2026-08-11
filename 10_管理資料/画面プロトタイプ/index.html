@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DiffXL — 画面プロトタイプ</title>
+  <link rel="stylesheet" href="css/common.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- タイトルバー（WPF ウィンドウ枠のイメージ） -->
+    <div class="title-bar">
+      <div class="brand">
+        <span class="brand-badge">D</span>
+        <span>DiffXL — Excel 比較</span>
+      </div>
+      <div class="window-controls" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- ツールバー -->
+    <div class="toolbar" id="toolbar">
+      <button type="button" class="tool-btn" data-action="goto-startup" title="ファイル選択に戻る">
+        <span class="icon">📂</span> ファイル
+      </button>
+      <button type="button" class="tool-btn primary" data-action="recompare" title="再比較">
+        <span class="icon">🔄</span> 再比較
+      </button>
+      <span class="sep"></span>
+      <button type="button" class="tool-btn" data-action="open-sheet-map" title="シート対応付け">
+        <span class="icon">📑</span> シート対応
+      </button>
+      <button type="button" class="tool-btn" data-action="open-anchor" title="アンカー設定">
+        <span class="icon">⚓</span> アンカー
+      </button>
+      <button type="button" class="tool-btn primary" data-action="toggle-sync" title="同期スクロール">
+        <span class="icon">🔗</span> 同期スクロール
+      </button>
+      <span class="sep"></span>
+      <button type="button" class="tool-btn" data-action="open-settings" title="設定">
+        <span class="icon">⚙</span> 設定
+      </button>
+      <span class="sep"></span>
+      <button type="button" class="tool-btn" data-action="load-demo" title="デモデータを表示">
+        <span class="icon">▶</span> デモ読込
+      </button>
+    </div>
+
+    <!-- メイン領域 -->
+    <div class="main-area">
+      <!-- ========== SCR-01 起動／ファイル選択 ========== -->
+      <section id="screen-startup" class="screen active" aria-label="起動／ファイル選択">
+        <div class="startup">
+          <div class="startup-card">
+            <div class="startup-header">
+              <h1>2つの Excel を比較</h1>
+              <p>
+                左右に Excel（.xlsx）を選び、「比較開始」で差分を表示します。<br />
+                テキスト変更・画像の部分差分・シートずれに対応する WinMerge 風の比較ツールです。
+              </p>
+            </div>
+
+            <div class="startup-body">
+              <div class="file-pick-panel">
+                <span class="side-tag">LEFT</span>
+                <h2>比較元（左）</h2>
+                <div id="startup-left-path" class="file-path">（未選択）</div>
+                <button type="button" class="btn" data-action="pick-left">ファイルを選択...</button>
+                <p class="help-text">旧版・ベースとなるファイルを指定します。</p>
+              </div>
+
+              <div class="vs-badge">VS</div>
+
+              <div class="file-pick-panel">
+                <span class="side-tag right">RIGHT</span>
+                <h2>比較先（右）</h2>
+                <div id="startup-right-path" class="file-path">（未選択）</div>
+                <button type="button" class="btn" data-action="pick-right">ファイルを選択...</button>
+                <p class="help-text">新版・変更後のファイルを指定します。</p>
+              </div>
+            </div>
+
+            <div class="startup-footer">
+              <div class="legend">
+                <span class="legend-item"><span class="swatch text-diff"></span>テキスト差分</span>
+                <span class="legend-item"><span class="swatch image-diff"></span>画像差分（黄）</span>
+                <span class="legend-item"><span class="swatch added"></span>片側のみ</span>
+              </div>
+              <div class="startup-actions">
+                <button type="button" class="btn ghost" data-action="load-demo">デモで開く</button>
+                <button type="button" class="btn primary" data-action="start-compare">比較開始</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SCR-02 メイン比較画面 ========== -->
+      <section id="screen-main" class="screen" aria-label="メイン比較画面">
+        <div class="compare-layout">
+          <!-- 左ペイン -->
+          <div class="pane left">
+            <div class="pane-header">
+              <div class="pane-file-row">
+                <span class="side-label">左</span>
+                <span id="main-left-path" class="path">（未選択）</span>
+                <button type="button" class="btn tiny" data-action="open-replace-left">差替</button>
+              </div>
+              <div class="pane-sheet-row">
+                <label for="left-sheet">シート</label>
+                <select id="left-sheet">
+                  <option>表紙</option>
+                  <option selected>仕様一覧</option>
+                  <option>付録</option>
+                </select>
+              </div>
+            </div>
+            <div id="left-viewport" class="excel-viewport">
+              <div class="excel-sheet">
+                <table class="excel-grid" aria-label="左 Excel ビュー（モック）">
+                  <thead>
+                    <tr>
+                      <th class="row-head"></th>
+                      <th>A</th>
+                      <th>B</th>
+                      <th>C</th>
+                      <th>D</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="row-head">1</td>
+                      <td>項目</td>
+                      <td>内容</td>
+                      <td>担当</td>
+                      <td>備考</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">2</td>
+                      <td class="cell-same">画面タイトル</td>
+                      <td class="cell-diff-text">DiffXL 旧</td>
+                      <td>開発</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">3</td>
+                      <td>バージョン</td>
+                      <td>1.0.0</td>
+                      <td>QA</td>
+                      <td>固定</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">4</td>
+                      <td>図1</td>
+                      <td class="img-cell" colspan="3">
+                        <div class="mock-image">
+                          <span class="caption">image001.png</span>
+                          <div class="diff-overlay" style="left:42%; top:28%; width:34%; height:40%;"></div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">5</td>
+                      <td>説明</td>
+                      <td colspan="3">比較対象のベース画像です。黄色枠は差分強調のイメージです。</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">6</td>
+                      <td>図2</td>
+                      <td class="img-cell" colspan="3">
+                        <div class="mock-image only-one">
+                          <span class="caption">image002.png（右に無し）</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">7</td>
+                      <td class="cell-same">共通見出し</td>
+                      <td class="cell-same">同期ポイント</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">8</td>
+                      <td>図3</td>
+                      <td class="img-cell" colspan="3">
+                        <div class="mock-image">
+                          <span class="caption">image003.png</span>
+                          <div class="diff-overlay" style="left:18%; top:50%; width:50%; height:28%;"></div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">9</td>
+                      <td>注記</td>
+                      <td class="cell-diff-text">旧仕様の注意書き</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">10</td>
+                      <td>空行</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">11</td>
+                      <td>フッター</td>
+                      <td colspan="3">Copyright Sample — Left</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">12</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">13</td>
+                      <td>追記</td>
+                      <td colspan="3">スクロール同期確認用のダミー行です。</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">14</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">15</td>
+                      <td>末尾</td>
+                      <td colspan="3">END LEFT</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="sheet-tabs">
+              <button type="button" class="sheet-tab">表紙</button>
+              <button type="button" class="sheet-tab active">仕様一覧</button>
+              <button type="button" class="sheet-tab">付録</button>
+            </div>
+          </div>
+
+          <!-- 右ペイン -->
+          <div class="pane right">
+            <div class="pane-header">
+              <div class="pane-file-row">
+                <span class="side-label">右</span>
+                <span id="main-right-path" class="path">（未選択）</span>
+                <button type="button" class="btn tiny" data-action="open-replace-right">差替</button>
+              </div>
+              <div class="pane-sheet-row">
+                <label for="right-sheet">シート</label>
+                <select id="right-sheet">
+                  <option>表紙</option>
+                  <option selected>仕様一覧</option>
+                  <option>変更履歴</option>
+                  <option>付録</option>
+                </select>
+              </div>
+            </div>
+            <div id="right-viewport" class="excel-viewport">
+              <div class="excel-sheet">
+                <table class="excel-grid" aria-label="右 Excel ビュー（モック）">
+                  <thead>
+                    <tr>
+                      <th class="row-head"></th>
+                      <th>A</th>
+                      <th>B</th>
+                      <th>C</th>
+                      <th>D</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="row-head">1</td>
+                      <td>項目</td>
+                      <td>内容</td>
+                      <td>担当</td>
+                      <td>備考</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">2</td>
+                      <td class="cell-same">画面タイトル</td>
+                      <td class="cell-diff-text">DiffXL 新</td>
+                      <td>開発</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">3</td>
+                      <td>バージョン</td>
+                      <td>1.0.0</td>
+                      <td>QA</td>
+                      <td>固定</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">4</td>
+                      <td>図1</td>
+                      <td class="img-cell" colspan="3">
+                        <div class="mock-image variant-b">
+                          <span class="caption">image001.png</span>
+                          <div class="diff-overlay" style="left:42%; top:28%; width:34%; height:40%;"></div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">5</td>
+                      <td>説明</td>
+                      <td colspan="3">比較対象の更新画像です。黄色枠は OpenCV 差分強調のイメージです。</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">6</td>
+                      <td>図2</td>
+                      <td class="img-cell" colspan="3">
+                        <div style="color:#6b7280; font-size:12px; padding:12px; border:1px dashed #86efac; border-radius:4px; background:#f0fdf4;">
+                          （左のみ存在 — スキップして次の類似画像へ）
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">7</td>
+                      <td class="cell-same">共通見出し</td>
+                      <td class="cell-same">同期ポイント</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">8</td>
+                      <td>図3</td>
+                      <td class="img-cell" colspan="3">
+                        <div class="mock-image variant-b">
+                          <span class="caption">image003.png</span>
+                          <div class="diff-overlay" style="left:18%; top:50%; width:50%; height:28%;"></div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">9</td>
+                      <td>注記</td>
+                      <td class="cell-diff-text">新仕様の注意書き</td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">10</td>
+                      <td>空行</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">11</td>
+                      <td>フッター</td>
+                      <td colspan="3">Copyright Sample — Right</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">12</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">13</td>
+                      <td>追記</td>
+                      <td colspan="3">スクロール同期確認用のダミー行です。</td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">14</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td class="row-head">15</td>
+                      <td>末尾</td>
+                      <td colspan="3">END RIGHT</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="sheet-tabs">
+              <button type="button" class="sheet-tab">表紙</button>
+              <button type="button" class="sheet-tab active">仕様一覧</button>
+              <button type="button" class="sheet-tab">変更履歴</button>
+              <button type="button" class="sheet-tab">付録</button>
+            </div>
+          </div>
+
+          <!-- MiniMap -->
+          <aside class="minimap-pane" aria-label="MiniMap">
+            <div class="minimap-title">MiniMap</div>
+            <div id="minimap" class="minimap" title="クリック／ドラッグで移動">
+              <div class="minimap-track"></div>
+              <div class="minimap-marker" style="top: 12%;" title="テキスト差分"></div>
+              <div class="minimap-marker image" style="top: 28%;" title="画像差分"></div>
+              <div class="minimap-marker added" style="top: 42%;" title="片側のみ"></div>
+              <div class="minimap-marker image" style="top: 56%;" title="画像差分"></div>
+              <div class="minimap-marker" style="top: 64%;" title="テキスト差分"></div>
+              <div id="minimap-viewport" class="minimap-viewport" style="top: 0;"></div>
+            </div>
+            <div class="minimap-hint">
+              赤: テキスト<br />
+              黄: 画像差分<br />
+              緑: 片側のみ<br />
+              枠をドラッグで移動
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ========== SCR-03 シート対応付け ========== -->
+      <div id="overlay-sheet-map" class="overlay" role="dialog" aria-modal="true" aria-labelledby="sheet-map-title">
+        <div class="dialog wide">
+          <div class="dialog-header">
+            <h2 id="sheet-map-title">シート対応付け</h2>
+            <button type="button" class="btn ghost" data-close-overlay>閉じる</button>
+          </div>
+          <div class="dialog-body">
+            <p class="help-text">
+              基本は同名シート同士で比較します。名前が一致しない場合や、意図的に別シートを比べたい場合はここで手動対応を設定します。
+            </p>
+            <table class="mapping-table">
+              <thead>
+                <tr>
+                  <th style="width:40%">左シート</th>
+                  <th style="width:40%">右シート（対応先）</th>
+                  <th>状態</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>表紙</td>
+                  <td>
+                    <select>
+                      <option selected>表紙</option>
+                      <option>仕様一覧</option>
+                      <option>変更履歴</option>
+                      <option>付録</option>
+                      <option>（比較しない）</option>
+                    </select>
+                  </td>
+                  <td>同名</td>
+                </tr>
+                <tr>
+                  <td>仕様一覧</td>
+                  <td>
+                    <select>
+                      <option>表紙</option>
+                      <option selected>仕様一覧</option>
+                      <option>変更履歴</option>
+                      <option>付録</option>
+                      <option>（比較しない）</option>
+                    </select>
+                  </td>
+                  <td>同名</td>
+                </tr>
+                <tr>
+                  <td>付録</td>
+                  <td>
+                    <select>
+                      <option>表紙</option>
+                      <option>仕様一覧</option>
+                      <option>変更履歴</option>
+                      <option selected>付録</option>
+                      <option>（比較しない）</option>
+                    </select>
+                  </td>
+                  <td>同名</td>
+                </tr>
+                <tr>
+                  <td>—</td>
+                  <td>
+                    <select>
+                      <option selected>（左に無し）変更履歴</option>
+                      <option>（比較しない）</option>
+                    </select>
+                  </td>
+                  <td>片側のみ</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="dialog-footer">
+            <button type="button" class="btn" data-close-overlay>キャンセル</button>
+            <button type="button" class="btn primary" data-action="apply-sheet-map">適用して再比較</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== SCR-04 アンカー設定 ========== -->
+      <div id="overlay-anchor" class="overlay" role="dialog" aria-modal="true" aria-labelledby="anchor-title">
+        <div class="dialog">
+          <div class="dialog-header">
+            <h2 id="anchor-title">アンカー設定（比較開始位置）</h2>
+            <button type="button" class="btn ghost" data-close-overlay>閉じる</button>
+          </div>
+          <div class="dialog-body">
+            <p class="help-text">
+              自動対応がずれたときに、左右それぞれ「ここから比較を再開する」位置を指定します。
+              同じテキスト行をアンカーにすると再連結しやすくなります。
+            </p>
+            <div class="anchor-grid">
+              <div class="anchor-box">
+                <h3>左（比較元）</h3>
+                <div class="field">
+                  <label for="anchor-left-row">開始行</label>
+                  <input id="anchor-left-row" type="number" value="7" min="1" />
+                </div>
+                <div class="field">
+                  <label for="anchor-left-col">開始列</label>
+                  <input id="anchor-left-col" type="text" value="A" />
+                </div>
+                <div class="field">
+                  <label for="anchor-left-note">目印テキスト（任意）</label>
+                  <input id="anchor-left-note" type="text" value="共通見出し" />
+                </div>
+              </div>
+              <div class="anchor-box">
+                <h3>右（比較先）</h3>
+                <div class="field">
+                  <label for="anchor-right-row">開始行</label>
+                  <input id="anchor-right-row" type="number" value="7" min="1" />
+                </div>
+                <div class="field">
+                  <label for="anchor-right-col">開始列</label>
+                  <input id="anchor-right-col" type="text" value="A" />
+                </div>
+                <div class="field">
+                  <label for="anchor-right-note">目印テキスト（任意）</label>
+                  <input id="anchor-right-note" type="text" value="共通見出し" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button type="button" class="btn" data-close-overlay>キャンセル</button>
+            <button type="button" class="btn primary" data-action="apply-anchor">適用して再比較</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== SCR-06 片側ファイル差し替え ========== -->
+      <div id="overlay-replace" class="overlay" role="dialog" aria-modal="true" aria-labelledby="replace-title">
+        <div class="dialog">
+          <div class="dialog-header">
+            <h2 id="replace-title">ファイル差し替え</h2>
+            <button type="button" class="btn ghost" data-close-overlay>閉じる</button>
+          </div>
+          <div class="dialog-body">
+            <div class="field">
+              <label for="replace-side">対象</label>
+              <select id="replace-side">
+                <option value="left">左ファイル</option>
+                <option value="right">右ファイル</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="replace-path">ファイルパス（デモでは手入力）</label>
+              <input id="replace-path" type="text" value="" />
+            </div>
+            <p class="help-text">適用後、自動で再比較を実行します（本プロトタイプではシミュレーション）。</p>
+          </div>
+          <div class="dialog-footer">
+            <button type="button" class="btn" data-close-overlay>キャンセル</button>
+            <button type="button" class="btn primary" data-action="apply-replace">差し替えて再比較</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== SCR-05 設定 ========== -->
+      <div id="overlay-settings" class="overlay" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="dialog wide">
+          <div class="dialog-header">
+            <h2 id="settings-title">設定（YAML 保存）</h2>
+            <button type="button" class="btn ghost" data-close-overlay>閉じる</button>
+          </div>
+          <div class="dialog-body">
+            <div class="settings-grid">
+              <nav class="settings-nav" aria-label="設定カテゴリ">
+                <button type="button" class="active" data-settings-tab="general">一般</button>
+                <button type="button" data-settings-tab="compare">比較</button>
+                <button type="button" data-settings-tab="display">表示</button>
+                <button type="button" data-settings-tab="log">ログ</button>
+              </nav>
+              <div class="settings-content">
+                <div class="settings-section active" data-settings-section="general">
+                  <div class="field">
+                    <label for="set-lang">表示言語</label>
+                    <select id="set-lang">
+                      <option selected>日本語</option>
+                      <option>English</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="set-yaml">設定ファイルパス</label>
+                    <input id="set-yaml" type="text" value="settings.yaml" />
+                  </div>
+                  <label class="check-row">
+                    <input type="checkbox" checked />
+                    <span>起動時に前回のファイルパスを復元する</span>
+                  </label>
+                </div>
+                <div class="settings-section" data-settings-section="compare">
+                  <label class="check-row">
+                    <input type="checkbox" checked />
+                    <span>同名シートを自動で対応付ける</span>
+                  </label>
+                  <label class="check-row">
+                    <input type="checkbox" checked />
+                    <span>同一テキストで比較位置を再連結する</span>
+                  </label>
+                  <label class="check-row">
+                    <input type="checkbox" checked />
+                    <span>片側のみの画像はスキップして次へ進む</span>
+                  </label>
+                  <div class="field">
+                    <label for="set-img-threshold">画像差分しきい値（OpenCV）</label>
+                    <input id="set-img-threshold" type="number" value="12" min="0" max="100" />
+                  </div>
+                </div>
+                <div class="settings-section" data-settings-section="display">
+                  <div class="field">
+                    <label for="set-text-color">テキスト差分色</label>
+                    <input id="set-text-color" type="text" value="#fecaca" />
+                  </div>
+                  <div class="field">
+                    <label for="set-img-color">画像差分強調色</label>
+                    <input id="set-img-color" type="text" value="#eab308" />
+                  </div>
+                  <label class="check-row">
+                    <input type="checkbox" checked />
+                    <span>MiniMap を表示する</span>
+                  </label>
+                  <label class="check-row">
+                    <input type="checkbox" checked />
+                    <span>起動時に同期スクロールを ON にする</span>
+                  </label>
+                </div>
+                <div class="settings-section" data-settings-section="log">
+                  <div class="field">
+                    <label for="set-log-dir">ログ出力フォルダ</label>
+                    <input id="set-log-dir" type="text" value="logs" />
+                  </div>
+                  <div class="field">
+                    <label for="set-log-level">ログレベル</label>
+                    <select id="set-log-level">
+                      <option>Debug</option>
+                      <option selected>Info</option>
+                      <option>Error</option>
+                    </select>
+                  </div>
+                  <p class="help-text">1日1ファイル（例: DiffXL_2026-08-11.log）。Log.Info / Debug / Error / Exception で出力。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer">
+            <button type="button" class="btn" data-close-overlay>キャンセル</button>
+            <button type="button" class="btn primary" data-action="save-settings">YAML に保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ローディング／トースト -->
+      <div id="loading-mask" class="loading-mask" aria-live="polite">
+        <div class="spinner"></div>
+        <div>比較処理中（デモ）...</div>
+      </div>
+      <div id="toast" class="toast" role="status"></div>
+    </div>
+
+    <!-- ステータスバー -->
+    <div class="status-bar">
+      <div class="status-left">
+        <span id="status-text">準備完了</span>
+      </div>
+      <div class="status-right">
+        <span id="status-diff" class="status-pill">差分 —</span>
+        <span class="status-pill">プロトタイプ v0.1</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+﻿[2026-08-11 19:25:27] BEGIN ux-sync harness RepoRoot=C:\JUN\WORK\DiffXL
+[2026-08-11 19:25:27] Evidence=C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_ux_sync_20260811_192527
+[2026-08-11 19:25:28] MSBuild=C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe
+[2026-08-11 19:25:35] BUILD_OK
+[2026-08-11 19:25:35] csc SyncUxSmoke -> C:\JUN\WORK\DiffXL\20_ソース\DiffXL\DiffXL\bin\x64\Debug\SyncUxSmoke.exe
+[2026-08-11 19:25:35] RUN SyncUxSmoke
+[2026-08-11 19:25:36] SyncUxSmoke exit=0
+[2026-08-11 19:25:36] PASS SYNC_UX_SMOKE_PASS
+[2026-08-11 19:25:36] csc PerfectSmoke -> C:\JUN\WORK\DiffXL\20_ソース\DiffXL\DiffXL\bin\x64\Debug\ContentScrollPerfectSmoke.exe
+[2026-08-11 19:25:36] RUN PerfectSmoke
+[2026-08-11 19:25:37] PerfectSmoke exit=0
+[2026-08-11 19:25:37] PASS PERFECT_SCROLL_PASS
+[2026-08-11 19:25:38] RUN auto-live content_scroll timeout=180s
+[2026-08-11 19:26:02] auto-live content_scroll exit=0
+[2026-08-11 19:26:02] PASS content_scroll AUTO_LIVE_PASS
+[2026-08-11 19:26:02] PASS content_scroll STATUS_LINE_OK
+[2026-08-11 19:26:02] PASS content_scroll JUMP_HINT_PATH logged
+[2026-08-11 19:26:03] RUN auto-live full_feature timeout=180s
+[2026-08-11 19:26:28] auto-live full_feature exit=0
+[2026-08-11 19:26:28] PASS full_feature AUTO_LIVE_PASS
+[2026-08-11 19:26:28] UX_SYNC_HARNESS_PASS

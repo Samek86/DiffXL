@@ -1,0 +1,80 @@
+﻿2026-08-11 10:11:05.036 [INFO] TryGotoRow OK via cached Window row=44
+2026-08-11 10:11:05.051 [INFO] MiniMap navigate OK sheet=長い一覧 row=44 L=True R=True
+2026-08-11 10:11:05.051 [INFO] [AUTO] MINIMAP targetSheet=長い一覧 targetRow=44 Lsheet=長い一覧 Rsheet=長い一覧 Lsr=44 Rsr=44 status=MiniMap → 長い一覧!行 44 / テキスト差分 E44: 「2480」→「2980」 (L:OK R:OK)
+2026-08-11 10:11:05.051 [INFO] [AUTO] MINIMAP_OK
+2026-08-11 10:11:05.067 [DEBUG] シートをアクティブ化: レイアウト確認
+2026-08-11 10:11:05.082 [DEBUG] シートをアクティブ化: レイアウト確認
+2026-08-11 10:11:05.082 [INFO] MiniMap click ratio=0.4 item=売上サマリ!D5
+2026-08-11 10:11:05.270 [DEBUG] シートをアクティブ化: 売上サマリ
+2026-08-11 10:11:05.286 [DEBUG] シートをアクティブ化: 売上サマリ
+2026-08-11 10:11:05.395 [INFO] TryGotoRow OK via cached Window row=5
+2026-08-11 10:11:05.411 [INFO] TryGotoRow OK via cached Window row=5
+2026-08-11 10:11:05.411 [INFO] MiniMap navigate OK sheet=売上サマリ row=5 L=True R=True
+2026-08-11 10:11:05.411 [INFO] [AUTO] MINIMAP_MULTI sheet=売上サマリ row=5 Lsheet=売上サマリ Rsheet=売上サマリ Lsr=5 Rsr=5 ok=True
+2026-08-11 10:11:05.426 [DEBUG] シートをアクティブ化: レイアウト確認
+2026-08-11 10:11:05.442 [DEBUG] シートをアクティブ化: レイアウト確認
+2026-08-11 10:11:05.442 [INFO] MiniMap click ratio=0.4 item=製品カタログ!D5
+2026-08-11 10:11:05.473 [DEBUG] シートをアクティブ化: 製品カタログ
+2026-08-11 10:11:05.504 [DEBUG] シートをアクティブ化: 製品カタログ
+2026-08-11 10:11:05.645 [INFO] TryGotoRow OK via cached Window row=5
+2026-08-11 10:11:05.676 [INFO] TryGotoRow OK via cached Window row=5
+2026-08-11 10:11:05.676 [INFO] MiniMap navigate OK sheet=製品カタログ row=5 L=True R=True
+2026-08-11 10:11:05.676 [INFO] [AUTO] MINIMAP_MULTI sheet=製品カタログ row=5 Lsheet=製品カタログ Rsheet=製品カタログ Lsr=5 Rsr=5 ok=True
+2026-08-11 10:11:05.692 [DEBUG] シートをアクティブ化: レイアウト確認
+2026-08-11 10:11:05.707 [DEBUG] シートをアクティブ化: レイアウト確認
+2026-08-11 10:11:05.707 [INFO] MiniMap click ratio=0.4 item=長い一覧!C7
+2026-08-11 10:11:05.723 [DEBUG] シートをアクティブ化: 長い一覧
+2026-08-11 10:11:05.739 [DEBUG] シートをアクティブ化: 長い一覧
+2026-08-11 10:11:05.817 [INFO] TryGotoRow OK via cached Window row=7
+2026-08-11 10:11:05.848 [INFO] TryGotoRow OK via cached Window row=7
+2026-08-11 10:11:05.848 [INFO] MiniMap navigate OK sheet=長い一覧 row=7 L=True R=True
+2026-08-11 10:11:05.848 [INFO] [AUTO] MINIMAP_MULTI sheet=長い一覧 row=7 Lsheet=長い一覧 Rsheet=長い一覧 Lsr=7 Rsr=7 ok=True
+2026-08-11 10:11:05.864 [DEBUG] シートをアクティブ化: レイアウト確認
+2026-08-11 10:11:05.879 [DEBUG] シートをアクティブ化: レイアウト確認
+2026-08-11 10:11:05.879 [INFO] MiniMap click ratio=0.4 item=表紙!B3
+2026-08-11 10:11:05.895 [DEBUG] シートをアクティブ化: 表紙
+2026-08-11 10:11:05.911 [DEBUG] シートをアクティブ化: 表紙
+2026-08-11 10:11:05.957 [INFO] TryGotoRow OK via cached Window row=3
+2026-08-11 10:11:05.989 [INFO] TryGotoRow OK via cached Window row=3
+2026-08-11 10:11:05.989 [INFO] MiniMap navigate OK sheet=表紙 row=3 L=True R=True
+2026-08-11 10:11:05.989 [INFO] [AUTO] MINIMAP_MULTI sheet=表紙 row=3 Lsheet=表紙 Rsheet=表紙 Lsr=3 Rsr=3 ok=True
+2026-08-11 10:11:05.989 [INFO] [AUTO] MINIMAP_MULTI_SUMMARY ok=4/4
+2026-08-11 10:11:05.989 [INFO] [AUTO] MINIMAP_MULTI_OK
+2026-08-11 10:11:06.004 [DEBUG] シートをアクティブ化: 表紙
+2026-08-11 10:11:06.004 [DEBUG] シートをアクティブ化: 表紙
+2026-08-11 10:11:06.020 [DEBUG] シートをアクティブ化: 長い一覧
+2026-08-11 10:11:06.020 [INFO] シート同期 L→R: 長い一覧 → 長い一覧
+2026-08-11 10:11:06.036 [DEBUG] シートをアクティブ化: 長い一覧
+2026-08-11 10:11:06.036 [INFO] [AUTO] SHEET_SYNC after L→長い一覧 Lsheet=長い一覧 Rsheet=長い一覧
+2026-08-11 10:11:06.036 [INFO] [AUTO] SHEET_SYNC_OK
+2026-08-11 10:11:06.036 [INFO] [AUTO] PAIR_COMBO count=6
+2026-08-11 10:11:06.051 [DEBUG] キャッシュを準備しています...
+2026-08-11 10:11:06.067 [INFO] 比較キャッシュ整理: 削除 1 件
+2026-08-11 10:11:06.082 [DEBUG] ブックを読み込んでいます...
+2026-08-11 10:11:06.082 [DEBUG] 埋め込み画像を抽出しています...
+2026-08-11 10:11:06.094 [DEBUG] シート比較中 (1/6): 表紙 ↔ 表紙
+2026-08-11 10:11:06.094 [DEBUG] シート比較中 (2/6): 売上サマリ ↔ 売上サマリ
+2026-08-11 10:11:06.094 [DEBUG] シート比較中 (3/6): 製品カタログ ↔ 製品カタログ
+2026-08-11 10:11:06.110 [DEBUG] シート比較中 (4/6): 長い一覧 ↔ 長い一覧
+2026-08-11 10:11:06.110 [DEBUG] シート比較中 (5/6): レイアウト確認 ↔ レイアウト確認
+2026-08-11 10:11:06.110 [DEBUG] シート比較中 (6/6): ずれ試験 ↔ ずれ試験
+2026-08-11 10:11:06.125 [INFO] 比較完了: 差分 69 件 / 75 ms / cache=C:\Users\Jun\AppData\Roaming\DiffXL\cache\20260811_101106_082_e632dd35
+2026-08-11 10:11:06.125 [DEBUG] 比較完了
+2026-08-11 10:11:06.863 [INFO] [AUTO] RECOMPARE_OK count=69
+2026-08-11 10:11:06.895 [INFO] [AUTO] SETTINGS_OPEN_OK constructed SettingsWindow
+2026-08-11 10:11:06.895 [INFO] SETTINGS_OPEN_OK SettingsWindow constructed for ShowDialog
+2026-08-11 10:11:07.188 [INFO] SettingsWindow 保存完了 color=#FFCC00 opacity=0.6
+2026-08-11 10:11:07.188 [INFO] [AUTO] SETTINGS_DIALOG_SAVE saved=True
+2026-08-11 10:11:07.188 [INFO] [AUTO] SETTINGS_DIALOG result=True SavedProp=True
+2026-08-11 10:11:07.203 [INFO] [AUTO] SETTINGS_SAVE_OK=True color=#FFCC00 via=SettingsWindow.ShowDialog
+2026-08-11 10:11:07.203 [INFO] [AUTO] SETTINGS_OPEN_OK
+2026-08-11 10:11:07.548 [INFO] SettingsWindow 保存完了 color=#FFFF00 opacity=0.5
+2026-08-11 10:11:07.548 [INFO] [AUTO] SETTINGS_RESTORED color=#FFFF00
+2026-08-11 10:11:07.970 [INFO] [AUTO] RESIZE leftH0=727.04 leftH1=727.04 hostAttachedL=True
+2026-08-11 10:11:07.970 [INFO] [AUTO] FAILURES=0
+2026-08-11 10:11:07.970 [INFO] [AUTO] AUTO_LIVE_PASS
+2026-08-11 10:11:07.970 [DEBUG] ScrollSync Detach
+2026-08-11 10:11:08.864 [DEBUG] Excel Application を破棄しました。
+2026-08-11 10:11:09.744 [DEBUG] Excel Application を破棄しました。
+2026-08-11 10:11:09.760 [DEBUG] ScrollSync Detach
+2026-08-11 10:11:09.760 [DEBUG] ScrollSync Detach

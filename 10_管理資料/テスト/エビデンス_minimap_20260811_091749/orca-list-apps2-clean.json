@@ -1,0 +1,116 @@
+{
+  "id": "e2123b14-383f-40a4-a565-6a137ee195bb",
+  "ok": true,
+  "result": {
+    "apps": [
+      {
+        "name": "설정",
+        "bundleId": "ApplicationFrameHost",
+        "pid": 3336,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "comet",
+        "bundleId": "comet",
+        "pid": 3172,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "devenv",
+        "bundleId": "devenv",
+        "pid": 6180,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "DiffXL",
+        "bundleId": "DiffXL",
+        "pid": 6212,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "explorer",
+        "bundleId": "explorer",
+        "pid": 10280,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "Orca",
+        "bundleId": "Orca",
+        "pid": 7288,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "Paseo",
+        "bundleId": "Paseo",
+        "pid": 10740,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "picpick",
+        "bundleId": "picpick",
+        "pid": 1560,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "PoitoMark",
+        "bundleId": "PoitoMark",
+        "pid": 16968,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "ScriptedSandbox64",
+        "bundleId": "ScriptedSandbox64",
+        "pid": 4356,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "svchost",
+        "bundleId": "svchost",
+        "pid": 16600,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "SystemSettings",
+        "bundleId": "SystemSettings",
+        "pid": 7740,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      },
+      {
+        "name": "TextInputHost",
+        "bundleId": "TextInputHost",
+        "pid": 15208,
+        "isRunning": true,
+        "lastUsedAt": null,
+        "useCount": null
+      }
+    ]
+  },
+  "_meta": {
+    "runtimeId": "589ecb9e-6006-4fbf-ad49-b13a62b3fc0b"
+  }
+}
+

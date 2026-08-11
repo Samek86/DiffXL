@@ -1,0 +1,33 @@
+﻿SyncUxSmoke
+left=C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_left.xlsx
+right=C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_right.xlsx
+sheet=SC_画像ギャップ
+ContentScrollMap SC_画像ギャップ ↔ SC_画像ギャップ content segs=4 | Equal L1-7 R1-7 hold=0 | RightOnly L7-7 R8-11 hold=7 | Equal L8-10 R12-14 hold=0 | Equal L11-536870911 R15-536870911 hold=0
+ProbeFromRight(9) Kind=RightOnly MappedRow=7 HoldRow=7 Seg=8-11
+StatusLine=同期ON · 右のみの内容 · 左は行7で待機
+OK ProbeFromLeft(5) Kind=Equal Mapped=5
+OK SyncPollFallbackMs default=250
+OK ShowSyncToastOnJump default=true
+OK ReduceMotion default=false
+BuildJumpHint(ROnly→Eq 7→12)=同じ内容で再同期しました（7行 → 12行）
+OK BuildJumpHint gap→equal |Δ|>=3
+OK BuildJumpHint |Δ|<3 → null
+OK BuildJumpHint non-gap → null
+ApplyDrivenByRight State: Kind=RightOnly L7 R9 | 同期ON · 右のみの内容 · 左は行7で待機
+Jump re-sync: prev hold L7 → R14 L10 Kind=Equal JumpHint=同じ内容で再同期しました（7行 → 10行）
+OK Publish JumpHint=同じ内容で再同期しました（7行 → 10行）
+ApplyDrivenByLeft State: Kind=Equal L5 R5 Col L2 R2 | 同期ON · 内容対応 · L5 ↔ R5
+OK SyncScroll OFF → Kind=Disabled | 同期OFF
+Unavailable StatusLine=同期停止 · Excelスクロールを取得できません
+OK Unavailable StatusLine
+OK RetryAfterUnavailable → Kind=Equal | 同期ON · 内容対応 · L5 ↔ R5
+OK E1 identity · 同期ON · 行番号同期 · L10 ↔ R10
+OK E2 IsBusy ignores Apply
+OK E2 after IsBusy clear Apply works Kind=Equal
+OK E3 unpaired Status=同期ON · シート未対応
+OK E3 unpaired Apply does not map follower R=5
+E4 textMap ContentScrollMap TextOnly ↔ TextOnly content segs=4 | Equal L1-1 R1-1 hold=0 | RightOnly L1-1 R2-2 hold=1 | Equal L2-3 R3-4 hold=0 | Equal L4-536870911 R5-536870911 hold=0 ProbeR2 Kind=RightOnly Mapped=1
+OK E4 images=0 text-only gap Kind=RightOnly
+OK coalesce spam 100× Apply no exception Last=同期ON · 内容対応 · L1 ↔ R1
+SYNC_UX_SMOKE_PASS
+

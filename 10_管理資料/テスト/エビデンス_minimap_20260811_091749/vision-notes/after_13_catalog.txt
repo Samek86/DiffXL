@@ -1,0 +1,645 @@
+App=DiffXL (pid 6212)
+Window: "DiffXL", App: DiffXL.
+
+0 창 DiffXL
+\t1 텍스트 DiffXL
+\t2 텍스트 シート
+\t3 콤보 상자 PairSheetCombo
+\t4 단추 BtnRecompare
+\t\t5 텍스트 再比較
+\t6 단추 BtnSheetMap
+\t\t7 텍스트 シート対応
+\t8 단추 BtnAnchor
+\t\t9 텍스트 アンカー
+\t10 단추 BtnReplaceLeft
+\t\t11 텍스트 左差し替え
+\t12 단추 BtnReplaceRight
+\t\t13 텍스트 右差し替え
+\t14 단추 BtnHighlightToggle, Secondary Actions: Toggle
+\t\t15 텍스트 差分強調 ON
+\t16 단추 BtnSettings
+\t\t17 텍스트 設定
+\t18 단추 BtnBackToStart
+\t\t19 텍스트 最初から
+\t20 텍스트 MiniMap → 売上サマリ!行 17 / テキスト差分 B17: 「」→「右側だけに追記」 (L:OK R:OK)
+\t21 상태 표시줄
+\t\t22 텍스트 左:開 / 右:開
+\t\t23 구분 기호
+\t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
+\t25 사용자 지정 LeftPane
+\t\t26 텍스트 左
+\t\t27 텍스트 C:\\JUN\\WORK\\DiffXL\\30_参考資料\\samples\\full_feature_left.xlsx
+\t\t28 콤보 상자 SheetCombo
+\t\t29 단추 OpenButton
+\t\t\t30 텍스트 開く
+\t\t31 창
+\t\t\t32 pane Excel
+\t\t\t\t33 pane
+\t\t\t\t\t34 창 垂直方向
+\t\t\t\t\t\t35 ウィンドウ枠
+\t\t\t\t\t\t\t36 スクロール バー
+\t\t\t\t\t\t\t\t37 ボタン カーソルを 1 行上へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t38 ボタン 1 画面分上へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t39 サムネイル 位置
+\t\t\t\t\t\t\t\t40 ボタン 1 画面分下へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t41 ボタン カーソルを 1 行下へ移動, Secondary Actions: SetValue
+\t\t\t\t\t42 창 水平方向
+\t\t\t\t\t\t43 ウィンドウ枠
+\t\t\t\t\t\t\t44 スクロール バー
+\t\t\t\t\t\t\t\t45 ボタン 1 列分左へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t46 ボタン 1 画面分左へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t47 サムネイル 位置
+\t\t\t\t\t\t\t\t48 ボタン 1 画面分右へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t49 ボタン 1 列分右へ移動, Secondary Actions: SetValue
+\t\t\t\t\t50 pane 7
+\t\t\t\t\t51 창 full_feature_left
+\t\t\t\t\t\t52 Tab full_feature_left
+\t\t\t\t\t\t\t53 단추 左スクロール
+\t\t\t\t\t\t\t54 단추 右スクロール
+\t\t\t\t\t\t\t55 단추 シートの追加
+\t\t\t\t\t\t\t56 [シート] タブ 表紙, Secondary Actions: Select
+\t\t\t\t\t\t\t57 [シート] タブ 売上サマリ, Secondary Actions: Select
+\t\t\t\t\t\t\t58 [シート] タブ 製品カタログ, Secondary Actions: Select
+\t\t\t\t\t\t\t59 [シート] タブ 長い一覧, Secondary Actions: Select
+\t\t\t\t\t\t\t60 [シート] タブ レイアウト確認, Secondary Actions: Select
+\t\t\t\t\t\t\t61 [シート] タブ 仕様メモ_旧, Secondary Actions: Select
+\t\t\t\t\t\t\t62 [シート] タブ 左のみメモ, Secondary Actions: Select
+\t\t\t\t\t\t\t63 [シート] タブ ずれ試験, Secondary Actions: Select
+\t\t\t\t\t\t64 창 シート 表紙, Secondary Actions: Select
+\t\t\t\t\t\t65 창 シート 売上サマリ, Secondary Actions: Select
+\t\t\t\t\t\t\t66 데이터 그리드 グリッド
+\t\t\t\t\t\t\t\t67 머리글 항목 すべて選択
+\t\t\t\t\t\t\t\t68 列見出し A
+\t\t\t\t\t\t\t\t69 列見出し B
+\t\t\t\t\t\t\t\t70 列見出し C
+\t\t\t\t\t\t\t\t71 列見出し D
+\t\t\t\t\t\t\t\t72 列見出し E
+\t\t\t\t\t\t\t\t73 列見出し F
+\t\t\t\t\t\t\t\t74 行見出し 17
+\t\t\t\t\t\t\t\t75 항목 A17, Value: コメントC, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t76 항목 B17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t77 항목 C17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t78 항목 D17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t79 항목 E17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t80 항목 F17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t81 行見出し 18
+\t\t\t\t\t\t\t\t82 항목 A18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t83 항목 B18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t84 항목 C18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t85 항목 D18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t86 항목 E18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t87 항목 F18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t88 行見出し 19
+\t\t\t\t\t\t\t\t89 항목 A19, Value: 検証: 数量・金額・担当・備考・合計・B16/B17 のテキスト差分が検出されること。, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t90 항목 B19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t91 항목 C19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t92 항목 D19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t93 항목 E19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t94 항목 F19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t95 行見出し 20
+\t\t\t\t\t\t\t\t96 항목 A20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t97 항목 B20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t98 항목 C20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t99 항목 D20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t100 항목 E20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t101 항목 F20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t102 行見出し 21
+\t\t\t\t\t\t\t\t103 항목 A21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t104 항목 B21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t105 항목 C21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t106 항목 D21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t107 항목 E21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t108 항목 F21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t109 行見出し 22
+\t\t\t\t\t\t\t\t110 항목 A22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t111 항목 B22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t112 항목 C22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t113 항목 D22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t114 항목 E22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t115 항목 F22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t116 行見出し 23
+\t\t\t\t\t\t\t\t117 항목 A23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t118 항목 B23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t119 항목 C23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t120 항목 D23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t121 항목 E23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t122 항목 F23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t123 行見出し 24
+\t\t\t\t\t\t\t\t124 항목 A24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t125 항목 B24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t126 항목 C24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t127 항목 D24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t128 항목 E24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t129 항목 F24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t130 行見出し 25
+\t\t\t\t\t\t\t\t131 항목 A25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t132 항목 B25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t133 항목 C25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t134 항목 D25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t135 항목 E25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t136 항목 F25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t137 行見出し 26
+\t\t\t\t\t\t\t\t138 항목 A26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t139 항목 B26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t140 항목 C26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t141 항목 D26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t142 항목 E26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t143 항목 F26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t144 行見出し 27
+\t\t\t\t\t\t\t\t145 항목 A27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t146 항목 B27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t147 항목 C27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t148 항목 D27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t149 항목 E27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t150 항목 F27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t151 行見出し 28
+\t\t\t\t\t\t\t\t152 항목 A28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t153 항목 B28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t154 항목 C28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t155 항목 D28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t156 항목 E28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t157 항목 F28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t158 行見出し 29
+\t\t\t\t\t\t\t\t159 항목 A29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t160 항목 B29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t161 항목 C29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t162 항목 D29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t163 항목 E29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t164 항목 F29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t165 行見出し 30
+\t\t\t\t\t\t\t\t166 항목 A30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t167 항목 B30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t168 항목 C30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t169 항목 D30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t170 항목 E30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t171 항목 F30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t172 行見出し 31
+\t\t\t\t\t\t\t\t173 항목 A31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t174 항목 B31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t175 항목 C31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t176 항목 D31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t177 항목 E31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t178 항목 F31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t179 行見出し 32
+\t\t\t\t\t\t\t\t180 항목 A32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t181 항목 B32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t182 항목 C32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t183 항목 D32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t184 항목 E32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t185 항목 F32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t186 行見出し 33
+\t\t\t\t\t\t\t\t187 항목 A33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t188 항목 B33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t189 항목 C33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t190 항목 D33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t191 항목 E33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t192 항목 F33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t193 行見出し 34
+\t\t\t\t\t\t\t\t194 항목 A34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t195 항목 B34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t196 항목 C34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t197 항목 D34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t198 항목 E34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t199 항목 F34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t200 行見出し 35
+\t\t\t\t\t\t\t\t201 항목 A35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t202 항목 B35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t203 항목 C35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t204 항목 D35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t205 항목 E35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t206 항목 F35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t207 行見出し 36
+\t\t\t\t\t\t\t\t208 항목 A36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t209 항목 B36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t210 항목 C36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t211 항목 D36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t212 항목 E36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t213 항목 F36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t214 行見出し 37
+\t\t\t\t\t\t\t\t215 항목 A37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t216 항목 B37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t217 항목 C37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t218 항목 D37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t219 항목 E37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t220 항목 F37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t221 行見出し 38
+\t\t\t\t\t\t\t\t222 항목 A38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t223 항목 B38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t224 항목 C38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t225 항목 D38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t226 항목 E38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t227 항목 F38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t228 行見出し 39
+\t\t\t\t\t\t\t\t229 항목 A39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t230 항목 B39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t231 항목 C39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t232 항목 D39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t233 항목 E39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t234 항목 F39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t235 行見出し 40
+\t\t\t\t\t\t\t\t236 항목 A40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t237 항목 B40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t238 항목 C40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t239 항목 D40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t240 항목 E40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t241 항목 F40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t242 行見出し 41
+\t\t\t\t\t\t\t\t243 항목 A41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t244 항목 B41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t245 항목 C41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t246 항목 D41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t247 항목 E41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t248 항목 F41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t249 行見出し 42
+\t\t\t\t\t\t\t\t250 항목 A42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t251 항목 B42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t252 항목 C42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t253 항목 D42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t254 항목 E42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t255 항목 F42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t256 行見出し 43
+\t\t\t\t\t\t\t\t257 항목 A43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t258 항목 B43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t259 항목 C43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t260 항목 D43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t261 항목 E43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t262 항목 F43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t263 行見出し 44
+\t\t\t\t\t\t\t\t264 항목 A44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t265 항목 B44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t266 항목 C44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t267 항목 D44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t268 항목 E44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t269 항목 F44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t270 行見出し 45
+\t\t\t\t\t\t\t\t271 항목 A45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t272 항목 B45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t273 항목 C45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t274 항목 D45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t275 항목 E45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t276 항목 F45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t277 行見出し 46
+\t\t\t\t\t\t\t\t278 항목 A46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t279 항목 B46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t280 항목 C46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t281 항목 D46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t282 항목 E46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t283 항목 F46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t284 行見出し 47
+\t\t\t\t\t\t\t\t285 항목 A47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t286 항목 B47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t287 항목 C47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t288 항목 D47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t289 항목 E47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t290 항목 F47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t291 行見出し 48
+\t\t\t\t\t\t\t\t292 항목 A48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t293 항목 B48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t294 항목 C48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t295 항목 D48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t296 항목 E48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t297 항목 F48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t298 行見出し 49
+\t\t\t\t\t\t\t\t299 항목 A49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t300 항목 B49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t301 항목 C49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t302 항목 D49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t303 항목 E49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t304 항목 F49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t305 行見出し 50
+\t\t\t\t\t\t\t\t306 항목 A50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t307 항목 B50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t308 항목 C50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t309 항목 D50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t310 항목 E50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t311 항목 F50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t312 行見出し 51
+\t\t\t\t\t\t\t\t313 항목 A51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t314 항목 B51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t315 항목 C51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t316 항목 D51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t317 항목 E51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t318 항목 F51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t319 창 シート 製品カタログ, Secondary Actions: Select
+\t\t\t\t\t\t320 창 シート 長い一覧, Secondary Actions: Select
+\t\t\t\t\t\t321 창 シート レイアウト確認, Secondary Actions: Select
+\t\t\t\t\t\t322 창 シート 仕様メモ_旧, Secondary Actions: Select
+\t\t\t\t\t\t323 창 シート 左のみメモ, Secondary Actions: Select
+\t\t\t\t\t\t324 창 シート ずれ試験, Secondary Actions: Select
+\t325 엄지
+\t326 사용자 지정 RightPane
+\t\t327 텍스트 右
+\t\t328 텍스트 C:\\JUN\\WORK\\DiffXL\\30_参考資料\\samples\\full_feature_right.xlsx
+\t\t329 콤보 상자 SheetCombo
+\t\t330 단추 OpenButton
+\t\t\t331 텍스트 開く
+\t\t332 창
+\t\t\t333 pane Excel
+\t\t\t\t334 pane
+\t\t\t\t\t335 창 垂直方向
+\t\t\t\t\t\t336 ウィンドウ枠
+\t\t\t\t\t\t\t337 スクロール バー
+\t\t\t\t\t\t\t\t338 ボタン カーソルを 1 行上へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t339 ボタン 1 画面分上へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t340 サムネイル 位置
+\t\t\t\t\t\t\t\t341 ボタン 1 画面分下へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t342 ボタン カーソルを 1 行下へ移動, Secondary Actions: SetValue
+\t\t\t\t\t343 창 水平方向
+\t\t\t\t\t\t344 ウィンドウ枠
+\t\t\t\t\t\t\t345 スクロール バー
+\t\t\t\t\t\t\t\t346 ボタン 1 列分左へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t347 ボタン 1 画面分左へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t348 サムネイル 位置
+\t\t\t\t\t\t\t\t349 ボタン 1 画面分右へ移動, Secondary Actions: SetValue
+\t\t\t\t\t\t\t\t350 ボタン 1 列分右へ移動, Secondary Actions: SetValue
+\t\t\t\t\t351 pane 7
+\t\t\t\t\t352 창 full_feature_right
+\t\t\t\t\t\t353 Tab full_feature_right
+\t\t\t\t\t\t\t354 단추 左スクロール
+\t\t\t\t\t\t\t355 단추 右スクロール
+\t\t\t\t\t\t\t356 단추 シートの追加
+\t\t\t\t\t\t\t357 [シート] タブ 表紙, Secondary Actions: Select
+\t\t\t\t\t\t\t358 [シート] タブ 売上サマリ, Secondary Actions: Select
+\t\t\t\t\t\t\t359 [シート] タブ 製品カタログ, Secondary Actions: Select
+\t\t\t\t\t\t\t360 [シート] タブ 長い一覧, Secondary Actions: Select
+\t\t\t\t\t\t\t361 [シート] タブ レイアウト確認, Secondary Actions: Select
+\t\t\t\t\t\t\t362 [シート] タブ 仕様メモ_新, Secondary Actions: Select
+\t\t\t\t\t\t\t363 [シート] タブ 右のみメモ, Secondary Actions: Select
+\t\t\t\t\t\t\t364 [シート] タブ ずれ試験, Secondary Actions: Select
+\t\t\t\t\t\t365 창 シート 表紙, Secondary Actions: Select
+\t\t\t\t\t\t366 창 シート 売上サマリ, Secondary Actions: Select
+\t\t\t\t\t\t\t367 데이터 그리드 グリッド
+\t\t\t\t\t\t\t\t368 머리글 항목 すべて選択
+\t\t\t\t\t\t\t\t369 列見出し A
+\t\t\t\t\t\t\t\t370 列見出し B
+\t\t\t\t\t\t\t\t371 列見出し C
+\t\t\t\t\t\t\t\t372 列見出し D
+\t\t\t\t\t\t\t\t373 列見出し E
+\t\t\t\t\t\t\t\t374 列見出し F
+\t\t\t\t\t\t\t\t375 行見出し 17
+\t\t\t\t\t\t\t\t376 항목 A17, Value: コメントC, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t377 항목 B17, Value: 右側だけに追記, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t378 항목 C17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t379 항목 D17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t380 항목 E17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t381 항목 F17, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t382 行見出し 18
+\t\t\t\t\t\t\t\t383 항목 A18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t384 항목 B18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t385 항목 C18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t386 항목 D18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t387 항목 E18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t388 항목 F18, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t389 行見出し 19
+\t\t\t\t\t\t\t\t390 항목 A19, Value: 検証: 数量・金額・担当・備考・合計・B16/B17 のテキスト差分が検出されること。, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t391 항목 B19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t392 항목 C19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t393 항목 D19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t394 항목 E19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t395 항목 F19, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t396 行見出し 20
+\t\t\t\t\t\t\t\t397 항목 A20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t398 항목 B20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t399 항목 C20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t400 항목 D20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t401 항목 E20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t402 항목 F20, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t403 行見出し 21
+\t\t\t\t\t\t\t\t404 항목 A21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t405 항목 B21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t406 항목 C21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t407 항목 D21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t408 항목 E21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t409 항목 F21, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t410 行見出し 22
+\t\t\t\t\t\t\t\t411 항목 A22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t412 항목 B22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t413 항목 C22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t414 항목 D22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t415 항목 E22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t416 항목 F22, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t417 行見出し 23
+\t\t\t\t\t\t\t\t418 항목 A23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t419 항목 B23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t420 항목 C23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t421 항목 D23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t422 항목 E23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t423 항목 F23, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t424 行見出し 24
+\t\t\t\t\t\t\t\t425 항목 A24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t426 항목 B24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t427 항목 C24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t428 항목 D24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t429 항목 E24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t430 항목 F24, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t431 行見出し 25
+\t\t\t\t\t\t\t\t432 항목 A25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t433 항목 B25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t434 항목 C25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t435 항목 D25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t436 항목 E25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t437 항목 F25, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t438 行見出し 26
+\t\t\t\t\t\t\t\t439 항목 A26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t440 항목 B26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t441 항목 C26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t442 항목 D26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t443 항목 E26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t444 항목 F26, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t445 行見出し 27
+\t\t\t\t\t\t\t\t446 항목 A27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t447 항목 B27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t448 항목 C27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t449 항목 D27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t450 항목 E27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t451 항목 F27, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t452 行見出し 28
+\t\t\t\t\t\t\t\t453 항목 A28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t454 항목 B28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t455 항목 C28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t456 항목 D28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t457 항목 E28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t458 항목 F28, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t459 行見出し 29
+\t\t\t\t\t\t\t\t460 항목 A29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t461 항목 B29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t462 항목 C29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t463 항목 D29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t464 항목 E29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t465 항목 F29, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t466 行見出し 30
+\t\t\t\t\t\t\t\t467 항목 A30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t468 항목 B30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t469 항목 C30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t470 항목 D30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t471 항목 E30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t472 항목 F30, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t473 行見出し 31
+\t\t\t\t\t\t\t\t474 항목 A31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t475 항목 B31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t476 항목 C31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t477 항목 D31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t478 항목 E31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t479 항목 F31, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t480 行見出し 32
+\t\t\t\t\t\t\t\t481 항목 A32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t482 항목 B32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t483 항목 C32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t484 항목 D32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t485 항목 E32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t486 항목 F32, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t487 行見出し 33
+\t\t\t\t\t\t\t\t488 항목 A33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t489 항목 B33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t490 항목 C33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t491 항목 D33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t492 항목 E33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t493 항목 F33, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t494 行見出し 34
+\t\t\t\t\t\t\t\t495 항목 A34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t496 항목 B34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t497 항목 C34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t498 항목 D34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t499 항목 E34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t500 항목 F34, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t501 行見出し 35
+\t\t\t\t\t\t\t\t502 항목 A35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t503 항목 B35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t504 항목 C35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t505 항목 D35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t506 항목 E35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t507 항목 F35, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t508 行見出し 36
+\t\t\t\t\t\t\t\t509 항목 A36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t510 항목 B36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t511 항목 C36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t512 항목 D36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t513 항목 E36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t514 항목 F36, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t515 行見出し 37
+\t\t\t\t\t\t\t\t516 항목 A37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t517 항목 B37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t518 항목 C37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t519 항목 D37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t520 항목 E37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t521 항목 F37, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t522 行見出し 38
+\t\t\t\t\t\t\t\t523 항목 A38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t524 항목 B38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t525 항목 C38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t526 항목 D38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t527 항목 E38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t528 항목 F38, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t529 行見出し 39
+\t\t\t\t\t\t\t\t530 항목 A39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t531 항목 B39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t532 항목 C39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t533 항목 D39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t534 항목 E39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t535 항목 F39, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t536 行見出し 40
+\t\t\t\t\t\t\t\t537 항목 A40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t538 항목 B40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t539 항목 C40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t540 항목 D40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t541 항목 E40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t542 항목 F40, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t543 行見出し 41
+\t\t\t\t\t\t\t\t544 항목 A41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t545 항목 B41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t546 항목 C41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t547 항목 D41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t548 항목 E41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t549 항목 F41, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t550 行見出し 42
+\t\t\t\t\t\t\t\t551 항목 A42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t552 항목 B42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t553 항목 C42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t554 항목 D42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t555 항목 E42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t556 항목 F42, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t557 行見出し 43
+\t\t\t\t\t\t\t\t558 항목 A43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t559 항목 B43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t560 항목 C43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t561 항목 D43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t562 항목 E43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t563 항목 F43, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t564 行見出し 44
+\t\t\t\t\t\t\t\t565 항목 A44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t566 항목 B44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t567 항목 C44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t568 항목 D44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t569 항목 E44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t570 항목 F44, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t571 行見出し 45
+\t\t\t\t\t\t\t\t572 항목 A45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t573 항목 B45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t574 항목 C45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t575 항목 D45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t576 항목 E45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t577 항목 F45, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t578 行見出し 46
+\t\t\t\t\t\t\t\t579 항목 A46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t580 항목 B46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t581 항목 C46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t582 항목 D46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t583 항목 E46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t584 항목 F46, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t585 行見出し 47
+\t\t\t\t\t\t\t\t586 항목 A47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t587 항목 B47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t588 항목 C47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t589 항목 D47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t590 항목 E47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t591 항목 F47, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t592 行見出し 48
+\t\t\t\t\t\t\t\t593 항목 A48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t594 항목 B48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t595 항목 C48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t596 항목 D48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t597 항목 E48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t598 항목 F48, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t599 行見出し 49
+\t\t\t\t\t\t\t\t600 항목 A49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t601 항목 B49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t602 항목 C49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t603 항목 D49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t604 항목 E49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t605 항목 F49, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t606 行見出し 50
+\t\t\t\t\t\t\t\t607 항목 A50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t608 항목 B50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t609 항목 C50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t610 항목 D50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t611 항목 E50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t612 항목 F50, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t613 行見出し 51
+\t\t\t\t\t\t\t\t614 항목 A51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t615 항목 B51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t616 항목 C51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t617 항목 D51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t618 항목 E51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t\t\t619 항목 F51, Secondary Actions: SetValue, Select
+\t\t\t\t\t\t620 창 シート 製品カタログ, Secondary Actions: Select
+\t\t\t\t\t\t621 창 シート 長い一覧, Secondary Actions: Select
+\t\t\t\t\t\t622 창 シート レイアウト確認, Secondary Actions: Select
+\t\t\t\t\t\t623 창 シート 仕様メモ_新, Secondary Actions: Select
+\t\t\t\t\t\t624 창 シート 右のみメモ, Secondary Actions: Select
+\t\t\t\t\t\t625 창 シート ずれ試験, Secondary Actions: Select
+\t626 엄지
+\t627 사용자 지정 MiniMap
+\t\t628 텍스트 MiniMap
+\t\t629 텍스트 全体俯瞰
+\t\t630 텍스트 1. 表紙
+\t\t631 텍스트 2. 売上サマリ
+\t\t632 텍스트 3. 製品カタログ
+\t\t633 텍스트 4. 長い一覧
+\t\t634 텍스트 5. レイアウト確認
+\t\t635 텍스트 6. ずれ試験
+\t\t636 텍스트 7. 仕様メモ_旧
+\t\t637 텍스트 8. 左のみメモ
+\t\t638 텍스트 9. 仕様メモ_新
+\t\t639 텍스트 10. 右のみメモ
+\t\t640 텍스트 売上サマリ · 行58
+\t\t641 텍스트 差分 69 件 売上サマリ 行58 クリックで移動

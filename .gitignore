@@ -1,0 +1,27 @@
+# Build
+**/bin/
+**/obj/
+**/.vs/
+*.user
+*.suo
+*.cache
+
+# Native / packages
+**/packages/
+**/TestResults/
+
+# App/runtime noise
+**/_cache_janitor.pid
+**/*.exe
+!**/.gitkeep
+**/_smoke/*.exe
+**/_smoke/*.pdb
+**/_smoke/*.dll
+!20_ソース/DiffXL/DiffXL/_smoke/README.md
+
+# SDD scratch
+.superpowers/sdd/
+
+# OS
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <Costura>
+    <!-- OpenCV ネイティブは AppData 展開。マネージ OpenCvSharp は埋め込み -->
+    <Unmanaged64Assemblies>
+      OpenCvSharpExtern
+    </Unmanaged64Assemblies>
+  </Costura>
+</Weavers>
