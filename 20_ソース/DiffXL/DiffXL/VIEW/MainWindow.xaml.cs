@@ -12,7 +12,6 @@ using System.Windows.Threading;
 using DiffXL.COMMON;
 using DiffXL.LOGIC;
 using DiffXL.LOGIC.Diff;
-using DiffXL.LOGIC.Excel;
 using DiffXL.VIEW;
 using DiffXL.VIEW.Controls;
 using DiffXL.VIEW.Dialogs;
@@ -94,7 +93,7 @@ namespace DiffXL
         /// <summary>
         /// フックコールバック保持（GC 防止）。
         /// </summary>
-        private Win32.LowLevelMouseProc _mouseHookProc;
+        private NativeInput.LowLevelMouseProc _mouseHookProc;
 
         /// <summary>
         /// 前回 MiniMap に出した左行（重複更新抑制）。
@@ -141,7 +140,6 @@ namespace DiffXL
                 Enabled = AppSettings.Current.Ui == null || AppSettings.Current.Ui.SyncScroll
             };
             _scrollSync.StateChanged += OnScrollSyncStateChanged;
-            ApplyGapOverlays(_scrollSync.CurrentState);
             ApplySyncStatusUi(_scrollSync.CurrentState);
 
             // 差分印は MiniMap のみ（左右ガターは廃止）
@@ -359,10 +357,10 @@ namespace DiffXL
 
                     // MiniMap 経由の Goto 結果を確認（再 Goto はせず、状態を読む）
                     int lsr = 0, rsr = 0, sc;
-                    bool lOk = LeftPane.Session != null && LeftPane.Session.IsOpen
-                        && LeftPane.Session.TryGetScroll(out lsr, out sc);
-                    bool rOk = RightPane.Session != null && RightPane.Session.IsOpen
-                        && RightPane.Session.TryGetScroll(out rsr, out sc);
+                    bool lOk = LeftPane.IsOpen
+                        && LeftPane.TryGetScroll(out lsr, out sc);
+                    bool rOk = RightPane.IsOpen
+                        && RightPane.TryGetScroll(out rsr, out sc);
 
                     // シートが切り替わっているか（Combo 表示）
                     string leftSheetUi = LeftPane.SelectedSheetName ?? string.Empty;
@@ -467,8 +465,8 @@ namespace DiffXL
                             }
 
                             int gl = 0, gr = 0, gc;
-                            LeftPane.Session.TryGetScroll(out gl, out gc);
-                            RightPane.Session.TryGetScroll(out gr, out gc);
+                            LeftPane.TryGetScroll(out gl, out gc);
+                            RightPane.TryGetScroll(out gr, out gc);
                             string ls = LeftPane.SelectedSheetName ?? string.Empty;
                             string rs = RightPane.SelectedSheetName ?? string.Empty;
                             bool okSheet = string.Equals(ls, sheetName, StringComparison.OrdinalIgnoreCase)
@@ -617,7 +615,7 @@ namespace DiffXL
                             {
                                 _scrollSync.Enabled = AppSettings.Current.Ui == null || AppSettings.Current.Ui.SyncScroll;
                                 _scrollSync.RefreshPollIntervalFromSettings();
-                                ApplyGapOverlays(_scrollSync.CurrentState);
+
                             }
 
                             MiniMap.RefreshStyle();
@@ -676,7 +674,7 @@ namespace DiffXL
                     await System.Threading.Tasks.Task.Delay(400);
                     LeftPane.UpdateLayout();
                     auto.WriteLine("RESIZE leftH0=" + h0 + " leftH1=" + LeftPane.ActualHeight
-                        + " hostAttachedL=" + (LeftPane.Session != null && LeftPane.Session.IsOpen));
+                        + " hostAttachedL=" + (LeftPane.IsOpen));
 
                     // ---- 内容ベース縦スクロール同期の検証 ----
                     try
@@ -847,22 +845,22 @@ namespace DiffXL
             {
                 const int rightOnlyRow = 8;
                 const int expectLeftMax = 7;
-                if (RightPane.Session != null)
+                if (RightPane.IsOpen)
                 {
-                    RightPane.Session.TrySetScroll(rightOnlyRow, 1);
+                    RightPane.TrySetScroll(rightOnlyRow, 1);
                 }
 
                 await System.Threading.Tasks.Task.Delay(200);
                 int mappedLeft = _scrollSync.MapRightToLeft(rightOnlyRow);
-                if (LeftPane.Session != null)
+                if (LeftPane.IsOpen)
                 {
-                    LeftPane.Session.TrySetScroll(mappedLeft, 1);
+                    LeftPane.TrySetScroll(mappedLeft, 1);
                 }
 
                 await System.Threading.Tasks.Task.Delay(400);
                 int lr = 0, rr = 0, c;
-                bool lok = LeftPane.Session != null && LeftPane.Session.TryGetScroll(out lr, out c);
-                bool rok = RightPane.Session != null && RightPane.Session.TryGetScroll(out rr, out c);
+                bool lok = LeftPane.TryGetScroll(out lr, out c);
+                bool rok = RightPane.TryGetScroll(out rr, out c);
                 auto.WriteLine("GAP_SCROLL_RIGHT_ONLY Lsr=" + lr + " Rsr=" + rr
                     + " mappedL=" + mappedLeft + " lok=" + lok + " rok=" + rok);
                 if (!rok || Math.Abs(rr - rightOnlyRow) > 2)
@@ -884,20 +882,20 @@ namespace DiffXL
                 // same_B: 右 row12 → 左 row8（±2）
                 const int sameBRight = 12;
                 const int sameBLeft = 8;
-                if (RightPane.Session != null)
+                if (RightPane.IsOpen)
                 {
-                    RightPane.Session.TrySetScroll(sameBRight, 1);
+                    RightPane.TrySetScroll(sameBRight, 1);
                 }
 
                 int mappedLeftB = _scrollSync.MapRightToLeft(sameBRight);
-                if (LeftPane.Session != null)
+                if (LeftPane.IsOpen)
                 {
-                    LeftPane.Session.TrySetScroll(mappedLeftB, 1);
+                    LeftPane.TrySetScroll(mappedLeftB, 1);
                 }
 
                 await System.Threading.Tasks.Task.Delay(400);
-                lok = LeftPane.Session != null && LeftPane.Session.TryGetScroll(out lr, out c);
-                rok = RightPane.Session != null && RightPane.Session.TryGetScroll(out rr, out c);
+                lok = LeftPane.TryGetScroll(out lr, out c);
+                rok = RightPane.TryGetScroll(out rr, out c);
                 auto.WriteLine("GAP_SCROLL_SAME_B Lsr=" + lr + " Rsr=" + rr + " mappedL=" + mappedLeftB);
                 if (!lok || !rok
                     || Math.Abs(lr - sameBLeft) > 2
@@ -976,22 +974,22 @@ namespace DiffXL
             _scrollSync.Suspend();
             try
             {
-                if (LeftPane.Session != null)
+                if (LeftPane.IsOpen)
                 {
-                    LeftPane.Session.TrySetScroll(5, 5);
+                    LeftPane.TrySetScroll(5, 5);
                 }
 
                 await System.Threading.Tasks.Task.Delay(200);
                 int mappedR = _scrollSync.MapLeftToRight(5);
-                if (RightPane.Session != null)
+                if (RightPane.IsOpen)
                 {
-                    RightPane.Session.TrySetScroll(mappedR, 5);
+                    RightPane.TrySetScroll(mappedR, 5);
                 }
 
                 await System.Threading.Tasks.Task.Delay(400);
                 int lr2 = 0, lc2 = 0, rr2 = 0, rc2 = 0;
-                bool lok2 = LeftPane.Session != null && LeftPane.Session.TryGetScroll(out lr2, out lc2);
-                bool rok2 = RightPane.Session != null && RightPane.Session.TryGetScroll(out rr2, out rc2);
+                bool lok2 = LeftPane.TryGetScroll(out lr2, out lc2);
+                bool rok2 = RightPane.TryGetScroll(out rr2, out rc2);
                 auto.WriteLine("HSCROLL L=" + lr2 + "," + lc2 + " R=" + rr2 + "," + rc2 + " mappedR=" + mappedR);
                 if (!lok2 || !rok2 || lc2 != 5 || rc2 != 5)
                 {
@@ -1112,22 +1110,22 @@ namespace DiffXL
             _scrollSync.Suspend();
             try
             {
-                if (RightPane.Session != null)
+                if (RightPane.IsOpen)
                 {
-                    RightPane.Session.TrySetScroll(7, 1);
+                    RightPane.TrySetScroll(7, 1);
                 }
 
                 await System.Threading.Tasks.Task.Delay(200);
                 int mappedLeft = _scrollSync.MapRightToLeft(7);
-                if (LeftPane.Session != null)
+                if (LeftPane.IsOpen)
                 {
-                    LeftPane.Session.TrySetScroll(mappedLeft, 1);
+                    LeftPane.TrySetScroll(mappedLeft, 1);
                 }
 
                 await System.Threading.Tasks.Task.Delay(400);
                 int lr = 0, rr = 0, c;
-                bool lok = LeftPane.Session != null && LeftPane.Session.TryGetScroll(out lr, out c);
-                bool rok = RightPane.Session != null && RightPane.Session.TryGetScroll(out rr, out c);
+                bool lok = LeftPane.TryGetScroll(out lr, out c);
+                bool rok = RightPane.TryGetScroll(out rr, out c);
                 auto.WriteLine("CATALOG_SCROLL_RIGHT_ONLY Lsr=" + lr + " Rsr=" + rr + " mappedL=" + mappedLeft
                     + " lok=" + lok + " rok=" + rok);
                 if (!rok || Math.Abs(rr - 7) > 2)
@@ -1147,20 +1145,20 @@ namespace DiffXL
                 }
 
                 // 同一画像 row8 で再同期
-                if (RightPane.Session != null)
+                if (RightPane.IsOpen)
                 {
-                    RightPane.Session.TrySetScroll(8, 1);
+                    RightPane.TrySetScroll(8, 1);
                 }
 
                 int mappedLeft8 = _scrollSync.MapRightToLeft(8);
-                if (LeftPane.Session != null)
+                if (LeftPane.IsOpen)
                 {
-                    LeftPane.Session.TrySetScroll(mappedLeft8, 1);
+                    LeftPane.TrySetScroll(mappedLeft8, 1);
                 }
 
                 await System.Threading.Tasks.Task.Delay(400);
-                lok = LeftPane.Session != null && LeftPane.Session.TryGetScroll(out lr, out c);
-                rok = RightPane.Session != null && RightPane.Session.TryGetScroll(out rr, out c);
+                lok = LeftPane.TryGetScroll(out lr, out c);
+                rok = RightPane.TryGetScroll(out rr, out c);
                 auto.WriteLine("CATALOG_SCROLL_MATCH Lsr=" + lr + " Rsr=" + rr + " mappedL=" + mappedLeft8);
                 if (!lok || !rok || Math.Abs(lr - 8) > 2 || Math.Abs(rr - 8) > 2)
                 {
@@ -1224,23 +1222,23 @@ namespace DiffXL
             _scrollSync.Suspend();
             try
             {
-                if (LeftPane.Session != null)
+                if (LeftPane.IsOpen)
                 {
-                    LeftPane.Session.TrySetScroll(10, 5);
+                    LeftPane.TrySetScroll(10, 5);
                 }
 
                 await System.Threading.Tasks.Task.Delay(200);
                 // 同期サービス相当: 横は同列、縦はマップ
                 int mappedR = _scrollSync.MapLeftToRight(10);
-                if (RightPane.Session != null)
+                if (RightPane.IsOpen)
                 {
-                    RightPane.Session.TrySetScroll(mappedR, 5);
+                    RightPane.TrySetScroll(mappedR, 5);
                 }
 
                 await System.Threading.Tasks.Task.Delay(400);
                 int lr2 = 0, lc2 = 0, rr2 = 0, rc2 = 0;
-                bool lok2 = LeftPane.Session != null && LeftPane.Session.TryGetScroll(out lr2, out lc2);
-                bool rok2 = RightPane.Session != null && RightPane.Session.TryGetScroll(out rr2, out rc2);
+                bool lok2 = LeftPane.TryGetScroll(out lr2, out lc2);
+                bool rok2 = RightPane.TryGetScroll(out rr2, out rc2);
                 auto.WriteLine("HSCROLL L=" + lr2 + "," + lc2 + " R=" + rr2 + "," + rc2 + " mappedR=" + mappedR);
                 if (!lok2 || !rok2 || lc2 != 5 || rc2 != 5)
                 {
@@ -1385,25 +1383,6 @@ namespace DiffXL
                 string.IsNullOrEmpty(right) ? "（なし）" : right);
             Log.Info("この組み合わせで比較 L=" + (left ?? "") + " R=" + (right ?? ""));
             await RunCompareOnlyAsync();
-        }
-
-        /// <summary>
-        /// アンカー設定。
-        /// </summary>
-        private async void BtnAnchor_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new AnchorDialog(
-                _session.Options.AnchorLeftAddress,
-                _session.Options.AnchorRightAddress)
-            {
-                Owner = this
-            };
-            if (dialog.ShowDialog() == true)
-            {
-                _session.Options.AnchorLeftAddress = dialog.AnchorLeftAddress;
-                _session.Options.AnchorRightAddress = dialog.AnchorRightAddress;
-                await RunCompareOnlyAsync();
-            }
         }
 
         /// <summary>
@@ -1813,8 +1792,8 @@ namespace DiffXL
                 return;
             }
 
-            bool isVWheel = msg.message == Win32.WM_MOUSEWHEEL;
-            bool isHWheel = msg.message == Win32.WM_MOUSEHWHEEL;
+            bool isVWheel = msg.message == NativeInput.WM_MOUSEWHEEL;
+            bool isHWheel = msg.message == NativeInput.WM_MOUSEHWHEEL;
             if (!isVWheel && !isHWheel)
             {
                 return;
@@ -1830,8 +1809,8 @@ namespace DiffXL
             bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
             bool horizontal = isHWheel || (isVWheel && shift);
 
-            Win32.POINT pt;
-            if (!Win32.GetCursorPos(out pt))
+            NativeInput.POINT pt;
+            if (!NativeInput.GetCursorPos(out pt))
             {
                 return;
             }
@@ -1842,11 +1821,6 @@ namespace DiffXL
                 WorkbookPane pane = HitTestPane(screen);
                 if (pane != null)
                 {
-                    if (pane.Session != null)
-                    {
-                        pane.Session.ActivateForInput();
-                    }
-
                     // ScrollInteracted → ApplyDrivenBy* が同一 UI スレッドで相手側をマップ同期
                     if (pane.TryScrollByWheelDelta(wheelDelta, horizontal))
                     {
@@ -1869,18 +1843,18 @@ namespace DiffXL
         private bool TryHandlePanMessage(ref MSG msg, ref bool handled)
         {
             int m = msg.message;
-            Win32.POINT pt;
-            if (!Win32.GetCursorPos(out pt))
+            NativeInput.POINT pt;
+            if (!NativeInput.GetCursorPos(out pt))
             {
                 return false;
             }
 
             // 中 / 右 / Alt+左
             bool alt = (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt;
-            if (m == Win32.WM_MBUTTONDOWN || m == Win32.WM_RBUTTONDOWN
-                || (m == Win32.WM_LBUTTONDOWN && alt))
+            if (m == NativeInput.WM_MBUTTONDOWN || m == NativeInput.WM_RBUTTONDOWN
+                || (m == NativeInput.WM_LBUTTONDOWN && alt))
             {
-                BeginPanAtScreen(pt.X, pt.Y, m == Win32.WM_RBUTTONDOWN);
+                BeginPanAtScreen(pt.X, pt.Y, m == NativeInput.WM_RBUTTONDOWN);
                 if (_isPanning)
                 {
                     handled = true;
@@ -1895,14 +1869,14 @@ namespace DiffXL
                 return false;
             }
 
-            if (m == Win32.WM_MBUTTONUP || m == Win32.WM_RBUTTONUP || m == Win32.WM_LBUTTONUP)
+            if (m == NativeInput.WM_MBUTTONUP || m == NativeInput.WM_RBUTTONUP || m == NativeInput.WM_LBUTTONUP)
             {
                 EndPan();
                 handled = true;
                 return true;
             }
 
-            if (m == Win32.WM_MOUSEMOVE)
+            if (m == NativeInput.WM_MOUSEMOVE)
             {
                 ContinuePanAtScreen(pt.X, pt.Y);
                 handled = true;
@@ -2065,18 +2039,18 @@ namespace DiffXL
                 int lc = 1, rc = 1;
                 bool any = false;
 
-                if (LeftPane != null && LeftPane.Session != null && LeftPane.Session.IsOpen)
+                if (LeftPane != null && LeftPane.IsOpen)
                 {
-                    if (LeftPane.Session.TryGetScroll(out lr, out lc))
+                    if (LeftPane.TryGetScroll(out lr, out lc))
                     {
                         LeftPane.NoteScroll(lr, lc);
                         any = true;
                     }
                 }
 
-                if (RightPane != null && RightPane.Session != null && RightPane.Session.IsOpen)
+                if (RightPane != null && RightPane.IsOpen)
                 {
-                    if (RightPane.Session.TryGetScroll(out rr, out rc))
+                    if (RightPane.TryGetScroll(out rr, out rc))
                     {
                         RightPane.NoteScroll(rr, rc);
                         any = true;
@@ -2088,17 +2062,7 @@ namespace DiffXL
                     UpdateMiniMapViewportFromScroll(lr, rr);
                 }
 
-                // マウスが Excel 上ならフォーカスを維持（クリック不要ホイールの補助）
-                Win32.POINT pt;
-                if (Win32.GetCursorPos(out pt))
-                {
-                    var screen = new Point(pt.X, pt.Y);
-                    if (LeftPane != null && LeftPane.IsOpen && LeftPane.ContainsScreenPoint(screen)
-                        && LeftPane.Session != null)
-                    {
-                        // 毎ティック Activate は重いので、ホイール直前に任せる
-                    }
-                }
+
             }
             catch (Exception ex)
             {
@@ -2120,8 +2084,8 @@ namespace DiffXL
             using (var curProcess = System.Diagnostics.Process.GetCurrentProcess())
             using (var curModule = curProcess.MainModule)
             {
-                IntPtr hMod = Win32.GetModuleHandle(curModule != null ? curModule.ModuleName : null);
-                _mouseHook = Win32.SetWindowsHookEx(Win32.WH_MOUSE_LL, _mouseHookProc, hMod, 0);
+                IntPtr hMod = NativeInput.GetModuleHandle(curModule != null ? curModule.ModuleName : null);
+                _mouseHook = NativeInput.SetWindowsHookEx(NativeInput.WH_MOUSE_LL, _mouseHookProc, hMod, 0);
             }
 
             if (_mouseHook == IntPtr.Zero)
@@ -2134,7 +2098,7 @@ namespace DiffXL
         {
             if (_mouseHook != IntPtr.Zero)
             {
-                Win32.UnhookWindowsHookEx(_mouseHook);
+                NativeInput.UnhookWindowsHookEx(_mouseHook);
                 _mouseHook = IntPtr.Zero;
             }
 
@@ -2145,30 +2109,30 @@ namespace DiffXL
         {
             try
             {
-                if (nCode < Win32.HC_ACTION)
+                if (nCode < NativeInput.HC_ACTION)
                 {
-                    return Win32.CallNextHookEx(_mouseHook, nCode, wParam, lParam);
+                    return NativeInput.CallNextHookEx(_mouseHook, nCode, wParam, lParam);
                 }
 
-                IntPtr fg = Win32.GetForegroundWindow();
+                IntPtr fg = NativeInput.GetForegroundWindow();
                 uint pid;
-                Win32.GetWindowThreadProcessId(fg, out pid);
+                NativeInput.GetWindowThreadProcessId(fg, out pid);
                 if (pid != (uint)System.Diagnostics.Process.GetCurrentProcess().Id)
                 {
-                    return Win32.CallNextHookEx(_mouseHook, nCode, wParam, lParam);
+                    return NativeInput.CallNextHookEx(_mouseHook, nCode, wParam, lParam);
                 }
 
-                var hs = (Win32.MSLLHOOKSTRUCT)System.Runtime.InteropServices.Marshal.PtrToStructure(
-                    lParam, typeof(Win32.MSLLHOOKSTRUCT));
+                var hs = (NativeInput.MSLLHOOKSTRUCT)System.Runtime.InteropServices.Marshal.PtrToStructure(
+                    lParam, typeof(NativeInput.MSLLHOOKSTRUCT));
                 int x = hs.pt.X;
                 int y = hs.pt.Y;
                 int msg = wParam.ToInt32();
 
                 // ホイール
-                if (msg == Win32.WM_MOUSEWHEEL || msg == Win32.WM_MOUSEHWHEEL)
+                if (msg == NativeInput.WM_MOUSEWHEEL || msg == NativeInput.WM_MOUSEHWHEEL)
                 {
                     int wheelDelta = unchecked((short)((hs.mouseData >> 16) & 0xFFFF));
-                    bool horizontal = msg == Win32.WM_MOUSEHWHEEL
+                    bool horizontal = msg == NativeInput.WM_MOUSEHWHEEL
                         || (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -2176,21 +2140,21 @@ namespace DiffXL
                     }));
                 }
                 // 中ボタン パン / 右ボタンドラッグ パン（Excel セル選択と衝突しにくい）
-                else if (msg == Win32.WM_MBUTTONDOWN || msg == Win32.WM_RBUTTONDOWN)
+                else if (msg == NativeInput.WM_MBUTTONDOWN || msg == NativeInput.WM_RBUTTONDOWN)
                 {
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        BeginPanAtScreen(x, y, msg == Win32.WM_RBUTTONDOWN);
+                        BeginPanAtScreen(x, y, msg == NativeInput.WM_RBUTTONDOWN);
                     }));
                 }
-                else if (msg == Win32.WM_MOUSEMOVE && _isPanning)
+                else if (msg == NativeInput.WM_MOUSEMOVE && _isPanning)
                 {
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
                         ContinuePanAtScreen(x, y);
                     }));
                 }
-                else if (msg == Win32.WM_MBUTTONUP || msg == Win32.WM_RBUTTONUP || msg == Win32.WM_LBUTTONUP)
+                else if (msg == NativeInput.WM_MBUTTONUP || msg == NativeInput.WM_RBUTTONUP || msg == NativeInput.WM_LBUTTONUP)
                 {
                     if (_isPanning)
                     {
@@ -2203,7 +2167,7 @@ namespace DiffXL
                 // フック内で落とさない
             }
 
-            return Win32.CallNextHookEx(_mouseHook, nCode, wParam, lParam);
+            return NativeInput.CallNextHookEx(_mouseHook, nCode, wParam, lParam);
         }
 
         /// <summary>
@@ -2252,12 +2216,6 @@ namespace DiffXL
                 {
                     return;
                 }
-
-                if (pane.Session != null)
-                {
-                    pane.Session.ActivateForInput();
-                }
-
                 // ScrollInteracted → ApplyDrivenBy* が内容マップで相手側を即時同期
                 if (pane.TryScrollByWheelDelta(wheelDelta, horizontal))
                 {
@@ -2349,7 +2307,7 @@ namespace DiffXL
                 var helper = new WindowInteropHelper(this);
                 if (helper.Handle != IntPtr.Zero)
                 {
-                    Win32.SetCapture(helper.Handle);
+                    NativeInput.SetCapture(helper.Handle);
                 }
             }
             catch
@@ -2409,7 +2367,7 @@ namespace DiffXL
 
             _isPanning = false;
             _panPrimaryPane = null;
-            try { Win32.ReleaseCapture(); } catch { /* ignore */ }
+            try { NativeInput.ReleaseCapture(); } catch { /* ignore */ }
             StatusText.Text = "パン終了";
         }
 
@@ -2436,7 +2394,6 @@ namespace DiffXL
                 {
                     _scrollSync.Enabled = AppSettings.Current.Ui == null || AppSettings.Current.Ui.SyncScroll;
                     _scrollSync.RefreshPollIntervalFromSettings();
-                    ApplyGapOverlays(_scrollSync.CurrentState);
                 }
 
                 MiniMap.RefreshStyle();
@@ -2445,7 +2402,7 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// ScrollSyncService の状態変化 → ギャップオーバーレイ + 再同期トースト + ステータス/失敗バナー。
+        /// ScrollSyncService の状態変化 → 再同期トースト + ステータス。
         /// </summary>
         private void OnScrollSyncStateChanged(SyncSessionState state)
         {
@@ -2453,20 +2410,18 @@ namespace DiffXL
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    ApplyGapOverlays(state);
                     ShowSyncToastIfNeeded(state);
                     ApplySyncStatusUi(state);
                 }));
                 return;
             }
 
-            ApplyGapOverlays(state);
             ShowSyncToastIfNeeded(state);
             ApplySyncStatusUi(state);
         }
 
         /// <summary>
-        /// フッタ SyncStatusText と COM 失敗バナーを状態に合わせる。
+        /// フッタ SyncStatusText を状態に合わせる。
         /// </summary>
         private void ApplySyncStatusUi(SyncSessionState state)
         {
@@ -2481,7 +2436,6 @@ namespace DiffXL
                 SyncStatusText.Text = line;
             }
 
-            // フッタ同期アイコン周りにツールチップ（状態の短い説明）
             if (SyncStatusPanel != null)
             {
                 string tip = line;
@@ -2491,43 +2445,6 @@ namespace DiffXL
                 }
 
                 SyncStatusPanel.ToolTip = tip;
-            }
-
-            if (SyncErrorBanner != null)
-            {
-                SyncErrorBanner.Visibility = state.SegmentKind == SyncSegmentKind.Unavailable
-                    ? Visibility.Visible
-                    : Visibility.Collapsed;
-            }
-        }
-
-        /// <summary>
-        /// COM 失敗バナーの「再試行」— failCount クリア・タイマー再開・バナー非表示（StateChanged 経由）。
-        /// </summary>
-        private void BtnSyncRetry_Click(object sender, RoutedEventArgs e)
-        {
-            if (_scrollSync == null)
-            {
-                return;
-            }
-
-            _scrollSync.RetryAfterUnavailable();
-            StatusText.Text = "同期スクロールを再試行しています…";
-        }
-
-        /// <summary>
-        /// 左右 WorkbookPane 上の SyncGapOverlay を更新する。
-        /// </summary>
-        private void ApplyGapOverlays(SyncSessionState state)
-        {
-            if (LeftPane != null && LeftPane.GapOverlay != null)
-            {
-                LeftPane.GapOverlay.Apply(state, isLeftPane: true);
-            }
-
-            if (RightPane != null && RightPane.GapOverlay != null)
-            {
-                RightPane.GapOverlay.Apply(state, isLeftPane: false);
             }
         }
 
@@ -2590,48 +2507,19 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// Ctrl+H。
-        /// </summary>
-        /// <summary>
-        /// ウィンドウサイズ変更時に埋め込み Excel を追従させる。
+        /// ウィンドウサイズ変更（内容ビューは WPF レイアウトに追随）。
         /// </summary>
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            ForceExcelHostsResize();
+            // no-op: ContentPane はレイアウト自動追従
         }
 
         /// <summary>
-        /// 最大化／復元時にも Excel を追従させる。
+        /// 最大化／復元時。
         /// </summary>
         private void Window_StateChanged(object sender, EventArgs e)
         {
-            Dispatcher.BeginInvoke(
-                System.Windows.Threading.DispatcherPriority.Loaded,
-                new Action(ForceExcelHostsResize));
-            Dispatcher.BeginInvoke(
-                System.Windows.Threading.DispatcherPriority.ContextIdle,
-                new Action(ForceExcelHostsResize));
-        }
-
-        /// <summary>
-        /// 左右 Excel ホストを強制リサイズ。
-        /// </summary>
-        private void ForceExcelHostsResize()
-        {
-            try
-            {
-                LeftPane.ForceResizeHost();
-                RightPane.ForceResizeHost();
-                // リサイズ後もギャップカードをホスト中央に維持
-                if (_scrollSync != null)
-                {
-                    ApplyGapOverlays(_scrollSync.CurrentState);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Debug("ForceExcelHostsResize: " + ex.Message);
-            }
+            // no-op: ContentPane はレイアウト自動追従
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -2736,8 +2624,8 @@ namespace DiffXL
         {
             try
             {
-                Win32.POINT pt;
-                if (Win32.GetCursorPos(out pt))
+                NativeInput.POINT pt;
+                if (NativeInput.GetCursorPos(out pt))
                 {
                     WorkbookPane under = HitTestPane(new Point(pt.X, pt.Y));
                     if (under != null && under.IsOpen)
@@ -2914,42 +2802,42 @@ namespace DiffXL
                 if (_scrollSync != null)
                 {
                     _scrollSync.ScrollBothToRows(leftRow, rightRow);
-                    leftOk = LeftPane.Session != null && LeftPane.Session.IsOpen;
-                    rightOk = RightPane.Session != null && RightPane.Session.IsOpen;
+                    leftOk = LeftPane.IsOpen;
+                    rightOk = RightPane.IsOpen;
                     // ScrollBothToRows は bool を返さないので実測で確認
                     int gotL = 0, gotR = 0, gc;
-                    if (LeftPane.Session != null)
+                    if (LeftPane.IsOpen)
                     {
-                        leftOk = LeftPane.Session.TryGetScroll(out gotL, out gc) && Math.Abs(gotL - leftRow) <= 5;
+                        leftOk = LeftPane.TryGetScroll(out gotL, out gc) && Math.Abs(gotL - leftRow) <= 5;
                         if (!leftOk)
                         {
-                            leftOk = LeftPane.Session.TryGotoRow(leftRow)
-                                || LeftPane.Session.TrySetScroll(leftRow, 1);
+                            leftOk = LeftPane.TryGotoRow(leftRow)
+                                || LeftPane.TrySetScroll(leftRow, 1);
                         }
                     }
 
-                    if (RightPane.Session != null)
+                    if (RightPane.IsOpen)
                     {
-                        rightOk = RightPane.Session.TryGetScroll(out gotR, out gc) && Math.Abs(gotR - rightRow) <= 5;
+                        rightOk = RightPane.TryGetScroll(out gotR, out gc) && Math.Abs(gotR - rightRow) <= 5;
                         if (!rightOk)
                         {
-                            rightOk = RightPane.Session.TryGotoRow(rightRow)
-                                || RightPane.Session.TrySetScroll(rightRow, 1);
+                            rightOk = RightPane.TryGotoRow(rightRow)
+                                || RightPane.TrySetScroll(rightRow, 1);
                         }
                     }
                 }
                 else
                 {
-                    if (LeftPane.Session != null && LeftPane.Session.IsOpen)
+                    if (LeftPane.IsOpen)
                     {
-                        leftOk = LeftPane.Session.TryGotoRow(leftRow)
-                            || LeftPane.Session.TrySetScroll(leftRow, 1);
+                        leftOk = LeftPane.TryGotoRow(leftRow)
+                            || LeftPane.TrySetScroll(leftRow, 1);
                     }
 
-                    if (RightPane.Session != null && RightPane.Session.IsOpen)
+                    if (RightPane.IsOpen)
                     {
-                        rightOk = RightPane.Session.TryGotoRow(rightRow)
-                            || RightPane.Session.TrySetScroll(rightRow, 1);
+                        rightOk = RightPane.TryGotoRow(rightRow)
+                            || RightPane.TrySetScroll(rightRow, 1);
                     }
                 }
 
@@ -2957,14 +2845,14 @@ namespace DiffXL
                 if (_scrollSync != null)
                 {
                     int lr = leftRow, rr = rightRow, lc = 1, rc = 1;
-                    if (LeftPane.Session != null)
+                    if (LeftPane.IsOpen)
                     {
-                        LeftPane.Session.TryGetScroll(out lr, out lc);
+                        LeftPane.TryGetScroll(out lr, out lc);
                     }
 
-                    if (RightPane.Session != null)
+                    if (RightPane.IsOpen)
                     {
-                        RightPane.Session.TryGetScroll(out rr, out rc);
+                        RightPane.TryGetScroll(out rr, out rc);
                     }
 
                     _scrollSync.NotifyExternalScroll(lr, rr, lc, rc);
@@ -3023,8 +2911,8 @@ namespace DiffXL
                     + "L" + leftRow + " · R" + rightRow + "）。ログを確認してください。";
                 Log.Error("MiniMap navigate failed sheet=" + sheetLabel
                     + " Lrow=" + leftRow + " Rrow=" + rightRow + " ratio=" + ratio
-                    + " leftOpen=" + (LeftPane.Session != null && LeftPane.Session.IsOpen)
-                    + " rightOpen=" + (RightPane.Session != null && RightPane.Session.IsOpen)
+                    + " leftOpen=" + (LeftPane.IsOpen)
+                    + " rightOpen=" + (RightPane.IsOpen)
                     + " sheetL=" + sheetLeftOk + " sheetR=" + sheetRightOk);
             }
         }
@@ -3055,7 +2943,6 @@ namespace DiffXL
                     return;
                 }
 
-                // ScrollSync は Excel セッション無しでは no-op に近いが互換のため接続
                 AttachScrollSync();
                 await RunCompareOnlyAsync(showLoading: false);
             }
@@ -3751,19 +3638,10 @@ namespace DiffXL
                 return _session.Options.ManualSheetPairs;
             }
 
-            // 同名シートの交差（内容モデル or 互換 Session）
+            // 同名シートの交差（内容モデル）
             var pairs = new List<SheetPair>();
             IReadOnlyList<string> leftNames = LeftPane != null ? LeftPane.GetSheetNames() : null;
             IReadOnlyList<string> rightNames = RightPane != null ? RightPane.GetSheetNames() : null;
-            if ((leftNames == null || leftNames.Count == 0) && LeftPane != null && LeftPane.Session != null && LeftPane.Session.IsOpen)
-            {
-                leftNames = LeftPane.Session.GetSheetNames();
-            }
-
-            if ((rightNames == null || rightNames.Count == 0) && RightPane != null && RightPane.Session != null && RightPane.Session.IsOpen)
-            {
-                rightNames = RightPane.Session.GetSheetNames();
-            }
 
             if (leftNames != null && leftNames.Count > 0 && rightNames != null && rightNames.Count > 0)
             {
@@ -3890,7 +3768,7 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// スクロール同期を左右セッションに接続する。
+        /// スクロール同期を左右内容ビューに接続する。
         /// </summary>
         private void AttachScrollSync()
         {
@@ -3899,12 +3777,11 @@ namespace DiffXL
                 return;
             }
 
-            // 再アタッチ時に二重購読しない
             _scrollSync.ViewportChanged -= OnScrollViewportChanged;
 
             if (LeftPane.IsOpen && RightPane.IsOpen)
             {
-                _scrollSync.Attach(LeftPane.Session, RightPane.Session);
+                _scrollSync.Attach();
                 _scrollSync.Enabled = AppSettings.Current.Ui == null || AppSettings.Current.Ui.SyncScroll;
                 _scrollSync.ViewportChanged += OnScrollViewportChanged;
             }

@@ -231,13 +231,6 @@
                     ToolTip="Ui.SyncScroll — OFF で左右独立・ギャップ表示も停止" />
 
                 <CheckBox
-                    x:Name="ShowSyncGapOverlayCheck"
-                    Margin="0,0,0,8"
-                    Content="ギャップ表示（内容ギャップ時の説明オーバーレイ）"
-                    IsChecked="True"
-                    ToolTip="Ui.ShowSyncGapOverlay" />
-
-                <CheckBox
                     x:Name="ShowSyncToastOnJumpCheck"
                     Margin="0,0,0,8"
                     Content="再同期メッセージ（ジャンプ時の短い通知）"

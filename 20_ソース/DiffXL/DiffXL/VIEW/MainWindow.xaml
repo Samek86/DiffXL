@@ -92,12 +92,6 @@
                                 <TextBlock Text="シート対応" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnAnchor" Style="{StaticResource ToolBarButtonStyle}" MinWidth="72" Margin="0,0,6,0" Click="BtnAnchor_Click">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconPhosphorIcons Kind="Anchor" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
-                                <TextBlock Text="アンカー" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
                         <Button x:Name="BtnImageLink" Style="{StaticResource ToolBarButtonStyle}" MinWidth="88" Margin="0,0,6,0" Click="BtnImageLink_Click" ToolTip="画像の手動対応（ピン留め）">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="Images" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
@@ -160,32 +154,6 @@
                         Foreground="{StaticResource Brush.TextMuted}"
                         Text=""
                         TextTrimming="CharacterEllipsis" />
-                </DockPanel>
-            </Border>
-
-            <!-- COM 連続失敗で同期停止時のバナー（ツールバー直下） -->
-            <Border
-                x:Name="SyncErrorBanner"
-                DockPanel.Dock="Top"
-                Visibility="Collapsed"
-                Background="#33FF4444"
-                BorderBrush="#FF6666"
-                BorderThickness="0,0,0,1"
-                Padding="8,4">
-                <DockPanel>
-                    <Button
-                        x:Name="BtnSyncRetry"
-                        Content="再試行"
-                        DockPanel.Dock="Right"
-                        MinWidth="72"
-                        Margin="12,0,0,0"
-                        Padding="10,2"
-                        Click="BtnSyncRetry_Click" />
-                    <TextBlock
-                        x:Name="SyncErrorText"
-                        VerticalAlignment="Center"
-                        TextWrapping="Wrap"
-                        Text="同期を一時停止しました。Excel のスクロール位置を取得できません。" />
                 </DockPanel>
             </Border>
 

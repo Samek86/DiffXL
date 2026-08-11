@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using DiffXL.COMMON;
 using DiffXL.LOGIC.Diff;
-using DiffXL.LOGIC.Excel;
 using Microsoft.Win32;
 
 namespace DiffXL.VIEW.Controls
@@ -207,6 +206,44 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// 現在のスクロール位置を取得する（内容ビューのキャッシュ）。
+        /// </summary>
+        public bool TryGetScroll(out int row, out int col)
+        {
+            row = Math.Max(1, _lastKnownScrollRow);
+            col = Math.Max(1, _lastKnownScrollCol);
+            return IsOpen;
+        }
+
+        /// <summary>
+        /// スクロール位置を設定する（内容ビューのキャッシュ更新のみ）。
+        /// </summary>
+        public bool TrySetScroll(int row, int col)
+        {
+            if (!IsOpen)
+            {
+                return false;
+            }
+
+            NoteScroll(row, col);
+            return true;
+        }
+
+        /// <summary>
+        /// 指定行へジャンプする（内容ビューのキャッシュ更新のみ）。
+        /// </summary>
+        public bool TryGotoRow(int row)
+        {
+            if (!IsOpen)
+            {
+                return false;
+            }
+
+            NoteScrollRow(row);
+            return true;
+        }
+
+        /// <summary>
         /// 画面ピクセル移動量からパンする（内容ビューでは未対応）。
         /// </summary>
         public bool TryPanByPixels(double dx, double dy)
@@ -237,14 +274,6 @@ namespace DiffXL.VIEW.Controls
         public string FilePath
         {
             get { return _filePath; }
-        }
-
-        /// <summary>
-        /// 内部セッション（Excel 廃止のため常に null。互換 API）。
-        /// </summary>
-        public ExcelWorkbookSession Session
-        {
-            get { return null; }
         }
 
         /// <summary>
@@ -455,15 +484,6 @@ namespace DiffXL.VIEW.Controls
             {
                 _suppressSheetEvent = false;
             }
-        }
-
-        /// <summary>
-        /// 表示メトリクスを取得する（Excel 廃止のため常に false）。
-        /// </summary>
-        public bool TryGetViewMetrics(out ExcelViewMetrics metrics)
-        {
-            metrics = null;
-            return false;
         }
 
         /// <summary>

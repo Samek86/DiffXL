@@ -1,6 +1,6 @@
 using System;
 
-namespace DiffXL.LOGIC.Excel
+namespace DiffXL.LOGIC.Diff
 {
     /// <summary>
     /// 同期を駆動した側。
@@ -34,7 +34,7 @@ namespace DiffXL.LOGIC.Excel
         /// <summary>SyncScroll OFF。</summary>
         Disabled,
 
-        /// <summary>COM 失敗で停止。</summary>
+        /// <summary>取得失敗で停止（内容ビューでは未使用）。</summary>
         Unavailable,
 
         /// <summary>左右シートがマップ上で未対応（同期しない）。</summary>
@@ -62,7 +62,7 @@ namespace DiffXL.LOGIC.Excel
     }
 
     /// <summary>
-    /// 同期セッションの現在状態（UI ステータスバー／オーバーレイ用）。
+    /// 同期セッションの現在状態（UI ステータスバー用）。
     /// </summary>
     public sealed class SyncSessionState
     {
@@ -87,10 +87,10 @@ namespace DiffXL.LOGIC.Excel
         /// <summary>ユーザー向け 1 行（フッター用）。</summary>
         public string StatusLine { get; set; }
 
-        /// <summary>ギャップ時の短い理由（オーバーレイ用）。</summary>
+        /// <summary>ギャップ時の短い理由。</summary>
         public string GapCaption { get; set; }
 
-        /// <summary>再同期ジャンプ時の短いヒント（トースト用・Task 以降）。</summary>
+        /// <summary>再同期ジャンプ時の短いヒント。</summary>
         public string JumpHint { get; set; }
 
         public bool IsInGap
@@ -114,10 +114,9 @@ namespace DiffXL.LOGIC.Excel
             int leftRow,
             int rightRow)
         {
-            // Unavailable は Enabled=false で Publish されるため、OFF より先に判定する
             if (unavailable || kind == SyncSegmentKind.Unavailable)
             {
-                return "同期停止 · Excelスクロールを取得できません";
+                return "同期停止";
             }
 
             if (!enabled || kind == SyncSegmentKind.Disabled)
@@ -145,7 +144,7 @@ namespace DiffXL.LOGIC.Excel
         }
 
         /// <summary>
-        /// ギャップオーバーレイ用の短いキャプション。ギャップ外は null。
+        /// ギャップ用の短いキャプション。ギャップ外は null。
         /// </summary>
         public static string BuildGapCaption(SyncSegmentKind kind, int holdRow)
         {

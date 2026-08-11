@@ -108,10 +108,6 @@ namespace DiffXL.VIEW
                 SyncScrollCheck.IsChecked = ui.SyncScroll;
             }
 
-            if (ShowSyncGapOverlayCheck != null)
-            {
-                ShowSyncGapOverlayCheck.IsChecked = ui.ShowSyncGapOverlay;
-            }
 
             if (ShowSyncToastOnJumpCheck != null)
             {
@@ -316,8 +312,6 @@ namespace DiffXL.VIEW
             AppSettings.Current.Diff.ImageHighlightBorderThickness = imageStyle.BorderThickness;
 
             AppSettings.Current.Ui.SyncScroll = SyncScrollCheck != null && SyncScrollCheck.IsChecked == true;
-            AppSettings.Current.Ui.ShowSyncGapOverlay = ShowSyncGapOverlayCheck == null
-                || ShowSyncGapOverlayCheck.IsChecked == true;
             AppSettings.Current.Ui.ShowSyncToastOnJump = ShowSyncToastOnJumpCheck == null
                 || ShowSyncToastOnJumpCheck.IsChecked == true;
             AppSettings.Current.Ui.ReduceMotion = ReduceMotionCheck != null

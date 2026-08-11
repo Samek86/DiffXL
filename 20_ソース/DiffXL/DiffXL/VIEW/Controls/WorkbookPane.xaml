@@ -92,12 +92,6 @@
                     x:Name="ContentHost"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch" />
-                <local:SyncGapOverlay
-                    x:Name="GapOverlay"
-                    Panel.ZIndex="100"
-                    IsHitTestVisible="False"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch" />
             </Grid>
         </Border>
     </Grid>
