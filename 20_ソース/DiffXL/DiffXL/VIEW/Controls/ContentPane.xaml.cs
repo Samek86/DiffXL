@@ -45,11 +45,59 @@ namespace DiffXL.VIEW.Controls
         private bool _isLeft = true;
 
         /// <summary>
+        /// 画像ハイライト（枠・塗り）の表示フラグ。トグルで切替、再比較不要。
+        /// </summary>
+        private bool _highlightVisible = true;
+
+        /// <summary>
+        /// 現在表示中の ImagePairView 一覧（トグル伝播用）。
+        /// </summary>
+        private readonly List<ImagePairView> _imagePairViews = new List<ImagePairView>();
+
+        /// <summary>
         /// コンストラクタ。
         /// </summary>
         public ContentPane()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// 画像ハイライトの表示／非表示。画像本体は残し枠・塗りだけ切替（再比較不要）。
+        /// </summary>
+        public bool HighlightVisible
+        {
+            get { return _highlightVisible; }
+        }
+
+        /// <summary>
+        /// 画像ハイライト表示を全 ImagePairView に伝播する。
+        /// </summary>
+        /// <param name="visible">表示するなら true</param>
+        public void SetHighlightVisible(bool visible)
+        {
+            _highlightVisible = visible;
+            foreach (ImagePairView view in _imagePairViews)
+            {
+                if (view != null)
+                {
+                    view.SetHighlightVisible(visible);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 設定の画像ハイライト色を全ペアに再適用する。
+        /// </summary>
+        public void RefreshImageHighlightStyle()
+        {
+            foreach (ImagePairView view in _imagePairViews)
+            {
+                if (view != null)
+                {
+                    view.RefreshStyleFromSettings();
+                }
+            }
         }
 
         /// <summary>
@@ -99,7 +147,7 @@ namespace DiffXL.VIEW.Controls
                 ShapesSummary.Text = "図形: —";
                 CellsList.ItemsSource = null;
                 ClearTablesHost();
-                ImagesList.ItemsSource = null;
+                ClearImagesHost();
                 ShapesList.ItemsSource = null;
                 return;
             }
@@ -123,7 +171,7 @@ namespace DiffXL.VIEW.Controls
 
             LoadCellsTab(sheet);
             LoadTablesTab(sheet, partnerSheet);
-            LoadImagesTab(sheet);
+            LoadImagesTab(sheet, partnerSheet);
             LoadShapesTab(sheet);
         }
 
@@ -265,52 +313,248 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// 画像タブのプレースホルダ。
+        /// 画像タブ: AlignStep 順の ImagePairView を配置する。
+        /// Match は部分差領域を赤 3px＋黄 50% で重ね、Skip は片側のみ／ギャップ。
         /// </summary>
-        private void LoadImagesTab(SheetContent sheet)
+        private void LoadImagesTab(SheetContent sheet, SheetContent partnerSheet)
         {
-            var lines = new List<string>();
-            int n = sheet.Images != null ? sheet.Images.Count : 0;
-            ImagesSummary.Text = string.Format(
-                CultureInfo.InvariantCulture,
-                "画像: {0} 件 · 関連差分 {1} 件",
-                n,
-                CountDiffs(DiffKind.Image, DiffKind.ImageOnlyLeft, DiffKind.ImageOnlyRight));
+            ClearImagesHost();
 
-            if (sheet.Images != null)
+            IList<EmbeddedImage> selfImages =
+                sheet != null && sheet.Images != null
+                    ? (IList<EmbeddedImage>)sheet.Images
+                    : (IList<EmbeddedImage>)Array.Empty<EmbeddedImage>();
+            IList<EmbeddedImage> partnerImages =
+                partnerSheet != null && partnerSheet.Images != null
+                    ? (IList<EmbeddedImage>)partnerSheet.Images
+                    : (IList<EmbeddedImage>)Array.Empty<EmbeddedImage>();
+
+            IList<EmbeddedImage> leftImages = _isLeft ? selfImages : partnerImages;
+            IList<EmbeddedImage> rightImages = _isLeft ? partnerImages : selfImages;
+
+            int imageDiffCount = CountDiffs(
+                DiffKind.Image, DiffKind.ImageOnlyLeft, DiffKind.ImageOnlyRight);
+            int regionTotal = 0;
+            foreach (DiffItem d in EnumerateDiffs(DiffKind.Image))
             {
-                int i = 0;
-                foreach (EmbeddedImage img in sheet.Images)
+                if (d != null && d.HighlightRegions != null)
                 {
-                    if (img == null)
-                    {
-                        continue;
-                    }
-
-                    lines.Add(string.Format(
-                        CultureInfo.InvariantCulture,
-                        "#{0} {1} {2}x{3} hash={4}",
-                        i,
-                        img.FileName ?? img.PackagePath ?? "?",
-                        img.PixelWidth,
-                        img.PixelHeight,
-                        ShortHash(img.ContentHash)));
-                    i++;
+                    regionTotal += d.HighlightRegions.Count;
                 }
             }
 
-            foreach (DiffItem d in EnumerateDiffs(
-                DiffKind.Image, DiffKind.ImageOnlyLeft, DiffKind.ImageOnlyRight))
+            ImagesSummary.Text = string.Format(
+                CultureInfo.InvariantCulture,
+                "画像: 自側 {0} / 相手 {1} · 関連差分 {2} 件 · 領域 {3} · ハイライト {4}（赤枠3px＋黄50%・トグル可）",
+                selfImages.Count,
+                partnerImages.Count,
+                imageDiffCount,
+                regionTotal,
+                _highlightVisible ? "ON" : "OFF");
+
+            if (leftImages.Count == 0 && rightImages.Count == 0)
             {
-                lines.Add(FormatDiffLine(d));
+                ImagesHost.Children.Add(CreatePlainHint("（画像なし）"));
+                return;
             }
 
-            if (lines.Count == 0)
+            IList<AlignStep> steps;
+            try
             {
-                lines.Add("（画像なし）");
+                steps = ImageSequenceAligner.Align(leftImages, rightImages);
+            }
+            catch
+            {
+                // アライン失敗時は自側を単純列挙
+                steps = BuildFallbackImageSteps(leftImages.Count, rightImages.Count, _isLeft);
             }
 
-            ImagesList.ItemsSource = lines;
+            int pairs = 0;
+            foreach (AlignStep step in steps)
+            {
+                if (step == null)
+                {
+                    continue;
+                }
+
+                EmbeddedImage leftImg = null;
+                EmbeddedImage rightImg = null;
+                if (step.Op == AlignOp.Match || step.Op == AlignOp.SkipLeft)
+                {
+                    if (step.LeftIndex >= 0 && step.LeftIndex < leftImages.Count)
+                    {
+                        leftImg = leftImages[step.LeftIndex];
+                    }
+                }
+
+                if (step.Op == AlignOp.Match || step.Op == AlignOp.SkipRight)
+                {
+                    if (step.RightIndex >= 0 && step.RightIndex < rightImages.Count)
+                    {
+                        rightImg = rightImages[step.RightIndex];
+                    }
+                }
+
+                if (leftImg == null && rightImg == null)
+                {
+                    continue;
+                }
+
+                DiffItem related = FindImageDiff(leftImg, rightImg, step.Op);
+                var view = new ImagePairView();
+                view.Load(leftImg, rightImg, related, _isLeft, _highlightVisible);
+                ImagesHost.Children.Add(view);
+                _imagePairViews.Add(view);
+                pairs++;
+            }
+
+            if (pairs == 0)
+            {
+                ImagesHost.Children.Add(CreatePlainHint("（表示する画像なし）"));
+            }
+        }
+
+        /// <summary>
+        /// 画像ホストを空にする。
+        /// </summary>
+        private void ClearImagesHost()
+        {
+            _imagePairViews.Clear();
+            if (ImagesHost != null)
+            {
+                ImagesHost.Children.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Align 失敗時のフォールバック AlignStep 列。
+        /// </summary>
+        private static IList<AlignStep> BuildFallbackImageSteps(int leftCount, int rightCount, bool isLeft)
+        {
+            var steps = new List<AlignStep>();
+            if (isLeft)
+            {
+                for (int i = 0; i < leftCount; i++)
+                {
+                    steps.Add(new AlignStep
+                    {
+                        Op = AlignOp.SkipLeft,
+                        LeftIndex = i,
+                        RightIndex = -1
+                    });
+                }
+            }
+            else
+            {
+                for (int j = 0; j < rightCount; j++)
+                {
+                    steps.Add(new AlignStep
+                    {
+                        Op = AlignOp.SkipRight,
+                        LeftIndex = -1,
+                        RightIndex = j
+                    });
+                }
+            }
+
+            return steps;
+        }
+
+        /// <summary>
+        /// 画像ペア／片側に対応する DiffItem を探す。
+        /// </summary>
+        private DiffItem FindImageDiff(
+            EmbeddedImage leftImg,
+            EmbeddedImage rightImg,
+            AlignOp op)
+        {
+            if (_sheetDiffs == null)
+            {
+                return null;
+            }
+
+            string leftPath = leftImg != null ? leftImg.ExtractedPath : null;
+            string rightPath = rightImg != null ? rightImg.ExtractedPath : null;
+
+            foreach (DiffItem d in _sheetDiffs)
+            {
+                if (d == null)
+                {
+                    continue;
+                }
+
+                if (op == AlignOp.Match && d.Kind == DiffKind.Image)
+                {
+                    if (PathsEqual(d.LeftImagePath, leftPath)
+                        && PathsEqual(d.RightImagePath, rightPath))
+                    {
+                        return d;
+                    }
+
+                    // パス不一致でも片側パスが一致すれば候補
+                    if (!string.IsNullOrEmpty(leftPath)
+                        && PathsEqual(d.LeftImagePath, leftPath))
+                    {
+                        return d;
+                    }
+
+                    if (!string.IsNullOrEmpty(rightPath)
+                        && PathsEqual(d.RightImagePath, rightPath))
+                    {
+                        return d;
+                    }
+                }
+                else if (op == AlignOp.SkipLeft && d.Kind == DiffKind.ImageOnlyLeft)
+                {
+                    if (PathsEqual(d.LeftImagePath, leftPath))
+                    {
+                        return d;
+                    }
+                }
+                else if (op == AlignOp.SkipRight && d.Kind == DiffKind.ImageOnlyRight)
+                {
+                    if (PathsEqual(d.RightImagePath, rightPath))
+                    {
+                        return d;
+                    }
+                }
+            }
+
+            // DiffItem が無い完全一致 Match は null（ハイライトなし）
+            if (op == AlignOp.SkipLeft)
+            {
+                return new DiffItem
+                {
+                    Kind = DiffKind.ImageOnlyLeft,
+                    LeftImagePath = leftPath,
+                    Summary = "左のみの画像"
+                };
+            }
+
+            if (op == AlignOp.SkipRight)
+            {
+                return new DiffItem
+                {
+                    Kind = DiffKind.ImageOnlyRight,
+                    RightImagePath = rightPath,
+                    Summary = "右のみの画像"
+                };
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 画像パスの緩い一致（null 同士は false）。
+        /// </summary>
+        private static bool PathsEqual(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b))
+            {
+                return false;
+            }
+
+            return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

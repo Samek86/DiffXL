@@ -160,8 +160,12 @@ namespace DiffXL
 
             _highlightController.SetVisible(highlightOn);
             UpdateHighlightToggleCaption();
+            ApplyImageHighlightVisible(highlightOn);
             _highlightController.VisibilityChanged += visible =>
             {
+                // 画像ペアの枠・塗りも再比較なしで ON/OFF
+                ApplyImageHighlightVisible(visible);
+
                 if (_updatingHighlightToggle)
                 {
                     return;
@@ -600,6 +604,8 @@ namespace DiffXL
                                 bool on = AppSettings.Current.Diff != null && AppSettings.Current.Diff.HighlightEnabled;
                                 BtnHighlightToggle.IsChecked = on;
                                 _highlightController.SetVisible(on);
+                                ApplyImageHighlightVisible(on);
+                                RefreshImageHighlightStyleFromSettings();
                                 UpdateHighlightToggleCaption();
                             }
 
@@ -1618,6 +1624,7 @@ namespace DiffXL
 
         /// <summary>
         /// 差分強調トグル（Checked/Unchecked のみ。Click 併用は再入で StackOverflow になり得る）。
+        /// MiniMap と画像ハイライト（赤枠＋黄塗り）を再比較なしで切替。
         /// </summary>
         private void BtnHighlightToggle_CheckedChanged(object sender, RoutedEventArgs e)
         {
@@ -1631,12 +1638,62 @@ namespace DiffXL
             {
                 bool on = BtnHighlightToggle.IsChecked == true;
                 _highlightController.SetVisible(on);
+                ApplyImageHighlightVisible(on);
                 UpdateHighlightToggleCaption();
-                StatusText.Text = on ? "差分印: MiniMap に表示" : "差分印: 非表示（結果は保持）";
+                StatusText.Text = on
+                    ? "差分印: MiniMap / 画像ハイライト表示"
+                    : "差分印: 非表示（結果・画像は保持）";
             }
             finally
             {
                 _updatingHighlightToggle = false;
+            }
+        }
+
+        /// <summary>
+        /// 左右 ContentPane の画像ハイライト表示を切替（再比較不要）。
+        /// </summary>
+        /// <param name="visible">枠・塗りを出すなら true</param>
+        private void ApplyImageHighlightVisible(bool visible)
+        {
+            try
+            {
+                if (LeftPane != null && LeftPane.ContentHostControl != null)
+                {
+                    LeftPane.ContentHostControl.SetHighlightVisible(visible);
+                }
+
+                if (RightPane != null && RightPane.ContentHostControl != null)
+                {
+                    RightPane.ContentHostControl.SetHighlightVisible(visible);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("ApplyImageHighlightVisible: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 設定変更後に画像ハイライト色・線幅を再適用する。
+        /// </summary>
+        private void RefreshImageHighlightStyleFromSettings()
+        {
+            try
+            {
+                if (LeftPane != null && LeftPane.ContentHostControl != null)
+                {
+                    LeftPane.ContentHostControl.RefreshImageHighlightStyle();
+                }
+
+                if (RightPane != null && RightPane.ContentHostControl != null)
+                {
+                    RightPane.ContentHostControl.RefreshImageHighlightStyle();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("RefreshImageHighlightStyleFromSettings: " + ex.Message);
             }
         }
 
@@ -2303,6 +2360,8 @@ namespace DiffXL
                     bool on = AppSettings.Current.Diff != null && AppSettings.Current.Diff.HighlightEnabled;
                     BtnHighlightToggle.IsChecked = on;
                     _highlightController.SetVisible(on);
+                    ApplyImageHighlightVisible(on);
+                    RefreshImageHighlightStyleFromSettings();
                     UpdateHighlightToggleCaption();
                 }
 
@@ -3114,6 +3173,10 @@ namespace DiffXL
                     result.LeftContent,
                     leftPreferred);
             }
+
+            // 現在のハイライトトグル状態を画像ペアに反映（再比較不要の前提を維持）
+            bool hlOn = _highlightController == null || _highlightController.IsVisible;
+            ApplyImageHighlightVisible(hlOn);
         }
 
         /// <summary>

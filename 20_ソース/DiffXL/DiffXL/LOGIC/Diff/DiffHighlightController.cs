@@ -7,7 +7,9 @@ using DiffXL.VIEW.Controls;
 namespace DiffXL.LOGIC.Diff
 {
     /// <summary>
-    /// 比較結果の差分マーカーを MiniMap に反映する（ガター廃止）。
+    /// 比較結果の差分マーカーを MiniMap に反映し、画像ハイライト表示の
+    /// トグル状態（VisibilityChanged）を UI に通知する。
+    /// 画像の赤枠＋黄塗り自体は ImagePairView が描画し、本クラスは ON/OFF を伝播する。
     /// </summary>
     public sealed class DiffHighlightController
     {
@@ -24,6 +26,9 @@ namespace DiffXL.LOGIC.Diff
             SetVisible(_isVisible);
         }
 
+        /// <summary>
+        /// 差分強調（MiniMap・画像ハイライト）が表示中か。
+        /// </summary>
         public bool IsVisible
         {
             get { return _isVisible; }
@@ -34,6 +39,9 @@ namespace DiffXL.LOGIC.Diff
             get { return _result; }
         }
 
+        /// <summary>
+        /// 表示トグル変更（画像ハイライトは購読側で ImagePairView に伝播）。
+        /// </summary>
         public event Action<bool> VisibilityChanged;
 
         public void Apply(DiffResult result)
@@ -42,6 +50,10 @@ namespace DiffXL.LOGIC.Diff
             PushToMiniMap();
         }
 
+        /// <summary>
+        /// 差分強調の表示／非表示。OFF でも比較結果は保持（再比較不要）。
+        /// </summary>
+        /// <param name="visible">表示するなら true</param>
         public void SetVisible(bool visible)
         {
             bool changed = _isVisible != visible;
@@ -66,6 +78,9 @@ namespace DiffXL.LOGIC.Diff
             }
         }
 
+        /// <summary>
+        /// 設定の色などを MiniMap に再適用する（画像側は UI が RefreshImageHighlightStyle）。
+        /// </summary>
         public void RefreshStyleFromSettings()
         {
             PushToMiniMap();

@@ -124,7 +124,7 @@
             </TabItem>
 
             <TabItem Header="画像">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="8">
                     <StackPanel>
                         <TextBlock
                             x:Name="ImagesSummary"
@@ -132,25 +132,8 @@
                             Margin="0,0,0,8"
                             TextWrapping="Wrap"
                             Text="画像" />
-                        <ItemsControl x:Name="ImagesList">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        Margin="0,0,0,4"
-                                        Padding="8,6"
-                                        Background="#FF1F2937"
-                                        BorderBrush="#FF374151"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                        <TextBlock
-                                            Text="{Binding}"
-                                            Foreground="#FFF9FAFB"
-                                            TextWrapping="Wrap"
-                                            FontSize="12" />
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <!-- 画像ペア行（コードで ImagePairView を追加） -->
+                        <StackPanel x:Name="ImagesHost" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

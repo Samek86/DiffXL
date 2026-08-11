@@ -100,6 +100,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="VIEW\Controls\ImagePairView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="VIEW\Controls\DiffOverlayLayer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -184,6 +188,9 @@
     </Compile>
     <Compile Include="VIEW\Controls\TableDiffGrid.xaml.cs">
       <DependentUpon>TableDiffGrid.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VIEW\Controls\ImagePairView.xaml.cs">
+      <DependentUpon>ImagePairView.xaml</DependentUpon>
     </Compile>
     <Compile Include="VIEW\Dialogs\AnchorDialog.xaml.cs">
       <DependentUpon>AnchorDialog.xaml</DependentUpon>
