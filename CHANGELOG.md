@@ -23,7 +23,8 @@
 
 ### Changed
 
-- 単一 exe 配布向けに OpenCV ネイティブ（x64）を exe へ埋め込み、起動時に `%AppData%\Roaming\DiffXL\native` へ展開するよう変更
+- 単一 exe 配布向けに OpenCV ネイティブ（x64 の `OpenCvSharpExtern.dll` のみ）を exe へ埋め込み、起動時に `%AppData%\Roaming\DiffXL\native` へ展開するよう変更
+- 動画用 `opencv_videoio_ffmpeg*` は配布・埋め込み対象外（静止画比較のみのため不要）
 
 ### Removed
 

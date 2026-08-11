@@ -4,8 +4,9 @@
   <Costura>
     <!--
       マネージ依存（YamlDotNet / OpenCvSharp 等）は Costura で exe に埋め込む。
-      OpenCV ネイティブ（OpenCvSharpExtern / ffmpeg）は csproj の EmbeddedResource で exe に含め、
+      OpenCV ネイティブは OpenCvSharpExtern.dll（x64）のみ EmbeddedResource で exe に含め、
       実行時 NativeBootstrap が %AppData%\Roaming\DiffXL\native へ展開する。
+      動画用 opencv_videoio_ffmpeg* は不要（静止画 ImRead 等のみ使用）。
       Costura の Unmanaged* は使わない（二重埋め込みと temp 展開の衝突を避ける）。
     -->
   </Costura>

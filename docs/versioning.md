@@ -159,4 +159,5 @@ docs: add AI release procedure
 | 実行時 | `NativeBootstrap` が `%AppData%\Roaming\DiffXL\native` へ展開し PATH に追加 |
 | Git | `*.dll` はコミットしない（NuGet restore が正本） |
 
-OpenCvSharp の版を上げるときは `DiffXL.csproj` の `OpenCvSharpPackageVersion` と、ffmpeg のファイル名（例: `opencv_videoio_ffmpeg4100_64.dll`）を合わせて更新する。
+OpenCvSharp の版を上げるときは `DiffXL.csproj` の `OpenCvSharpPackageVersion` を更新する。  
+ネイティブ埋め込みは **`OpenCvSharpExtern.dll`（x64）のみ**（動画用 `opencv_videoio_ffmpeg*` は同梱しない）。

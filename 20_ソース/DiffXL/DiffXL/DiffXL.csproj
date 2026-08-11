@@ -250,12 +250,13 @@
     <OpenCvNativeDir>$(UserProfile)\.nuget\packages\opencvsharp4.runtime.win\$(OpenCvSharpPackageVersion)\runtimes\win-x64\native\</OpenCvNativeDir>
     <OpenCvNativeDir Condition="'$(NuGetPackageRoot)' != ''">$(NuGetPackageRoot)opencvsharp4.runtime.win\$(OpenCvSharpPackageVersion)\runtimes\win-x64\native\</OpenCvNativeDir>
   </PropertyGroup>
+  <!--
+    x64 は OpenCvSharpExtern のみ埋め込む。
+    opencv_videoio_ffmpeg* は動画 I/O 用で、本アプリは静止画比較（ImRead 等）のみのため不要。
+  -->
   <ItemGroup Condition="Exists('$(OpenCvNativeDir)OpenCvSharpExtern.dll')">
     <EmbeddedResource Include="$(OpenCvNativeDir)OpenCvSharpExtern.dll">
       <LogicalName>DiffXL.native.OpenCvSharpExtern.dll</LogicalName>
-    </EmbeddedResource>
-    <EmbeddedResource Include="$(OpenCvNativeDir)opencv_videoio_ffmpeg4100_64.dll" Condition="Exists('$(OpenCvNativeDir)opencv_videoio_ffmpeg4100_64.dll')">
-      <LogicalName>DiffXL.native.opencv_videoio_ffmpeg4100_64.dll</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\NuGet\Microsoft.NuGet.targets" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\NuGet\Microsoft.NuGet.targets')" />
