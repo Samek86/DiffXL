@@ -15,18 +15,18 @@
 
 | ファイル | 説明 |
 |----------|------|
-| `DiffXL.exe` | 本体（マネージ依存は内包） |
-| `DiffXL.exe.config` | .NET ランタイム用設定（アプリ設定ではない） |
+| `DiffXL.exe` | 本体のみ（マネージ依存 + OpenCV ネイティブを内包） |
 | `README.md` | 本ファイル |
 
-ユーザー設定・ログ・キャッシュは exe 横ではなく、次の場所に保存されます。
+**単一 exe 配布**です。DLL を横に置く必要はありません。  
+初回起動時に OpenCV ネイティブが次の場所へ展開されます。
 
 ```
 %AppData%\Roaming\DiffXL\
   settings.yaml
   logs\
   cache\
-  native\
+  native\          ← OpenCvSharpExtern 等（exe から展開）
 ```
 
 ## 使い方

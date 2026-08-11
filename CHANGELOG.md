@@ -21,6 +21,10 @@
 
 - （次リリース向けの修正をここに追記）
 
+### Changed
+
+- 単一 exe 配布向けに OpenCV ネイティブ（x64）を exe へ埋め込み、起動時に `%AppData%\Roaming\DiffXL\native` へ展開するよう変更
+
 ### Removed
 
 - リポジトリから OpenCV 等の `.dll` を除外（NuGet / ビルド成果物として取得。Git に載せない）

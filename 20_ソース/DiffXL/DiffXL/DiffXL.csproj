@@ -14,6 +14,8 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <!-- OpenCvSharp 版は PackageReference と埋め込みネイティブ DLL パスで共有 -->
+    <OpenCvSharpPackageVersion>4.10.0.20240616</OpenCvSharpPackageVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -112,15 +114,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="VIEW\Controls\SyncGapOverlay.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="VIEW\Dialogs\SheetMapDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="VIEW\Dialogs\AnchorDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -138,6 +132,7 @@
     <Compile Include="COMMON\Common.cs" />
     <Compile Include="COMMON\Log.cs" />
     <Compile Include="COMMON\NativeBootstrap.cs" />
+    <Compile Include="COMMON\NativeInput.cs" />
     <Compile Include="LOGIC\CompareSession.cs" />
     <Compile Include="LOGIC\Diff\AnchorRect.cs" />
     <Compile Include="LOGIC\Diff\CellBagComparer.cs" />
@@ -152,33 +147,23 @@
     <Compile Include="LOGIC\Diff\ImageDiffService.cs" />
     <Compile Include="LOGIC\Diff\ImageSequenceAligner.cs" />
     <Compile Include="LOGIC\Diff\ImageVisualComparer.cs" />
+    <Compile Include="LOGIC\Diff\ScrollSyncService.cs" />
     <Compile Include="LOGIC\Diff\SequenceAligner.cs" />
     <Compile Include="LOGIC\Diff\ShapeCompareService.cs" />
     <Compile Include="LOGIC\Diff\SheetAlignment.cs" />
     <Compile Include="LOGIC\Diff\SheetAlignmentBuilder.cs" />
     <Compile Include="LOGIC\Diff\SheetMatcher.cs" />
+    <Compile Include="LOGIC\Diff\SyncSessionState.cs" />
     <Compile Include="LOGIC\Diff\TableCompareService.cs" />
     <Compile Include="LOGIC\Diff\TableDetector.cs" />
     <Compile Include="LOGIC\Diff\TableRowAligner.cs" />
     <Compile Include="LOGIC\Diff\TextDiffService.cs" />
     <Compile Include="LOGIC\Diff\XlsxPackageReader.cs" />
-    <Compile Include="LOGIC\Excel\ExcelAppManager.cs" />
-    <Compile Include="LOGIC\Excel\ExcelAvailability.cs" />
-    <Compile Include="LOGIC\Excel\ExcelComHelper.cs" />
-    <Compile Include="LOGIC\Excel\ExcelViewMetrics.cs" />
-    <Compile Include="LOGIC\Excel\ExcelWorkbookSession.cs" />
-    <Compile Include="LOGIC\Excel\ScrollSyncService.cs" />
-    <Compile Include="LOGIC\Excel\SyncSessionState.cs" />
-    <Compile Include="LOGIC\Excel\Win32.cs" />
-    <Compile Include="VIEW\Controls\ExcelHostControl.cs" />
     <Compile Include="VIEW\Controls\DiffOverlayLayer.xaml.cs">
       <DependentUpon>DiffOverlayLayer.xaml</DependentUpon>
     </Compile>
     <Compile Include="VIEW\Controls\MiniMapControl.xaml.cs">
       <DependentUpon>MiniMapControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="VIEW\Controls\SyncGapOverlay.xaml.cs">
-      <DependentUpon>SyncGapOverlay.xaml</DependentUpon>
     </Compile>
     <Compile Include="VIEW\Controls\WorkbookPane.xaml.cs">
       <DependentUpon>WorkbookPane.xaml</DependentUpon>
@@ -191,9 +176,6 @@
     </Compile>
     <Compile Include="VIEW\Controls\ImagePairView.xaml.cs">
       <DependentUpon>ImagePairView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="VIEW\Dialogs\AnchorDialog.xaml.cs">
-      <DependentUpon>AnchorDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="VIEW\Dialogs\ImageLinkDialog.xaml.cs">
       <DependentUpon>ImageLinkDialog.xaml</DependentUpon>
@@ -251,15 +233,32 @@
     </PackageReference>
     <PackageReference Include="MahApps.Metro.IconPacks.PhosphorIcons" Version="6.2.1" />
     <PackageReference Include="OpenCvSharp4">
-      <Version>4.10.0.20240616</Version>
+      <Version>$(OpenCvSharpPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="OpenCvSharp4.runtime.win">
-      <Version>4.10.0.20240616</Version>
+      <Version>$(OpenCvSharpPackageVersion)</Version>
     </PackageReference>
     <PackageReference Include="YamlDotNet">
       <Version>18.1.0</Version>
     </PackageReference>
   </ItemGroup>
+  <!--
+    単一 exe 配布: NuGet の win-x64 ネイティブを埋め込み、実行時に AppData\native へ展開する。
+    Git には DLL を置かない（restore で取得）。
+  -->
+  <PropertyGroup>
+    <OpenCvNativeDir>$(UserProfile)\.nuget\packages\opencvsharp4.runtime.win\$(OpenCvSharpPackageVersion)\runtimes\win-x64\native\</OpenCvNativeDir>
+    <OpenCvNativeDir Condition="'$(NuGetPackageRoot)' != ''">$(NuGetPackageRoot)opencvsharp4.runtime.win\$(OpenCvSharpPackageVersion)\runtimes\win-x64\native\</OpenCvNativeDir>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(OpenCvNativeDir)OpenCvSharpExtern.dll')">
+    <EmbeddedResource Include="$(OpenCvNativeDir)OpenCvSharpExtern.dll">
+      <LogicalName>DiffXL.native.OpenCvSharpExtern.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(OpenCvNativeDir)opencv_videoio_ffmpeg4100_64.dll" Condition="Exists('$(OpenCvNativeDir)opencv_videoio_ffmpeg4100_64.dll')">
+      <LogicalName>DiffXL.native.opencv_videoio_ffmpeg4100_64.dll</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\NuGet\Microsoft.NuGet.targets" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\NuGet\Microsoft.NuGet.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
+

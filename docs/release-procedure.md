@@ -169,11 +169,12 @@ msbuild DiffXL.sln /t:Clean,Build /p:Configuration=Release /p:Platform=x64
 
 - `20_ソース\DiffXL\DiffXL\bin\x64\Release\DiffXL.exe` が存在する
 - マネージ依存 DLL が横に並ばない（Costura 想定）
+- ビルド出力に `dll\x64\*.dll` が残っていても **配布物には含めない**（exe 内埋め込み + 実行時 AppData 展開）
 
-### 3.2 `40_リリース` への配置
+### 3.2 `40_リリース` への配置（単一 exe）
 
 ```powershell
-# リポジトリルートから
+# リポジトリルートから — 配布は DiffXL.exe のみ（+ 利用者向け README）
 Copy-Item "20_ソース\DiffXL\DiffXL\bin\x64\Release\DiffXL.exe" "40_リリース\DiffXL.exe" -Force
 # config が必要な場合のみ
 # Copy-Item "20_ソース\DiffXL\DiffXL\bin\x64\Release\DiffXL.exe.config" "40_リリース\" -Force
@@ -181,10 +182,13 @@ Copy-Item "20_ソース\DiffXL\DiffXL\bin\x64\Release\DiffXL.exe" "40_リリー�
 
 注意:
 
+- **配布単位は原則 `DiffXL.exe` のみ**（ネイティブ OpenCV は exe 埋め込み → 初回起動で `%AppData%\Roaming\DiffXL\native`）。
 - `*.exe` は `.gitignore` 対象のため、**バイナリは Git にコミットしない**（原則）。
 - 配布は **GitHub Release のアセット**として添付する。
+- ビルド前に NuGet が復元されていること（`OpenCvSharp4.runtime.win` の x64 が埋め込み元）。
 
 - [ ] Release|x64 の `DiffXL.exe` を `40_リリース` に配置した
+- [ ] `dll\` フォルダを Release アセットに付けていない
 - [ ] 同梱 README（`40_リリース/README.md`）の前提条件が現状と一致している
 
 ### 3.3 最低限の動作確認（ベータでも実施）

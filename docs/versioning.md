@@ -149,3 +149,14 @@ docs: add AI release procedure
 | `docs/release-procedure.md` | リリース手順（AI 実行用） |
 | `docs/versioning.md` | 本ファイル |
 | `40_リリース/README.md` | 配布物同梱の利用者向け README |
+
+## 8. 単一 exe とネイティブ DLL（補足）
+
+| 種別 | 扱い |
+|------|------|
+| マネージ（YamlDotNet 等） | Costura.Fody で `DiffXL.exe` に埋め込み |
+| OpenCV ネイティブ x64 | NuGet からビルド時に **EmbeddedResource** として exe へ埋め込み |
+| 実行時 | `NativeBootstrap` が `%AppData%\Roaming\DiffXL\native` へ展開し PATH に追加 |
+| Git | `*.dll` はコミットしない（NuGet restore が正本） |
+
+OpenCvSharp の版を上げるときは `DiffXL.csproj` の `OpenCvSharpPackageVersion` と、ffmpeg のファイル名（例: `opencv_videoio_ffmpeg4100_64.dll`）を合わせて更新する。

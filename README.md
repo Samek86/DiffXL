@@ -51,7 +51,7 @@ DiffXL は、セルの値だけでなく **表・図形・埋め込み画像** �
 | ランタイム | .NET Framework **4.8** 以降 |
 | Excel | **デスクトップ版 Microsoft Excel**（COM 利用。必須） |
 | 対象ファイル | **`.xlsx` のみ**（`.xls` / `.xlsm` は非対応） |
-| 配布形態 | 原則 **単一 `DiffXL.exe`**（マネージ依存は内包） |
+| 配布形態 | 原則 **単一 `DiffXL.exe`**（マネージは Costura、OpenCV ネイティブは埋め込み → AppData 展開） |
 
 ユーザー設定・ログ・キャッシュ・OpenCV native は exe 横ではなく次に保存されます。
 
