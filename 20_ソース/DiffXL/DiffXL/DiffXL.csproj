@@ -138,6 +138,8 @@
     <Compile Include="LOGIC\Diff\ImageCorrespondence.cs" />
     <Compile Include="LOGIC\Diff\ImageCorrespondenceService.cs" />
     <Compile Include="LOGIC\Diff\ImageDiffService.cs" />
+    <Compile Include="LOGIC\Diff\ImageSequenceAligner.cs" />
+    <Compile Include="LOGIC\Diff\ImageVisualComparer.cs" />
     <Compile Include="LOGIC\Diff\SequenceAligner.cs" />
     <Compile Include="LOGIC\Diff\SheetAlignment.cs" />
     <Compile Include="LOGIC\Diff\SheetAlignmentBuilder.cs" />
