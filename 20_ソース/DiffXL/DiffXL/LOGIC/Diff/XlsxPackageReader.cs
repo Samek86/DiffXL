@@ -456,6 +456,439 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
+        /// シート drawing から図形（sp / cxnSp。pic は除く）を出現順で抽出する。
+        /// 図形内テキストがあれば Text に格納。無ければ Kind+サイズ等の正規化指紋を ContentHash にする。
+        /// ラスタ化は行わず RasterPath は null（重い処理を避ける最小実装）。
+        /// </summary>
+        /// <param name="sheetName">対象シート（null / 空なら全シート）</param>
+        /// <param name="cacheDir">キャッシュ先（現状未使用。将来ラスタ用。null 可）</param>
+        /// <returns>出現順（行→列）の図形一覧</returns>
+        public IList<ShapeContent> ExtractShapes(string sheetName, string cacheDir)
+        {
+            EnsureOpen();
+            if (!string.IsNullOrEmpty(cacheDir))
+            {
+                Directory.CreateDirectory(cacheDir);
+            }
+
+            var result = new List<ShapeContent>();
+            try
+            {
+                IEnumerable<KeyValuePair<string, string>> sheets = _sheetPaths;
+                if (!string.IsNullOrEmpty(sheetName))
+                {
+                    if (!_sheetPaths.ContainsKey(sheetName))
+                    {
+                        return result;
+                    }
+
+                    sheets = new[]
+                    {
+                        new KeyValuePair<string, string>(sheetName, _sheetPaths[sheetName])
+                    };
+                }
+
+                foreach (var kv in sheets)
+                {
+                    string name = kv.Key;
+                    string sheetPath = kv.Value;
+                    string sheetDir = GetPackageDirectory(sheetPath);
+                    string sheetFile = Path.GetFileName(sheetPath);
+                    string relsPath = sheetDir + "/_rels/" + sheetFile + ".rels";
+                    Dictionary<string, string> sheetRels = LoadRelationships(relsPath);
+
+                    foreach (var rel in sheetRels)
+                    {
+                        if (rel.Value.IndexOf("drawing", StringComparison.OrdinalIgnoreCase) < 0)
+                        {
+                            continue;
+                        }
+
+                        string drawingPath = ResolveRelativePackagePath(sheetDir, rel.Value);
+                        List<ShapeContent> shapes = ExtractShapesFromDrawing(drawingPath, name);
+                        result.AddRange(shapes);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("ExtractShapes 失敗: " + ex.Message);
+            }
+
+            // 出現順: 行 → 列 → 元順
+            result.Sort((a, b) =>
+            {
+                int ra = a.Anchor != null ? a.Anchor.RowStart : 0;
+                int rb = b.Anchor != null ? b.Anchor.RowStart : 0;
+                int cmp = ra.CompareTo(rb);
+                if (cmp != 0)
+                {
+                    return cmp;
+                }
+
+                int ca = a.Anchor != null ? a.Anchor.ColStart : 0;
+                int cb = b.Anchor != null ? b.Anchor.ColStart : 0;
+                cmp = ca.CompareTo(cb);
+                if (cmp != 0)
+                {
+                    return cmp;
+                }
+
+                return a.OrderIndex.CompareTo(b.OrderIndex);
+            });
+
+            for (int i = 0; i < result.Count; i++)
+            {
+                result[i].OrderIndex = i;
+                if (string.IsNullOrEmpty(result[i].Id))
+                {
+                    result[i].Id = "shape-" + i.ToString(CultureInfo.InvariantCulture);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// drawing XML から sp / cxnSp を抽出する（pic は無視）。
+        /// </summary>
+        private List<ShapeContent> ExtractShapesFromDrawing(string drawingPath, string sheetName)
+        {
+            var list = new List<ShapeContent>();
+            XDocument doc = ReadXmlEntry(drawingPath);
+            if (doc == null)
+            {
+                return list;
+            }
+
+            int order = 0;
+            foreach (XElement anchor in doc.Descendants())
+            {
+                string local = anchor.Name.LocalName;
+                bool isTwoCell = string.Equals(local, "twoCellAnchor", StringComparison.OrdinalIgnoreCase);
+                bool isOneCell = string.Equals(local, "oneCellAnchor", StringComparison.OrdinalIgnoreCase);
+                bool isAbsolute = string.Equals(local, "absoluteAnchor", StringComparison.OrdinalIgnoreCase);
+                if (!isTwoCell && !isOneCell && !isAbsolute)
+                {
+                    continue;
+                }
+
+                // pic のみのアンカーは画像側で扱う
+                bool hasPic = anchor.Elements().Any(e =>
+                    string.Equals(e.Name.LocalName, "pic", StringComparison.OrdinalIgnoreCase));
+                bool hasShape = anchor.Descendants().Any(e =>
+                {
+                    string ln = e.Name.LocalName;
+                    return string.Equals(ln, "sp", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(ln, "cxnSp", StringComparison.OrdinalIgnoreCase);
+                });
+                if (hasPic && !hasShape)
+                {
+                    continue;
+                }
+
+                int row0 = -1;
+                int col0 = -1;
+                int row1 = -1;
+                int col1 = -1;
+                XElement from = anchor.Elements().FirstOrDefault(e =>
+                    string.Equals(e.Name.LocalName, "from", StringComparison.OrdinalIgnoreCase));
+                if (from != null)
+                {
+                    TryReadMarkerRowCol(from, out row0, out col0);
+                }
+
+                if (isTwoCell)
+                {
+                    XElement to = anchor.Elements().FirstOrDefault(e =>
+                        string.Equals(e.Name.LocalName, "to", StringComparison.OrdinalIgnoreCase));
+                    if (to != null)
+                    {
+                        TryReadMarkerRowCol(to, out row1, out col1);
+                    }
+                }
+
+                AnchorRect rect = isAbsolute
+                    ? null
+                    : AnchorRect.FromZeroBased(row0, col0, row1, col1);
+
+                // 直接の sp/cxnSp および grpSp 内の sp/cxnSp
+                foreach (XElement shapeEl in EnumerateShapeElements(anchor))
+                {
+                    ShapeContent sc = BuildShapeContent(shapeEl, rect, order, sheetName);
+                    if (sc != null)
+                    {
+                        list.Add(sc);
+                        order++;
+                    }
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// アンカー配下の sp / cxnSp を列挙する（pic は除外。grpSp は再帰）。
+        /// </summary>
+        private static IEnumerable<XElement> EnumerateShapeElements(XElement anchor)
+        {
+            if (anchor == null)
+            {
+                yield break;
+            }
+
+            foreach (XElement child in anchor.Elements())
+            {
+                string ln = child.Name.LocalName;
+                if (string.Equals(ln, "sp", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(ln, "cxnSp", StringComparison.OrdinalIgnoreCase))
+                {
+                    yield return child;
+                }
+                else if (string.Equals(ln, "grpSp", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (XElement nested in EnumerateShapeElements(child))
+                    {
+                        yield return nested;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// sp / cxnSp 要素から ShapeContent を構築する。
+        /// </summary>
+        private static ShapeContent BuildShapeContent(
+            XElement shapeEl,
+            AnchorRect rect,
+            int order,
+            string sheetName)
+        {
+            if (shapeEl == null)
+            {
+                return null;
+            }
+
+            string elementKind = shapeEl.Name.LocalName;
+            string prst = null;
+            XElement prstGeom = shapeEl.Descendants().FirstOrDefault(e =>
+                string.Equals(e.Name.LocalName, "prstGeom", StringComparison.OrdinalIgnoreCase));
+            if (prstGeom != null)
+            {
+                XAttribute prstAttr = prstGeom.Attribute("prst");
+                if (prstAttr != null)
+                {
+                    prst = prstAttr.Value;
+                }
+            }
+
+            string kind = !string.IsNullOrEmpty(prst)
+                ? prst
+                : (string.Equals(elementKind, "cxnSp", StringComparison.OrdinalIgnoreCase)
+                    ? "connector"
+                    : "shape");
+
+            // 図形名（cNvPr@name）はメタ。Kind には幾何を優先
+            string name = null;
+            XElement cNvPr = shapeEl.Descendants().FirstOrDefault(e =>
+                string.Equals(e.Name.LocalName, "cNvPr", StringComparison.OrdinalIgnoreCase));
+            if (cNvPr != null)
+            {
+                XAttribute nameAttr = cNvPr.Attribute("name");
+                if (nameAttr != null)
+                {
+                    name = nameAttr.Value;
+                }
+            }
+
+            // 図形内テキスト（a:t 連結）
+            var textParts = new List<string>();
+            foreach (XElement t in shapeEl.Descendants())
+            {
+                if (string.Equals(t.Name.LocalName, "t", StringComparison.OrdinalIgnoreCase))
+                {
+                    string v = t.Value;
+                    if (!string.IsNullOrEmpty(v))
+                    {
+                        textParts.Add(v);
+                    }
+                }
+            }
+
+            string text = textParts.Count > 0
+                ? string.Join(string.Empty, textParts)
+                : string.Empty;
+
+            long cx = 0;
+            long cy = 0;
+            XElement ext = shapeEl.Descendants().FirstOrDefault(e =>
+                string.Equals(e.Name.LocalName, "ext", StringComparison.OrdinalIgnoreCase)
+                && e.Parent != null
+                && string.Equals(e.Parent.Name.LocalName, "xfrm", StringComparison.OrdinalIgnoreCase));
+            if (ext != null)
+            {
+                long.TryParse((string)ext.Attribute("cx"), NumberStyles.Integer, CultureInfo.InvariantCulture, out cx);
+                long.TryParse((string)ext.Attribute("cy"), NumberStyles.Integer, CultureInfo.InvariantCulture, out cy);
+            }
+
+            string fill = ExtractShapeFillKey(shapeEl);
+            string contentHash = ComputeShapeContentHash(kind, text, cx, cy, fill, shapeEl);
+
+            string idBase = !string.IsNullOrEmpty(name) ? name : kind;
+            return new ShapeContent
+            {
+                Id = idBase + "@" + (sheetName ?? "?") + "#" + order.ToString(CultureInfo.InvariantCulture),
+                OrderIndex = order,
+                Kind = kind,
+                Text = text,
+                RasterPath = null,
+                ContentHash = contentHash,
+                Anchor = rect != null ? rect.Clone() : null
+            };
+        }
+
+        /// <summary>
+        /// 塗りつぶしの簡易キー（solidFill srgbClr など）。無ければ空。
+        /// </summary>
+        private static string ExtractShapeFillKey(XElement shapeEl)
+        {
+            if (shapeEl == null)
+            {
+                return string.Empty;
+            }
+
+            XElement solid = shapeEl.Descendants().FirstOrDefault(e =>
+                string.Equals(e.Name.LocalName, "solidFill", StringComparison.OrdinalIgnoreCase));
+            if (solid == null)
+            {
+                // noFill
+                if (shapeEl.Descendants().Any(e =>
+                    string.Equals(e.Name.LocalName, "noFill", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return "nofill";
+                }
+
+                return string.Empty;
+            }
+
+            XElement srgb = solid.Descendants().FirstOrDefault(e =>
+                string.Equals(e.Name.LocalName, "srgbClr", StringComparison.OrdinalIgnoreCase));
+            if (srgb != null)
+            {
+                XAttribute val = srgb.Attribute("val");
+                if (val != null)
+                {
+                    return "srgb:" + val.Value;
+                }
+            }
+
+            XElement scheme = solid.Descendants().FirstOrDefault(e =>
+                string.Equals(e.Name.LocalName, "schemeClr", StringComparison.OrdinalIgnoreCase));
+            if (scheme != null)
+            {
+                XAttribute val = scheme.Attribute("val");
+                if (val != null)
+                {
+                    return "scheme:" + val.Value;
+                }
+            }
+
+            return "solid";
+        }
+
+        /// <summary>
+        /// Text+Kind+サイズ+塗り、または XML 正規化指紋から ContentHash を計算する。
+        /// </summary>
+        private static string ComputeShapeContentHash(
+            string kind,
+            string text,
+            long cx,
+            long cy,
+            string fill,
+            XElement shapeEl)
+        {
+            string fingerprint;
+            if (!string.IsNullOrEmpty(text))
+            {
+                // テキスト優先: Text + Kind + サイズ + 塗り
+                fingerprint = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "t|{0}|{1}|{2}x{3}|{4}",
+                    text,
+                    kind ?? string.Empty,
+                    cx,
+                    cy,
+                    fill ?? string.Empty);
+            }
+            else
+            {
+                // テキストなし: Kind+サイズ+塗り + 正規化 XML 断片
+                string xmlNorm = NormalizeShapeXml(shapeEl);
+                fingerprint = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "x|{0}|{1}x{2}|{3}|{4}",
+                    kind ?? string.Empty,
+                    cx,
+                    cy,
+                    fill ?? string.Empty,
+                    xmlNorm);
+            }
+
+            return ComputeStringHash(fingerprint);
+        }
+
+        /// <summary>
+        /// 図形 XML を id/name を除いた簡易正規化文字列にする。
+        /// </summary>
+        private static string NormalizeShapeXml(XElement shapeEl)
+        {
+            if (shapeEl == null)
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                XElement clone = new XElement(shapeEl);
+                foreach (XElement el in clone.DescendantsAndSelf())
+                {
+                    // 不安定な識別子を落とす
+                    el.Attribute("id")?.Remove();
+                    el.Attribute("name")?.Remove();
+                    // 名前空間接頭辞差を抑えるため LocalName ベースのタグ列に落とすのは重いので
+                    // 属性整理後の Outer 風文字列を使う
+                }
+
+                // 空白正規化
+                string raw = clone.ToString(SaveOptions.DisableFormatting);
+                return Regex.Replace(raw ?? string.Empty, @"\s+", " ").Trim();
+            }
+            catch
+            {
+                return shapeEl.Name.LocalName;
+            }
+        }
+
+        /// <summary>
+        /// 文字列の SHA256 十六進。
+        /// </summary>
+        private static string ComputeStringHash(string value)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(value ?? string.Empty);
+            using (var sha = SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(bytes);
+                var sb = new StringBuilder(hash.Length * 2);
+                foreach (byte b in hash)
+                {
+                    sb.Append(b.ToString("x2", CultureInfo.InvariantCulture));
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>
         /// リソースを解放する。
         /// </summary>
         public void Dispose()
