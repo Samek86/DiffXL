@@ -128,6 +128,7 @@
     <Compile Include="COMMON\NativeBootstrap.cs" />
     <Compile Include="LOGIC\CompareSession.cs" />
     <Compile Include="LOGIC\Diff\AnchorRect.cs" />
+    <Compile Include="LOGIC\Diff\CellBagComparer.cs" />
     <Compile Include="LOGIC\Diff\ContentModels.cs" />
     <Compile Include="LOGIC\Diff\ContentScrollMap.cs" />
     <Compile Include="LOGIC\Diff\DiffEngine.cs" />
