@@ -140,6 +140,7 @@
     <Compile Include="LOGIC\Diff\SheetAlignment.cs" />
     <Compile Include="LOGIC\Diff\SheetAlignmentBuilder.cs" />
     <Compile Include="LOGIC\Diff\SheetMatcher.cs" />
+    <Compile Include="LOGIC\Diff\TableDetector.cs" />
     <Compile Include="LOGIC\Diff\TextDiffService.cs" />
     <Compile Include="LOGIC\Diff\XlsxPackageReader.cs" />
     <Compile Include="LOGIC\Excel\ExcelAppManager.cs" />
