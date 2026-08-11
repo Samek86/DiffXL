@@ -48,5 +48,7 @@
 
 ## バージョン
 
+- 製品バージョン: **0.1.0-beta.1**（Beta / 開発中）  
 - ビルド構成: Release | x64  
 - 配布方針: 原則単一 exe（本フォルダは exe + config + README）  
+- 変更履歴: リポジトリの `CHANGELOG.md`  
