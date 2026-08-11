@@ -9,7 +9,8 @@ using DiffXL.COMMON;
 namespace DiffXL.LOGIC.Diff
 {
     /// <summary>
-    /// 2 つの .xlsx を比較し DiffResult を返す。
+    /// 2 つの .xlsx を内容ベースで比較し DiffResult を返す。
+    /// Excel COM は不要。セル多重集合・表行 LCS・画像系列 DP・図形系列を統括する。
     /// </summary>
     public sealed class DiffEngine
     {
@@ -20,7 +21,7 @@ namespace DiffXL.LOGIC.Diff
         /// <param name="rightPath">右 xlsx</param>
         /// <param name="options">オプション（null 可）</param>
         /// <param name="progress">進捗（null 可）</param>
-        /// <returns>比較結果</returns>
+        /// <returns>比較結果（LeftContent / RightContent 付き）</returns>
         public DiffResult Compare(
             string leftPath,
             string rightPath,
@@ -68,6 +69,10 @@ namespace DiffXL.LOGIC.Diff
                 Directory.CreateDirectory(maskDir);
                 result.CacheDirectory = cacheRoot;
 
+                // 旧 ContentScrollMap / Excel 向け Alignment は生成しない（空のまま）
+                result.ScrollMaps = new ContentScrollMapSet();
+                result.Alignments = new List<SheetAlignment>();
+
                 Report(progress, "ブックを読み込んでいます...");
                 using (XlsxPackageReader leftReader = XlsxPackageReader.Open(leftPath))
                 using (XlsxPackageReader rightReader = XlsxPackageReader.Open(rightPath))
@@ -80,6 +85,7 @@ namespace DiffXL.LOGIC.Diff
                         options != null ? options.ManualSheetPairs : null);
                     result.SheetPairs = match.Pairs;
 
+                    // 片側のみシート → Structure
                     foreach (string name in match.LeftOnlySheets)
                     {
                         result.Items.Add(new DiffItem
@@ -102,12 +108,17 @@ namespace DiffXL.LOGIC.Diff
                         });
                     }
 
-                    Report(progress, "埋め込み画像を抽出しています...");
-                    List<EmbeddedImage> leftAllImages = leftReader.ExtractImages(null, leftMediaDir).ToList();
-                    List<EmbeddedImage> rightAllImages = rightReader.ExtractImages(null, rightMediaDir).ToList();
-                    bool imagesHaveSheet =
-                        leftAllImages.Any(i => !string.IsNullOrEmpty(i.SheetName))
-                        || rightAllImages.Any(i => !string.IsNullOrEmpty(i.SheetName));
+                    // 全シートの SheetContent を構築
+                    Report(progress, "内容モデルを構築しています...");
+                    WorkbookContent leftContent = BuildWorkbookContent(
+                        leftReader, leftPath, leftMediaDir);
+                    WorkbookContent rightContent = BuildWorkbookContent(
+                        rightReader, rightPath, rightMediaDir);
+                    result.LeftContent = leftContent;
+                    result.RightContent = rightContent;
+
+                    Dictionary<string, SheetContent> leftByName = IndexSheets(leftContent);
+                    Dictionary<string, SheetContent> rightByName = IndexSheets(rightContent);
 
                     int pairIndex = 0;
                     foreach (SheetPair pair in match.Pairs)
@@ -121,142 +132,66 @@ namespace DiffXL.LOGIC.Diff
                             pair.LeftSheet,
                             pair.RightSheet));
 
-                        // 1) cells
-                        List<CellValue> leftCells = leftReader.EnumerateCells(pair.LeftSheet).ToList();
-                        List<CellValue> rightCells = rightReader.EnumerateCells(pair.RightSheet).ToList();
-
-                        // 2) images（シート紐付けあり）
-                        List<EmbeddedImage> leftImages = new List<EmbeddedImage>();
-                        List<EmbeddedImage> rightImages = new List<EmbeddedImage>();
-                        IList<ImageCorrespondence> imageCorr = new List<ImageCorrespondence>();
-                        if (imagesHaveSheet)
+                        SheetContent leftSheet = FindSheet(leftByName, pair.LeftSheet);
+                        SheetContent rightSheet = FindSheet(rightByName, pair.RightSheet);
+                        if (leftSheet == null)
                         {
-                            leftImages = leftAllImages
-                                .Where(i => string.Equals(i.SheetName, pair.LeftSheet, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
-                            rightImages = rightAllImages
-                                .Where(i => string.Equals(i.SheetName, pair.RightSheet, StringComparison.OrdinalIgnoreCase))
-                                .ToList();
-
-                            // 3) Match → DiffItems（手動ピンはコスト 0 強制ペア）
-                            IList<ManualImagePin> sheetPins = FilterPinsForSheet(
-                                options, pair.LeftSheet, pair.RightSheet);
-                            imageCorr = ImageCorrespondenceService.Match(
-                                leftImages, rightImages, sheetPins);
-                            AddDiffItemsFromCorrespondence(
-                                imageCorr, pair, maskDir, result.Items, pairIndex);
+                            leftSheet = new SheetContent { Name = pair.LeftSheet };
                         }
 
-                        // 4) テキスト差分
-                        foreach (DiffItem textItem in TextDiffService.Compare(leftCells, rightCells, pair, options))
+                        if (rightSheet == null)
                         {
-                            if (textItem != null)
+                            rightSheet = new SheetContent { Name = pair.RightSheet };
+                        }
+
+                        double baseHint = pairIndex * 1000.0;
+
+                        // 1) テーブル外セル（多重集合・位置無視）
+                        foreach (DiffItem item in CellBagComparer.Compare(
+                            leftSheet.LooseCells, rightSheet.LooseCells, pair))
+                        {
+                            if (item == null)
                             {
-                                textItem.OrderHint = pairIndex * 1000 + Math.Max(0, textItem.OrderHint);
-                                result.Items.Add(textItem);
+                                continue;
                             }
+
+                            item.OrderHint = baseHint + Math.Max(0, item.OrderHint);
+                            result.Items.Add(item);
                         }
 
-                        // 5) SheetAlignment（ScrollMap は ImageCorrespondence から構築）
-                        SheetAlignment alignment;
-                        try
+                        // 2) テーブル系列＋行 LCS
+                        foreach (DiffItem item in TableCompareService.Compare(
+                            leftSheet.Tables, rightSheet.Tables, pair))
                         {
-                            alignment = SheetAlignmentBuilder.Build(
-                                pair.LeftSheet,
-                                pair.RightSheet,
-                                leftCells,
-                                rightCells,
-                                imageCorr);
-                            if (alignment.ScrollMap != null)
+                            if (item == null)
                             {
-                                result.ScrollMaps.Add(alignment.ScrollMap);
-                                Log.Debug(alignment.ScrollMap.Describe());
+                                continue;
                             }
-                        }
-                        catch (Exception mapEx)
-                        {
-                            Log.Debug("SheetAlignment 構築スキップ: " + mapEx.Message);
-                            alignment = new SheetAlignment
-                            {
-                                LeftSheet = pair.LeftSheet,
-                                RightSheet = pair.RightSheet,
-                                Images = imageCorr,
-                                ScrollMap = ContentScrollMap.CreateIdentity(pair.LeftSheet, pair.RightSheet)
-                            };
-                            result.ScrollMaps.Add(alignment.ScrollMap);
+
+                            item.OrderHint = baseHint + 200 + Math.Max(0, item.OrderHint);
+                            result.Items.Add(item);
                         }
 
-                        result.Alignments.Add(alignment);
-                    }
+                        // 3) 画像出現順 DP + 視覚差分
+                        AddImageDiffItems(
+                            leftSheet.Images,
+                            rightSheet.Images,
+                            pair,
+                            maskDir,
+                            result.Items,
+                            pairIndex);
 
-                    // シート紐付けができない画像はブック単位で 1 回だけ比較
-                    if (!imagesHaveSheet && (leftAllImages.Count > 0 || rightAllImages.Count > 0))
-                    {
-                        Report(progress, "画像を比較しています（ブック単位）...");
-                        var bookPair = match.Pairs.FirstOrDefault() ?? new SheetPair
+                        // 4) 図形系列
+                        foreach (DiffItem item in ShapeCompareService.Compare(
+                            leftSheet.Shapes, rightSheet.Shapes, pair))
                         {
-                            LeftSheet = leftSheets.FirstOrDefault(),
-                            RightSheet = rightSheets.FirstOrDefault()
-                        };
-                        IList<ManualImagePin> bookPins =
-                            options != null ? options.ManualImagePins : null;
-                        IList<ImageCorrespondence> bookCorr =
-                            ImageCorrespondenceService.Match(leftAllImages, rightAllImages, bookPins);
-                        AddDiffItemsFromCorrespondence(
-                            bookCorr, bookPair, maskDir, result.Items, 0);
-
-                        // ブック単位画像のマップ（先頭シート対応に載せる）
-                        SheetAlignment bookAlignment = null;
-                        if (bookPair != null)
-                        {
-                            try
+                            if (item == null)
                             {
-                                List<CellValue> lc = string.IsNullOrEmpty(bookPair.LeftSheet)
-                                    ? new List<CellValue>()
-                                    : leftReader.EnumerateCells(bookPair.LeftSheet).ToList();
-                                List<CellValue> rc = string.IsNullOrEmpty(bookPair.RightSheet)
-                                    ? new List<CellValue>()
-                                    : rightReader.EnumerateCells(bookPair.RightSheet).ToList();
-                                bookAlignment = SheetAlignmentBuilder.Build(
-                                    bookPair.LeftSheet,
-                                    bookPair.RightSheet,
-                                    lc,
-                                    rc,
-                                    bookCorr);
-                                if (bookAlignment.ScrollMap != null && result.ScrollMaps.Count == 0)
-                                {
-                                    result.ScrollMaps.Add(bookAlignment.ScrollMap);
-                                }
-
-                                if (bookAlignment.ScrollMap != null)
-                                {
-                                    Log.Debug(bookAlignment.ScrollMap.Describe());
-                                }
+                                continue;
                             }
-                            catch (Exception mapEx)
-                            {
-                                Log.Debug("SheetAlignment(book) 構築スキップ: " + mapEx.Message);
-                            }
-                        }
 
-                        // Alignments が空なら book 用を追加、既存があれば先頭に Images を載せる
-                        if (result.Alignments.Count == 0)
-                        {
-                            result.Alignments.Add(bookAlignment ?? new SheetAlignment
-                            {
-                                LeftSheet = bookPair != null ? bookPair.LeftSheet : null,
-                                RightSheet = bookPair != null ? bookPair.RightSheet : null,
-                                Images = bookCorr,
-                                ScrollMap = null
-                            });
-                        }
-                        else
-                        {
-                            result.Alignments[0].Images = bookCorr;
-                            if (bookAlignment != null && bookAlignment.ScrollMap != null)
-                            {
-                                result.Alignments[0].ScrollMap = bookAlignment.ScrollMap;
-                            }
+                            item.OrderHint = baseHint + 700 + Math.Max(0, item.OrderHint);
+                            result.Items.Add(item);
                         }
                     }
                 }
@@ -291,85 +226,309 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// ImageCorrespondence から DiffItem を生成して items に追加する。
-        /// ハッシュ完全一致はスキップ。片側のみは ImageOnly*。ペアは ComparePair。
+        /// Reader から全シートの SheetContent を構築する。
+        /// EnumerateCellContents → TableDetector、画像・図形は出現順（行→列）でソート。
         /// </summary>
-        private static void AddDiffItemsFromCorrespondence(
-            IList<ImageCorrespondence> correspondences,
+        private static WorkbookContent BuildWorkbookContent(
+            XlsxPackageReader reader,
+            string path,
+            string mediaDir)
+        {
+            var wb = new WorkbookContent
+            {
+                Path = path,
+                Sheets = new List<SheetContent>()
+            };
+
+            if (reader == null)
+            {
+                return wb;
+            }
+
+            Directory.CreateDirectory(mediaDir);
+
+            // 画像は一度抽出しシートごとに振り分ける
+            List<EmbeddedImage> allImages;
+            try
+            {
+                allImages = reader.ExtractImages(null, mediaDir).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("ExtractImages 失敗: " + ex.Message);
+                allImages = new List<EmbeddedImage>();
+            }
+
+            IReadOnlyList<string> sheetNames = reader.GetSheetNames();
+            for (int si = 0; si < sheetNames.Count; si++)
+            {
+                string sheetName = sheetNames[si];
+                List<CellContent> cells;
+                try
+                {
+                    cells = reader.EnumerateCellContents(sheetName).ToList();
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug("EnumerateCellContents 失敗 [" + sheetName + "]: " + ex.Message);
+                    cells = new List<CellContent>();
+                }
+
+                TableDetectResult detect = TableDetector.Detect(cells);
+
+                List<EmbeddedImage> sheetImages = allImages
+                    .Where(i => i != null
+                        && string.Equals(i.SheetName, sheetName, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(i => i.AnchorRow > 0 ? i.AnchorRow : int.MaxValue)
+                    .ThenBy(i => i.AnchorColumn > 0 ? i.AnchorColumn : int.MaxValue)
+                    .ThenBy(i => i.FileName ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                // シート紐付けが無い画像は先頭シートへ（ブック単位フォールバック）
+                if (si == 0)
+                {
+                    List<EmbeddedImage> unmapped = allImages
+                        .Where(i => i != null && string.IsNullOrEmpty(i.SheetName))
+                        .OrderBy(i => i.FileName ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+                    if (unmapped.Count > 0)
+                    {
+                        sheetImages.AddRange(unmapped);
+                    }
+                }
+
+                IList<ShapeContent> shapes;
+                try
+                {
+                    shapes = reader.ExtractShapes(sheetName, mediaDir);
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug("ExtractShapes 失敗 [" + sheetName + "]: " + ex.Message);
+                    shapes = new List<ShapeContent>();
+                }
+
+                wb.Sheets.Add(new SheetContent
+                {
+                    Name = sheetName,
+                    LooseCells = detect.LooseCells ?? new List<CellContent>(),
+                    Tables = detect.Tables ?? new List<TableBlock>(),
+                    Images = sheetImages,
+                    Shapes = shapes != null ? shapes.ToList() : new List<ShapeContent>()
+                });
+            }
+
+            return wb;
+        }
+
+        /// <summary>
+        /// シート名 → SheetContent の辞書（大文字小文字無視）。
+        /// </summary>
+        private static Dictionary<string, SheetContent> IndexSheets(WorkbookContent wb)
+        {
+            var map = new Dictionary<string, SheetContent>(StringComparer.OrdinalIgnoreCase);
+            if (wb == null || wb.Sheets == null)
+            {
+                return map;
+            }
+
+            foreach (SheetContent s in wb.Sheets)
+            {
+                if (s == null || string.IsNullOrEmpty(s.Name))
+                {
+                    continue;
+                }
+
+                if (!map.ContainsKey(s.Name))
+                {
+                    map[s.Name] = s;
+                }
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        /// 辞書からシートを取得する（無ければ null）。
+        /// </summary>
+        private static SheetContent FindSheet(
+            Dictionary<string, SheetContent> map,
+            string name)
+        {
+            if (map == null || string.IsNullOrEmpty(name))
+            {
+                return null;
+            }
+
+            SheetContent s;
+            return map.TryGetValue(name, out s) ? s : null;
+        }
+
+        /// <summary>
+        /// 画像系列をアラインし、Match は視覚比較、Skip は ImageOnly* として items に追加する。
+        /// </summary>
+        private static void AddImageDiffItems(
+            IList<EmbeddedImage> leftImages,
+            IList<EmbeddedImage> rightImages,
             SheetPair pair,
             string maskDir,
             List<DiffItem> items,
             int pairIndex)
         {
-            if (correspondences == null || items == null)
+            if (items == null)
             {
                 return;
             }
 
             pair = pair ?? new SheetPair();
-            int index = 0;
-            foreach (ImageCorrespondence c in correspondences)
+            IList<EmbeddedImage> left = leftImages ?? Array.Empty<EmbeddedImage>();
+            IList<EmbeddedImage> right = rightImages ?? Array.Empty<EmbeddedImage>();
+
+            if (left.Count == 0 && right.Count == 0)
             {
-                if (c == null)
+                return;
+            }
+
+            IList<AlignStep> steps;
+            try
+            {
+                steps = ImageSequenceAligner.Align(left, right);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("ImageSequenceAligner 失敗: " + ex.Message);
+                return;
+            }
+
+            int index = 0;
+            foreach (AlignStep step in steps)
+            {
+                if (step == null)
                 {
                     continue;
                 }
 
-                if (c.IsExactHashMatch)
+                if (step.Op == AlignOp.SkipLeft)
                 {
-                    index++;
-                    continue;
-                }
-
-                if (c.IsLeftOnly)
-                {
-                    EmbeddedImage li = c.Left;
+                    EmbeddedImage li = left[step.LeftIndex];
                     items.Add(new DiffItem
                     {
                         Kind = DiffKind.ImageOnlyLeft,
                         SheetLeft = pair.LeftSheet,
+                        SheetRight = pair.RightSheet,
                         LeftImagePath = li != null ? li.ExtractedPath : null,
                         Summary = "左のみの画像: "
                             + (li != null ? li.FileName : "?")
                             + FormatDim(li),
-                        OrderHint = pairIndex * 1000 + 800 + index
+                        OrderHint = pairIndex * 1000 + 500 + index
                     });
-                    index++;
-                    continue;
                 }
-
-                if (c.IsRightOnly)
+                else if (step.Op == AlignOp.SkipRight)
                 {
-                    EmbeddedImage ri = c.Right;
+                    EmbeddedImage ri = right[step.RightIndex];
                     items.Add(new DiffItem
                     {
                         Kind = DiffKind.ImageOnlyRight,
+                        SheetLeft = pair.LeftSheet,
                         SheetRight = pair.RightSheet,
                         RightImagePath = ri != null ? ri.ExtractedPath : null,
                         Summary = "右のみの画像: "
                             + (ri != null ? ri.FileName : "?")
                             + FormatDim(ri),
-                        OrderHint = pairIndex * 1000 + 900 + index
+                        OrderHint = pairIndex * 1000 + 500 + index
                     });
-                    index++;
-                    continue;
                 }
-
-                // paired: 内容比較（閾値未満なら DiffItem なし）
-                if (c.IsPaired)
+                else if (step.Op == AlignOp.Match)
                 {
-                    CompareImagePairAndAdd(
-                        c.Left,
-                        c.Right,
-                        pair,
-                        maskDir,
-                        items,
-                        pairIndex,
-                        index,
-                        "corr");
+                    EmbeddedImage li = left[step.LeftIndex];
+                    EmbeddedImage ri = right[step.RightIndex];
+                    CompareMatchedImages(li, ri, pair, maskDir, items, pairIndex, index);
                 }
 
                 index++;
+            }
+        }
+
+        /// <summary>
+        /// 対応済み画像ペアを視覚比較する。ハッシュ一致はスキップ。差分があれば Regions 付き Image。
+        /// </summary>
+        private static void CompareMatchedImages(
+            EmbeddedImage li,
+            EmbeddedImage ri,
+            SheetPair pair,
+            string maskDir,
+            List<DiffItem> items,
+            int pairIndex,
+            int indexHint)
+        {
+            if (li == null || ri == null)
+            {
+                return;
+            }
+
+            // ContentHash 完全一致は見た目同一
+            if (!string.IsNullOrEmpty(li.ContentHash)
+                && !string.IsNullOrEmpty(ri.ContentHash)
+                && string.Equals(li.ContentHash, ri.ContentHash, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            string maskName = string.Format(
+                CultureInfo.InvariantCulture,
+                "p{0}_img_{1}.png",
+                pairIndex,
+                indexHint);
+
+            try
+            {
+                ImageVisualDiff visual = ImageVisualComparer.Compare(
+                    li.ExtractedPath,
+                    ri.ExtractedPath,
+                    maskDir,
+                    maskName);
+
+                if (visual != null && visual.IsSame)
+                {
+                    return;
+                }
+
+                var regions = visual != null && visual.Regions != null
+                    ? visual.Regions
+                    : new List<HighlightRegion>();
+
+                // 領域 0 かつ IsSame でない場合も、比較失敗として Image を出す
+                items.Add(new DiffItem
+                {
+                    Kind = DiffKind.Image,
+                    SheetLeft = pair.LeftSheet,
+                    SheetRight = pair.RightSheet,
+                    LeftImagePath = li.ExtractedPath,
+                    RightImagePath = ri.ExtractedPath,
+                    DiffMaskPath = visual != null ? visual.MaskPath : null,
+                    HighlightRegions = regions,
+                    Summary = string.Format(
+                        CultureInfo.InvariantCulture,
+                        "画像差分: {0} ↔ {1} (regions={2})",
+                        li.FileName ?? "?",
+                        ri.FileName ?? "?",
+                        regions.Count),
+                    OrderHint = pairIndex * 1000 + 500 + indexHint
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex);
+                items.Add(new DiffItem
+                {
+                    Kind = DiffKind.Image,
+                    SheetLeft = pair.LeftSheet,
+                    SheetRight = pair.RightSheet,
+                    LeftImagePath = li.ExtractedPath,
+                    RightImagePath = ri.ExtractedPath,
+                    Summary = "画像比較エラー: " + ex.Message,
+                    OrderHint = pairIndex * 1000 + 500 + indexHint
+                });
             }
         }
 
@@ -388,87 +547,8 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// 1 画像ペアを比較して items に追加する。
-        /// </summary>
-        private static void CompareImagePairAndAdd(
-            EmbeddedImage li,
-            EmbeddedImage ri,
-            SheetPair pair,
-            string maskDir,
-            List<DiffItem> items,
-            int pairIndex,
-            int indexHint,
-            string tag)
-        {
-            if (li == null || ri == null)
-            {
-                return;
-            }
-
-            string maskPath = Path.Combine(
-                maskDir,
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "p{0}_{1}_{2}.png",
-                    pairIndex,
-                    tag,
-                    Path.GetFileNameWithoutExtension(li.FileName ?? "img")));
-            try
-            {
-                DiffItem diff = ImageDiffService.ComparePair(
-                    li.ExtractedPath,
-                    ri.ExtractedPath,
-                    maskPath,
-                    pair.LeftSheet,
-                    pair.RightSheet,
-                    pairIndex * 1000 + indexHint);
-                if (diff != null)
-                {
-                    items.Add(diff);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Exception(ex);
-                items.Add(new DiffItem
-                {
-                    Kind = DiffKind.Image,
-                    SheetLeft = pair.LeftSheet,
-                    SheetRight = pair.RightSheet,
-                    LeftImagePath = li.ExtractedPath,
-                    RightImagePath = ri.ExtractedPath,
-                    Summary = "画像比較エラー: " + ex.Message,
-                    OrderHint = pairIndex * 1000 + indexHint
-                });
-            }
-        }
-
-        /// <summary>
         /// xlsx パスを検証する。
         /// </summary>
-        /// <summary>
-        /// 指定シートペア向けの手動画像ピンを抽出する。
-        /// </summary>
-        private static IList<ManualImagePin> FilterPinsForSheet(
-            CompareOptions options,
-            string leftSheet,
-            string rightSheet)
-        {
-            if (options == null || options.ManualImagePins == null || options.ManualImagePins.Count == 0)
-            {
-                return null;
-            }
-
-            var filtered = options.ManualImagePins
-                .Where(p => p != null
-                    && (string.IsNullOrEmpty(p.LeftSheet)
-                        || string.Equals(p.LeftSheet, leftSheet, StringComparison.OrdinalIgnoreCase))
-                    && (string.IsNullOrEmpty(p.RightSheet)
-                        || string.Equals(p.RightSheet, rightSheet, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
-            return filtered.Count > 0 ? filtered : null;
-        }
-
         private static void ValidateXlsx(string path, string side)
         {
             if (string.IsNullOrWhiteSpace(path))
