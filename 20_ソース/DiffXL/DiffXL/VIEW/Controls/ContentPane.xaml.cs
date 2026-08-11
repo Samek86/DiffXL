@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using DiffXL.LOGIC.Diff;
 
@@ -14,9 +15,24 @@ namespace DiffXL.VIEW.Controls
     public partial class ContentPane : UserControl
     {
         /// <summary>
+        /// テーブル間マッチの粗類似度しきい値（TableCompareService と揃える）。
+        /// </summary>
+        private const double TableMatchThreshold = 0.3;
+
+        /// <summary>
+        /// テーブル Skip コスト。
+        /// </summary>
+        private const double TableSkipCost = 0.4;
+
+        /// <summary>
         /// 現在表示中のシート。
         /// </summary>
         private SheetContent _sheet;
+
+        /// <summary>
+        /// 相手側シート（行アライン用。null 可）。
+        /// </summary>
+        private SheetContent _partnerSheet;
 
         /// <summary>
         /// 現在シートに紐づく差分。
@@ -52,7 +68,24 @@ namespace DiffXL.VIEW.Controls
         /// <param name="isLeft">左ペインなら true</param>
         public void Load(SheetContent sheet, IList<DiffItem> sheetDiffs, bool isLeft)
         {
+            Load(sheet, sheetDiffs, isLeft, partnerSheet: null);
+        }
+
+        /// <summary>
+        /// シート内容・相手シート・差分を読み込み、各タブを更新する。
+        /// </summary>
+        /// <param name="sheet">シート内容（null 可）</param>
+        /// <param name="sheetDiffs">このシート関連の差分</param>
+        /// <param name="isLeft">左ペインなら true</param>
+        /// <param name="partnerSheet">相手側シート（テーブル行アライン用。null 可）</param>
+        public void Load(
+            SheetContent sheet,
+            IList<DiffItem> sheetDiffs,
+            bool isLeft,
+            SheetContent partnerSheet)
+        {
             _sheet = sheet;
+            _partnerSheet = partnerSheet;
             _sheetDiffs = sheetDiffs ?? new List<DiffItem>();
             _isLeft = isLeft;
 
@@ -65,7 +98,7 @@ namespace DiffXL.VIEW.Controls
                 ImagesSummary.Text = "画像: —";
                 ShapesSummary.Text = "図形: —";
                 CellsList.ItemsSource = null;
-                TablesList.ItemsSource = null;
+                ClearTablesHost();
                 ImagesList.ItemsSource = null;
                 ShapesList.ItemsSource = null;
                 return;
@@ -89,7 +122,7 @@ namespace DiffXL.VIEW.Controls
                 shapeCount);
 
             LoadCellsTab(sheet);
-            LoadTablesTab(sheet);
+            LoadTablesTab(sheet, partnerSheet);
             LoadImagesTab(sheet);
             LoadShapesTab(sheet);
         }
@@ -141,53 +174,94 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// テーブルタブのプレースホルダ。
+        /// テーブルタブ: 対応テーブルごとに TableDiffGrid を配置する。
         /// </summary>
-        private void LoadTablesTab(SheetContent sheet)
+        private void LoadTablesTab(SheetContent sheet, SheetContent partnerSheet)
         {
-            var lines = new List<string>();
-            int n = sheet.Tables != null ? sheet.Tables.Count : 0;
+            ClearTablesHost();
+
+            IList<TableBlock> selfTables =
+                sheet != null && sheet.Tables != null
+                    ? (IList<TableBlock>)sheet.Tables
+                    : (IList<TableBlock>)Array.Empty<TableBlock>();
+            IList<TableBlock> partnerTables =
+                partnerSheet != null && partnerSheet.Tables != null
+                    ? (IList<TableBlock>)partnerSheet.Tables
+                    : (IList<TableBlock>)Array.Empty<TableBlock>();
+
+            IList<TableBlock> leftTables = _isLeft ? selfTables : partnerTables;
+            IList<TableBlock> rightTables = _isLeft ? partnerTables : selfTables;
+
+            int tableDiffCount = CountDiffs(
+                DiffKind.TableRowDelete,
+                DiffKind.TableRowInsert,
+                DiffKind.TableCellChange);
+
             TablesSummary.Text = string.Format(
                 CultureInfo.InvariantCulture,
-                "テーブル: {0} 件 · 関連差分 {1} 件",
-                n,
-                CountDiffs(DiffKind.TableRowDelete, DiffKind.TableRowInsert, DiffKind.TableCellChange));
+                "テーブル: 自側 {0} / 相手 {1} · 関連差分 {2} 件（行削除=赤 · 行追加=緑 · 相手欠落=空行 · セル変更=黄）",
+                selfTables.Count,
+                partnerTables.Count,
+                tableDiffCount);
 
-            if (sheet.Tables != null)
+            if (leftTables.Count == 0 && rightTables.Count == 0)
             {
-                foreach (TableBlock t in sheet.Tables)
+                TablesHost.Children.Add(CreatePlainHint("（テーブルなし）"));
+                return;
+            }
+
+            IList<AlignStep> tableSteps = SequenceAligner.Align(
+                leftTables.Count,
+                rightTables.Count,
+                (i, j) => TableSimilarity(leftTables[i], rightTables[j]),
+                TableMatchThreshold,
+                TableSkipCost);
+
+            int grids = 0;
+            foreach (AlignStep step in tableSteps)
+            {
+                if (step == null)
                 {
-                    if (t == null)
-                    {
-                        continue;
-                    }
-
-                    int rows = t.Rows != null ? t.Rows.Count : 0;
-                    lines.Add(string.Format(
-                        CultureInfo.InvariantCulture,
-                        "[{0}] order={1} R{2}-{3} C{4}-{5} 行数={6}",
-                        t.Id ?? "?",
-                        t.OrderIndex,
-                        t.RowStart,
-                        t.RowEnd,
-                        t.ColStart,
-                        t.ColEnd,
-                        rows));
+                    continue;
                 }
+
+                TableBlock leftT = null;
+                TableBlock rightT = null;
+                if (step.Op == AlignOp.Match
+                    || step.Op == AlignOp.SkipLeft)
+                {
+                    if (step.LeftIndex >= 0 && step.LeftIndex < leftTables.Count)
+                    {
+                        leftT = leftTables[step.LeftIndex];
+                    }
+                }
+
+                if (step.Op == AlignOp.Match
+                    || step.Op == AlignOp.SkipRight)
+                {
+                    if (step.RightIndex >= 0 && step.RightIndex < rightTables.Count)
+                    {
+                        rightT = rightTables[step.RightIndex];
+                    }
+                }
+
+                // 片側のみテーブルでもギャップ行を出す（left/right どちらかがあれば表示）
+                if (leftT == null && rightT == null)
+                {
+                    continue;
+                }
+
+                IList<DiffItem> tableDiffs = FilterDiffsForTable(leftT, rightT);
+                var grid = new TableDiffGrid();
+                grid.Load(leftT, rightT, tableDiffs, _isLeft);
+                TablesHost.Children.Add(grid);
+                grids++;
             }
 
-            foreach (DiffItem d in EnumerateDiffs(
-                DiffKind.TableRowDelete, DiffKind.TableRowInsert, DiffKind.TableCellChange))
+            if (grids == 0)
             {
-                lines.Add(FormatDiffLine(d));
+                TablesHost.Children.Add(CreatePlainHint("（表示するテーブルなし）"));
             }
-
-            if (lines.Count == 0)
-            {
-                lines.Add("（テーブルなし）");
-            }
-
-            TablesList.ItemsSource = lines;
         }
 
         /// <summary>
@@ -290,6 +364,151 @@ namespace DiffXL.VIEW.Controls
             }
 
             ShapesList.ItemsSource = lines;
+        }
+
+        /// <summary>
+        /// テーブルホストを空にする。
+        /// </summary>
+        private void ClearTablesHost()
+        {
+            if (TablesHost != null)
+            {
+                TablesHost.Children.Clear();
+            }
+        }
+
+        /// <summary>
+        /// プレーンなヒント TextBlock を作る。
+        /// </summary>
+        private static TextBlock CreatePlainHint(string text)
+        {
+            return new TextBlock
+            {
+                Text = text,
+                Foreground = new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(0x9C, 0xA3, 0xAF)),
+                FontSize = 12,
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+        }
+
+        /// <summary>
+        /// テーブル ID に紐づく差分を抽出する。
+        /// </summary>
+        private IList<DiffItem> FilterDiffsForTable(TableBlock leftT, TableBlock rightT)
+        {
+            string idL = leftT != null ? leftT.Id : null;
+            string idR = rightT != null ? rightT.Id : null;
+            var list = new List<DiffItem>();
+            if (_sheetDiffs == null)
+            {
+                return list;
+            }
+
+            foreach (DiffItem d in _sheetDiffs)
+            {
+                if (d == null)
+                {
+                    continue;
+                }
+
+                if (d.Kind != DiffKind.TableRowDelete
+                    && d.Kind != DiffKind.TableRowInsert
+                    && d.Kind != DiffKind.TableCellChange)
+                {
+                    continue;
+                }
+
+                bool matchL = !string.IsNullOrEmpty(idL)
+                    && string.Equals(d.TableIdLeft, idL, StringComparison.Ordinal);
+                bool matchR = !string.IsNullOrEmpty(idR)
+                    && string.Equals(d.TableIdRight, idR, StringComparison.Ordinal);
+                if (matchL || matchR)
+                {
+                    list.Add(d);
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// 2 テーブルの粗類似度（行キー多重集合 Jaccard）。TableCompareService と同趣旨。
+        /// </summary>
+        private static double TableSimilarity(TableBlock left, TableBlock right)
+        {
+            List<string> leftKeys = CollectRowKeys(left);
+            List<string> rightKeys = CollectRowKeys(right);
+
+            if (leftKeys.Count == 0 && rightKeys.Count == 0)
+            {
+                return 1.0;
+            }
+
+            if (leftKeys.Count == 0 || rightKeys.Count == 0)
+            {
+                return 0.0;
+            }
+
+            var leftCount = new Dictionary<string, int>(StringComparer.Ordinal);
+            foreach (string k in leftKeys)
+            {
+                int c;
+                leftCount.TryGetValue(k, out c);
+                leftCount[k] = c + 1;
+            }
+
+            var rightCount = new Dictionary<string, int>(StringComparer.Ordinal);
+            foreach (string k in rightKeys)
+            {
+                int c;
+                rightCount.TryGetValue(k, out c);
+                rightCount[k] = c + 1;
+            }
+
+            int inter = 0;
+            int union = 0;
+            var allKeys = new HashSet<string>(leftCount.Keys, StringComparer.Ordinal);
+            foreach (string k in rightCount.Keys)
+            {
+                allKeys.Add(k);
+            }
+
+            foreach (string k in allKeys)
+            {
+                int lc;
+                int rc;
+                leftCount.TryGetValue(k, out lc);
+                rightCount.TryGetValue(k, out rc);
+                inter += Math.Min(lc, rc);
+                union += Math.Max(lc, rc);
+            }
+
+            if (union == 0)
+            {
+                return 1.0;
+            }
+
+            return (double)inter / union;
+        }
+
+        /// <summary>
+        /// テーブルの行キー一覧。
+        /// </summary>
+        private static List<string> CollectRowKeys(TableBlock table)
+        {
+            var keys = new List<string>();
+            if (table == null || table.Rows == null)
+            {
+                return keys;
+            }
+
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                keys.Add(TableRowAligner.MakeRowKey(table.Rows[i]));
+            }
+
+            return keys;
         }
 
         /// <summary>

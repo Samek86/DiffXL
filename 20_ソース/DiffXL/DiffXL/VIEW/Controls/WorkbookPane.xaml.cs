@@ -37,6 +37,16 @@ namespace DiffXL.VIEW.Controls
         private WorkbookContent _workbook;
 
         /// <summary>
+        /// 相手側ブック内容（テーブル行アライン用）。
+        /// </summary>
+        private WorkbookContent _partnerWorkbook;
+
+        /// <summary>
+        /// 相手側の優先シート名（シート対応ペア）。
+        /// </summary>
+        private string _partnerPreferredSheetName;
+
+        /// <summary>
         /// 比較結果の全差分。
         /// </summary>
         private IList<DiffItem> _allDiffs = new List<DiffItem>();
@@ -362,7 +372,35 @@ namespace DiffXL.VIEW.Controls
             bool isLeft,
             string preferredSheetName = null)
         {
+            LoadWorkbookContent(
+                workbook,
+                allDiffs,
+                isLeft,
+                preferredSheetName,
+                partnerWorkbook: null,
+                partnerPreferredSheetName: null);
+        }
+
+        /// <summary>
+        /// 比較結果のブック内容と相手ブックを読み込み、指定シートを ContentPane に表示する。
+        /// </summary>
+        /// <param name="workbook">ブック内容</param>
+        /// <param name="allDiffs">全差分</param>
+        /// <param name="isLeft">左ペインなら true</param>
+        /// <param name="preferredSheetName">表示したいシート名（null なら先頭）</param>
+        /// <param name="partnerWorkbook">相手側ブック（テーブルアライン用）</param>
+        /// <param name="partnerPreferredSheetName">相手側シート名</param>
+        public void LoadWorkbookContent(
+            WorkbookContent workbook,
+            IList<DiffItem> allDiffs,
+            bool isLeft,
+            string preferredSheetName,
+            WorkbookContent partnerWorkbook,
+            string partnerPreferredSheetName)
+        {
             _workbook = workbook;
+            _partnerWorkbook = partnerWorkbook;
+            _partnerPreferredSheetName = partnerPreferredSheetName;
             _allDiffs = allDiffs ?? new List<DiffItem>();
             _isLeft = isLeft;
 
@@ -386,7 +424,7 @@ namespace DiffXL.VIEW.Controls
             _isLeft = isLeft;
             if (ContentHost != null)
             {
-                ContentHost.Load(sheet, sheetDiffs, isLeft);
+                ContentHost.Load(sheet, sheetDiffs, isLeft, partnerSheet: null);
             }
         }
 
@@ -397,10 +435,12 @@ namespace DiffXL.VIEW.Controls
         {
             _filePath = null;
             _workbook = null;
+            _partnerWorkbook = null;
+            _partnerPreferredSheetName = null;
             _allDiffs = new List<DiffItem>();
             if (ContentHost != null)
             {
-                ContentHost.Load(null, null, _isLeft);
+                ContentHost.Load(null, null, _isLeft, partnerSheet: null);
             }
 
             PathText.Text = "（未選択）";
@@ -487,12 +527,41 @@ namespace DiffXL.VIEW.Controls
         /// </summary>
         private void ShowSheet(string sheetName)
         {
-            SheetContent sheet = FindSheet(sheetName);
+            SheetContent sheet = FindSheet(_workbook, sheetName);
+            SheetContent partner = ResolvePartnerSheet(sheet);
             IList<DiffItem> sheetDiffs = FilterDiffsForSheet(sheet);
             if (ContentHost != null)
             {
-                ContentHost.Load(sheet, sheetDiffs, _isLeft);
+                ContentHost.Load(sheet, sheetDiffs, _isLeft, partner);
             }
+        }
+
+        /// <summary>
+        /// 相手側シートを解決する（優先名 → 同名 → 先頭）。
+        /// </summary>
+        private SheetContent ResolvePartnerSheet(SheetContent selfSheet)
+        {
+            if (_partnerWorkbook == null || _partnerWorkbook.Sheets == null)
+            {
+                return null;
+            }
+
+            SheetContent byPreferred = FindSheet(_partnerWorkbook, _partnerPreferredSheetName);
+            if (byPreferred != null)
+            {
+                return byPreferred;
+            }
+
+            if (selfSheet != null && !string.IsNullOrEmpty(selfSheet.Name))
+            {
+                SheetContent sameName = FindSheet(_partnerWorkbook, selfSheet.Name);
+                if (sameName != null)
+                {
+                    return sameName;
+                }
+            }
+
+            return _partnerWorkbook.Sheets.FirstOrDefault(s => s != null);
         }
 
         /// <summary>
@@ -500,14 +569,22 @@ namespace DiffXL.VIEW.Controls
         /// </summary>
         private SheetContent FindSheet(string sheetName)
         {
-            if (_workbook == null || _workbook.Sheets == null)
+            return FindSheet(_workbook, sheetName);
+        }
+
+        /// <summary>
+        /// 指定ブックからシート名で SheetContent を探す。
+        /// </summary>
+        private static SheetContent FindSheet(WorkbookContent workbook, string sheetName)
+        {
+            if (workbook == null || workbook.Sheets == null)
             {
                 return null;
             }
 
             if (!string.IsNullOrEmpty(sheetName))
             {
-                foreach (SheetContent s in _workbook.Sheets)
+                foreach (SheetContent s in workbook.Sheets)
                 {
                     if (s != null && string.Equals(s.Name, sheetName, StringComparison.OrdinalIgnoreCase))
                     {
@@ -516,7 +593,7 @@ namespace DiffXL.VIEW.Controls
                 }
             }
 
-            return _workbook.Sheets.FirstOrDefault(s => s != null);
+            return workbook.Sheets.FirstOrDefault(s => s != null);
         }
 
         /// <summary>

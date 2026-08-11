@@ -3095,12 +3095,24 @@ namespace DiffXL
 
             if (LeftPane != null)
             {
-                LeftPane.LoadWorkbookContent(result.LeftContent, result.Items, isLeft: true, leftPreferred);
+                LeftPane.LoadWorkbookContent(
+                    result.LeftContent,
+                    result.Items,
+                    isLeft: true,
+                    leftPreferred,
+                    result.RightContent,
+                    rightPreferred);
             }
 
             if (RightPane != null)
             {
-                RightPane.LoadWorkbookContent(result.RightContent, result.Items, isLeft: false, rightPreferred);
+                RightPane.LoadWorkbookContent(
+                    result.RightContent,
+                    result.Items,
+                    isLeft: false,
+                    rightPreferred,
+                    result.LeftContent,
+                    leftPreferred);
             }
         }
 

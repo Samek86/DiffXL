@@ -109,7 +109,7 @@
             </TabItem>
 
             <TabItem Header="テーブル">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="8">
                     <StackPanel>
                         <TextBlock
                             x:Name="TablesSummary"
@@ -117,25 +117,8 @@
                             Margin="0,0,0,8"
                             TextWrapping="Wrap"
                             Text="テーブル" />
-                        <ItemsControl x:Name="TablesList">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        Margin="0,0,0,4"
-                                        Padding="8,6"
-                                        Background="#FF1F2937"
-                                        BorderBrush="#FF374151"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                        <TextBlock
-                                            Text="{Binding}"
-                                            Foreground="#FFF9FAFB"
-                                            TextWrapping="Wrap"
-                                            FontSize="12" />
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <!-- テーブル差分グリッド群（コードで TableDiffGrid を追加） -->
+                        <StackPanel x:Name="TablesHost" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
