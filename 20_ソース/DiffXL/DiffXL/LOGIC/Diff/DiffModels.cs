@@ -21,7 +21,28 @@ namespace DiffXL.LOGIC.Diff
         ImageOnlyRight,
 
         /// <summary>シート構成などの構造差分。</summary>
-        Structure
+        Structure,
+
+        /// <summary>セル背景色差分。</summary>
+        Background,
+
+        /// <summary>テーブル行の削除（左のみ）。</summary>
+        TableRowDelete,
+
+        /// <summary>テーブル行の挿入（右のみ）。</summary>
+        TableRowInsert,
+
+        /// <summary>テーブル内セルの内容変更。</summary>
+        TableCellChange,
+
+        /// <summary>図形内容差分。</summary>
+        Shape,
+
+        /// <summary>左のみに存在する図形。</summary>
+        ShapeOnlyLeft,
+
+        /// <summary>右のみに存在する図形。</summary>
+        ShapeOnlyRight
     }
 
     /// <summary>
@@ -78,6 +99,41 @@ namespace DiffXL.LOGIC.Diff
         /// 行方向の目安（MiniMap 用。大きいほど下）。
         /// </summary>
         public double OrderHint { get; set; }
+
+        /// <summary>
+        /// 画像ローカル座標のハイライト領域一覧（ピクセル）。
+        /// </summary>
+        public List<HighlightRegion> HighlightRegions { get; set; } = new List<HighlightRegion>();
+
+        /// <summary>
+        /// 左テーブル ID。
+        /// </summary>
+        public string TableIdLeft { get; set; }
+
+        /// <summary>
+        /// 右テーブル ID。
+        /// </summary>
+        public string TableIdRight { get; set; }
+
+        /// <summary>
+        /// 左テーブル内の行インデックス（0 始まり。不明時は null）。
+        /// </summary>
+        public int? RowIndexLeft { get; set; }
+
+        /// <summary>
+        /// 右テーブル内の行インデックス（0 始まり。不明時は null）。
+        /// </summary>
+        public int? RowIndexRight { get; set; }
+
+        /// <summary>
+        /// 左セル背景色（#AARRGGBB。なしは null）。
+        /// </summary>
+        public string BackgroundLeft { get; set; }
+
+        /// <summary>
+        /// 右セル背景色（#AARRGGBB。なしは null）。
+        /// </summary>
+        public string BackgroundRight { get; set; }
     }
 
     /// <summary>
@@ -129,6 +185,16 @@ namespace DiffXL.LOGIC.Diff
         /// シートごとの統合対応（画像対応 + スクロールマップ）。
         /// </summary>
         public IList<SheetAlignment> Alignments { get; set; } = new List<SheetAlignment>();
+
+        /// <summary>
+        /// 左ブックの正規化内容（内容ベース比較用。未設定可）。
+        /// </summary>
+        public WorkbookContent LeftContent { get; set; }
+
+        /// <summary>
+        /// 右ブックの正規化内容（内容ベース比較用。未設定可）。
+        /// </summary>
+        public WorkbookContent RightContent { get; set; }
     }
 
     /// <summary>
