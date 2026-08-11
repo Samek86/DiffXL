@@ -3531,7 +3531,8 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// MiniMap を現在の左右シートペアの差分だけに差し替える（全シート横断禁止）。
+        /// MiniMap をフォーカス中シート（左優先、なければ右）の差分だけに差し替える。
+        /// 左右が未対応の別シートでも、相手シートのマーカーは出さない。
         /// </summary>
         private void RefreshMiniMapForCurrentSheet()
         {
@@ -3555,58 +3556,50 @@ namespace DiffXL
 
             string leftSheet = LeftPane != null ? LeftPane.SelectedSheetName : null;
             string rightSheet = RightPane != null ? RightPane.SelectedSheetName : null;
-            string displaySheet = !string.IsNullOrEmpty(leftSheet)
+            // フォーカスシート = 左があれば左、なければ右（現在シートのみ）
+            string focusSheet = !string.IsNullOrEmpty(leftSheet)
                 ? leftSheet
                 : (rightSheet ?? string.Empty);
 
             var filtered = new List<DiffItem>();
-            foreach (DiffItem item in result.Items)
+            if (!string.IsNullOrEmpty(focusSheet))
             {
-                if (item != null && ItemMatchesCurrentSheets(item, leftSheet, rightSheet))
+                foreach (DiffItem item in result.Items)
                 {
-                    filtered.Add(item);
+                    if (item != null && ItemBelongsToFocusSheet(item, focusSheet))
+                    {
+                        filtered.Add(item);
+                    }
                 }
             }
 
-            MiniMap.SetCurrentSheet(displaySheet, filtered);
+            MiniMap.SetCurrentSheet(focusSheet, filtered);
             ApplyMiniMapAlignmentForSheets(leftSheet, rightSheet);
-            _lastMiniMapSheet = displaySheet ?? string.Empty;
+            _lastMiniMapSheet = focusSheet ?? string.Empty;
             _lastMiniMapLeftRow = -1;
             _lastMiniMapRightRow = -1;
         }
 
         /// <summary>
-        /// 差分アイテムが現在表示中のシートペアに属するか。
+        /// 差分がフォーカスシートに属するか（SheetLeft または SheetRight が一致）。
         /// </summary>
-        private static bool ItemMatchesCurrentSheets(DiffItem item, string leftSheet, string rightSheet)
+        private static bool ItemBelongsToFocusSheet(DiffItem item, string focusSheet)
         {
-            if (item == null)
+            if (item == null || string.IsNullOrEmpty(focusSheet))
             {
                 return false;
             }
 
-            string sl = item.SheetLeft ?? string.Empty;
-            string sr = item.SheetRight ?? string.Empty;
-
-            if (!string.IsNullOrEmpty(leftSheet))
+            if (string.Equals(item.SheetLeft, focusSheet, StringComparison.OrdinalIgnoreCase))
             {
-                if (string.Equals(sl, leftSheet, StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(sr, leftSheet, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
+                return true;
             }
 
-            if (!string.IsNullOrEmpty(rightSheet))
+            if (string.Equals(item.SheetRight, focusSheet, StringComparison.OrdinalIgnoreCase))
             {
-                if (string.Equals(sr, rightSheet, StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(sl, rightSheet, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
+                return true;
             }
 
-            // どちらも未選択なら何も出さない
             return false;
         }
 

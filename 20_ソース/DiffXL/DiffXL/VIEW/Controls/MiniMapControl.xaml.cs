@@ -89,17 +89,31 @@ namespace DiffXL.VIEW.Controls
 
         /// <summary>
         /// 現在シートのみを MiniMap に載せる（全シート横断は禁止）。
-        /// items は呼び出し側で現在ペア分に絞済みとみなし、そのまま載せる。
+        /// 指定シート以外の Items は必ず落とし、帯も 1 枚に縮約する。
         /// </summary>
-        /// <param name="sheetName">帯ラベル用シート名（左優先。片側のみは右名可）</param>
-        /// <param name="items">そのシート／ペア関連の差分</param>
+        /// <param name="sheetName">フォーカスシート名（左優先。片側のみは右名可）</param>
+        /// <param name="items">候補差分（シート外は内部で除去）</param>
         public void SetCurrentSheet(string sheetName, IEnumerable<DiffItem> items)
         {
             string name = string.IsNullOrWhiteSpace(sheetName) ? string.Empty : sheetName.Trim();
             _items.Clear();
             if (items != null)
             {
-                _items.AddRange(items.Where(i => i != null));
+                foreach (DiffItem item in items)
+                {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+
+                    // シート名が分かる場合は厳密にそのシートのみ
+                    if (!string.IsNullOrEmpty(name) && !ItemBelongsToSheet(item, name))
+                    {
+                        continue;
+                    }
+
+                    _items.Add(item);
+                }
             }
 
             // ラベル: 指定名 → 差分から推定
@@ -120,6 +134,8 @@ namespace DiffXL.VIEW.Controls
                 ? new List<string>()
                 : new List<string> { name };
             _viewportSheet = name;
+            // 防御: 混入した他シート差分・複数帯を必ず 1 シートに縮約
+            CollapseToSingleSheet();
             RebuildSegments();
             UpdateHintText();
             ScheduleRebuild();
@@ -713,16 +729,20 @@ namespace DiffXL.VIEW.Controls
                 return false;
             }
 
+            // 現在フォーカス帯以外のシート差分は描画しない
+            string focus = _segments[0].Name;
+            if (!string.IsNullOrEmpty(focus) && !ItemBelongsToSheet(item, focus))
+            {
+                return false;
+            }
+
             int row = GetItemRow(item);
             if (row <= 0)
             {
                 row = 1;
             }
 
-            // 現在シート単一帯: シート名が異なっても同一帯へ投影（異名ペア）
-            string sheet = item.SheetLeft ?? item.SheetRight ?? string.Empty;
-            SheetSegment seg = FindSegment(sheet) ?? _segments[0];
-            ratio = MapRowToRatio(seg, row);
+            ratio = MapRowToRatio(_segments[0], row);
             return true;
         }
 
