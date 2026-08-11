@@ -2,7 +2,39 @@
 
 このフォルダのサンプルは、DiffXL の主要機能を一通り確認するためのものです。
 
-## 推奨ペア（フル機能）
+比較方針は **内容ベース**（セル番地・画像アンカー位置をキーにしない）です。  
+Microsoft Excel のインストールは不要です（OOXML 抽出＋自前内容ビュー）。
+
+## 内容ベース比較（推奨・設計シナリオ）
+
+| 左 (Left) | 右 (Right) | 生成スクリプト |
+|-----------|------------|----------------|
+| `content_diff_left.xlsx` | `content_diff_right.xlsx` | `_gen/create_content_diff_samples.py` |
+
+設計書（`docs/superpowers/specs/2026-08-12-content-based-diff-design.md` §7.1）の必須シナリオを 1 ペアでカバーします。  
+エンジン検証は `ContentDiffSmoke`（`_smoke/ContentDiffSmoke.cs`）が本ペアを前提とします。
+
+| シート | 確認したいこと | 期待 |
+|--------|----------------|------|
+| `S_Cells` | セル位置無視（左 A1 / 右 A2 の Hello） | Text 差なし |
+| `S_Bg` | 同一テキスト・背景色のみ差 | Background |
+| `S_TableDel` | 表の行 12345 vs 1245 | TableRowDelete（行 3） |
+| `S_TableCell` | 表内 1 セル文言変更 | TableCellChange |
+| `S_ImgSame` | 同見た目画像・異位置（B5 vs D20） | Image 差なし |
+| `S_Img8v9` | 画像 8 枚 vs 9 枚（5 枚目が余分） | ImageOnlyRight×1、以降再同期 |
+| `S_ImgPartial` | 画像の部分差 | Image ＋ HighlightRegions≥1（赤枠＋黄塗り） |
+| `S_Common` | 同一内容 | 差分なし |
+| `S_LeftOnly` | 左のみシート | Structure |
+
+再生成:
+
+```text
+python 30_参考資料/samples/_gen/create_content_diff_samples.py
+```
+
+中間メディアは `_gen/media_content_diff/`。
+
+## 推奨ペア（フル機能・回帰）
 
 | 左 (Left) | 右 (Right) |
 |-----------|------------|
@@ -15,12 +47,12 @@
 | 表紙 | 表紙 | ○ 同名 | 基本表示、版番号テキスト差分 |
 | 売上サマリ | 売上サマリ | ○ | **テキスト差分**（数量・金額・担当・備考・合計） |
 | 製品カタログ | 製品カタログ | ○ | **画像差分**（同一 / 内容変更 / 左のみ / 右のみ） |
-| 長い一覧 | 長い一覧 | ○ | **同期スクロール**・**MiniMap**（上下に散在する差分） |
-| レイアウト確認 | レイアウト確認 | ○ | **表示忠実性**（行高・列幅・フォント・結合セル） |
+| 長い一覧 | 長い一覧 | ○ | **同期・MiniMap**（上下に散在する差分） |
+| レイアウト確認 | レイアウト確認 | ○ | 結合セル・フォント等の**内容表示**（行高・列幅は比較対象外） |
 | 仕様メモ_旧 | 仕様メモ_新 | × 別名 | **手動シート対応付け** → 再比較 |
 | 左のみメモ | （なし） | — | **シート構成差分**（左のみ） |
 | （なし） | 右のみメモ | — | **シート構成差分**（右のみ） |
-| ずれ試験 | ずれ試験 | ○ | **行挿入によるずれ**・**アンカー設定** |
+| ずれ試験 | ずれ試験 | ○ | **行挿入によるずれ**・内容再同期 |
 
 ### 製品カタログの画像
 
@@ -58,7 +90,7 @@
 | BIG-G | 1600x900 同一 | 同一 | 画像差分なし |
 | BIG-H | 1600x900 | DIFF スタンプ | 画像内容差分 |
 
-シート名は `表紙` / `売上サマリ` / `製品カタログ` / `長い一覧` / `レイアウト確認` で full_feature と同様に `--auto-live-test` 互換。
+シート名は `表紙` / `売上サマリ` / `製品カタログ` / `長い一覧` / `レイアウト確認` で full_feature と同様。
 
 再生成:
 
@@ -97,15 +129,17 @@ python 30_参考資料/samples/_gen/create_content_scroll_samples.py
 | ファイル | 用途 |
 |----------|------|
 | `text_only_left.xlsx` / `text_only_right.xlsx` | テキストのみの最小差分（スモーク） |
+| `content_extract_sample.xlsx` | 内容抽出単体スモーク |
 | `_smoke_plan02.xlsx` | 単体スモーク用 |
 
 ## 再生成
 
 ```text
+python 30_参考資料/samples/_gen/create_content_diff_samples.py
 python 30_参考資料/samples/_gen/create_samples.py
 python 30_参考資料/samples/_gen/create_large_image_samples.py
 python 30_参考資料/samples/_gen/create_content_scroll_samples.py
 ```
 
-生成物は `30_参考資料/samples/` 直下に上書き出力されます。
-中間 PNG は `_gen/media/` / `_gen/media_large/` / `_gen/media_content_scroll/` に置かれます。
+生成物は `30_参考資料/samples/` 直下に上書き出力されます。  
+中間 PNG は `_gen/media/` / `_gen/media_large/` / `_gen/media_content_scroll/` / `_gen/media_content_diff/` に置かれます。

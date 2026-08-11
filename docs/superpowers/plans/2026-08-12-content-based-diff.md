@@ -726,13 +726,13 @@ git commit -m "refactor: remove Excel COM embedding and dependency"
 - `10_管理資料/計画/00_全体ロードマップ.md`（計画 02 の位置づけ更新）
 - `docs/superpowers/specs/2026-08-12-content-based-diff-design.md`（状態: 承認済み）
 
-- [ ] **Step 1: 設計書の必須シナリオをカバーする xlsx を生成スクリプト化**
+- [x] **Step 1: 設計書の必須シナリオをカバーする xlsx を生成スクリプト化**
 
-- [ ] **Step 2: 要件定義の §1.3 / V-01 系を内容ビュー方針に改訂**
+- [x] **Step 2: 要件定義の §1.3 / V-01 系を内容ビュー方針に改訂**
 
-- [ ] **Step 3: ロードマップに本計画への参照を追記**
+- [x] **Step 3: ロードマップに本計画への参照を追記**
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git commit -m "docs: align requirements and samples with content-based diff"

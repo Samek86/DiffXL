@@ -1,11 +1,11 @@
 # DiffXL
 
-**2 つの Excel（`.xlsx`）を、見た目ごと並べて差分を見抜く** Windows デスクトップアプリです。
+**2 つの Excel（`.xlsx`）の内容を並べて、どこが違うかを見抜く** Windows デスクトップアプリです。
 
 [![Status](https://img.shields.io/badge/status-beta-yellow)](https://github.com/Samek86/DiffXL)
 [![Version](https://img.shields.io/badge/version-0.1.0--beta.1-orange)](./VERSION)
 [![Platform](https://img.shields.io/badge/platform-Windows%20x64-blue)](#動作環境)
-[![Excel](https://img.shields.io/badge/Excel-required-red)](#動作環境)
+[![Excel](https://img.shields.io/badge/Excel-not%20required-brightgreen)](#動作環境)
 
 > **Beta / 開発中**  
 > 現在はベータ版です。比較ロジック・UI・設定は今後変更されることがあります。  
@@ -15,30 +15,30 @@
 
 ## なにができるか
 
-DiffXL は、セルの値だけでなく **表・図形・埋め込み画像** まで含めて「どこが違うか」を視覚的に示します。
+DiffXL は、セルの値だけでなく **表・図形・埋め込み画像** まで含めて「どこが違うか」を視覚的に示します。  
+**Microsoft Excel のインストールは不要**です（OOXML 内容抽出＋自前の内容ビュー）。
 
 | できること | 説明 |
 |------------|------|
 | **左右分割ビュー** | 2 ブックを並べて同時表示（WinMerge 的な操作感） |
-| **Excel そのまま表示** | 行高・列幅・フォント・図形を Excel 本体描画で再現 |
-| **コンテンツベース比較** | 位置だけに頼らず、内容の並び（シーケンス）で突き合わせ |
-| **画像差分** | OpenCV で埋め込み画像の変化を検出し強調 |
-| **同期スクロール** | 片方のスクロールともう片方を内容に合わせて連動 |
-| **MiniMap** | 差分位置の俯瞰とジャンプ |
+| **内容ベース比較** | セル番地や画像位置に頼らず、中身の並び・多重集合で突き合わせ |
+| **テーブル行 diff** | 行の追加・削除・行内セル変更が一目で分かる |
+| **画像差分** | OpenCV で見た目の変化を検出し、赤枠＋黄塗りで強調 |
+| **選択同期 / MiniMap** | 差分の連動選択と、**現在シート**の差分俯瞰・ジャンプ |
 | **差分色のカスタム** | 色・不透明度を設定画面から変更（YAML 永続化） |
 
 ### 設計の核心
 
-表示品質を最優先にしています。自前グリッドでは保証しにくい **1px 単位のレイアウト再現** のため、**インストール済み Microsoft Excel をビューアとして埋め込み**、差分はその上に半透明オーバーレイで重ねます。
+最重要は **Excel そっくりの見た目再現ではなく、内容差分の正確さ・分かりやすさ・安定性** です。
 
 ```
 ┌──────────────── DiffXL ────────────────┐
 │  [左 .xlsx]     MiniMap     [右 .xlsx] │
-│  Excel 埋め込み  ←同期→   Excel 埋め込み │
-│  + 差分オーバーレイ（黄 50% など）        │
+│  内容ビュー     ←選択同期→  内容ビュー │
+│  + 差分強調（画像: 赤枠3px＋黄50% など） │
 └────────────────────────────────────────┘
          │                    │
-    .xlsx 解析 / 内容抽出      OpenCV 画像比較
+    .xlsx OOXML 内容抽出      OpenCV 画像比較
 ```
 
 ---
@@ -49,7 +49,7 @@ DiffXL は、セルの値だけでなく **表・図形・埋め込み画像** �
 |------|------|
 | OS | **Windows 64bit** |
 | ランタイム | .NET Framework **4.8** 以降 |
-| Excel | **デスクトップ版 Microsoft Excel**（COM 利用。必須） |
+| Excel | **不要**（デスクトップ版 Excel のインストール・COM は使いません） |
 | 対象ファイル | **`.xlsx` のみ**（`.xls` / `.xlsm` は非対応） |
 | 配布形態 | 原則 **単一 `DiffXL.exe`**（マネージは Costura、OpenCV ネイティブは埋め込み → AppData 展開） |
 
@@ -69,13 +69,14 @@ DiffXL は、セルの値だけでなく **表・図形・埋め込み画像** �
 
 1. [Releases](https://github.com/Samek86/DiffXL/releases) から `DiffXL.exe` を取得（または下記ビルド）
 2. 起動し、左右の `.xlsx` を選んで比較開始
-3. 差分は既定で **黄色・不透明度 50%** のオーバーレイ
+3. 差分は内容ビュー上で強調（画像は既定で **赤枠 3px ＋ 黄・不透明度 50%**）
 4. ツールバーやショートカットで **差分強調の ON/OFF**（再比較不要）
-5. **MiniMap** で差分へジャンプ
-6. シート対応・アンカー・片側差し替え・再比較で条件を調整
+5. **MiniMap** で現在シートの差分へジャンプ
+6. シート対応・片側差し替え・再比較で条件を調整
 7. **設定** で色・不透明度・同期などを変更
 
-サンプルファイルは `30_参考資料/samples/` にあります。
+サンプルファイルは `30_参考資料/samples/` にあります。  
+内容ベース必須シナリオは **`content_diff_left.xlsx` / `content_diff_right.xlsx`** を推奨します。
 
 ---
 
@@ -96,7 +97,7 @@ DiffXL/
 └── README.md                  # 本ファイル
 ```
 
-技術スタックの概要: **.NET Framework 4.8 / WPF / Excel COM / OpenCV (OpenCvSharp) / YamlDotNet / Costura.Fody**
+技術スタックの概要: **.NET Framework 4.8 / WPF / OpenCV (OpenCvSharp) / YamlDotNet / Costura.Fody**（Excel COM なし）
 
 ---
 
@@ -115,7 +116,7 @@ msbuild DiffXL.sln /t:Clean,Build /p:Configuration=Release /p:Platform=x64
 20_ソース\DiffXL\DiffXL\bin\x64\Release\DiffXL.exe
 ```
 
-スモーク用コードは `20_ソース/DiffXL/DiffXL/_smoke/` を参照してください。
+スモーク用コードは `20_ソース/DiffXL/DiffXL/_smoke/` を参照してください（`ContentDiffSmoke` が内容比較の正）。
 
 ---
 
@@ -148,14 +149,20 @@ msbuild DiffXL.sln /t:Clean,Build /p:Configuration=Release /p:Platform=x64
 
 | 領域 | 状態（ベータ時点） |
 |------|-------------------|
-| Excel 埋め込み左右ビュー | 利用可能 |
-| 差分オーバーレイ / 色設定 | 利用可能 |
-| 同期スクロール / MiniMap | 利用可能 |
-| コンテンツベース比較（表・図形・画像） | 開発・改善中 |
+| 内容ビュー（セル／表／画像／図形） | 利用可能（継続改善） |
+| 内容ベース比較（位置非依存） | 利用可能（継続改善） |
+| 差分強調 / 色設定 / 画像ハイライト | 利用可能 |
+| MiniMap（現在シートのみ） | 利用可能 |
+| Excel COM 埋め込み | **廃止**（不要） |
 | 単一 exe 配布 | 骨組みあり（継続検証中） |
 | 安定版 (1.0.0) | 未到達 |
 
-計画・要件の詳細は `10_管理資料/要件定義.md` と `10_管理資料/計画/` を参照してください。
+計画・要件の詳細は次を参照してください。
+
+- 要件定義: `10_管理資料/要件定義.md`（版 0.5・内容ベース）
+- 全体ロードマップ: `10_管理資料/計画/00_全体ロードマップ.md`
+- 内容ベース設計: `docs/superpowers/specs/2026-08-12-content-based-diff-design.md`
+- 内容ベース実装計画: `docs/superpowers/plans/2026-08-12-content-based-diff.md`
 
 ---
 
@@ -170,20 +177,20 @@ msbuild DiffXL.sln /t:Clean,Build /p:Configuration=Release /p:Platform=x64
 
 - アプリ本体のライセンス表記は整備中です（ベータ公開段階）。
 - 利用 OSS の概要は [`30_参考資料/licenses/README.md`](./30_参考資料/licenses/README.md) を参照してください。
-- Microsoft Excel はユーザー環境の製品ライセンスに従います。DiffXL は Excel 自体を再配布しません。
+- DiffXL は Microsoft Excel を再配布しません。比較は `.xlsx`（OOXML）の読み取りのみです。
 
 ---
 
 ## 注意事項
 
 - **Beta** のため、比較結果の網羅性・性能・UI は未完成部分があります。
-- 表示の完全再現は **Excel 本体** に依存します。Excel 未インストール環境では動作しません。
+- Excel 本体の埋め込み表示は行いません。行高・列幅・フォントスタイルの完全再現は対象外です。
 - 大きなブックや高解像度画像では比較に時間がかかることがあります。
 - テスト用エビデンスや大容量サンプルがリポジトリに含まれる場合があります（クローン時のサイズに注意）。
 
 ---
 
 <p align="center">
-  <b>DiffXL</b> — See the difference, as Excel sees it.<br>
-  <sub>Beta · Under active development · Windows x64</sub>
+  <b>DiffXL</b> — See the difference in the content.<br>
+  <sub>Beta · Under active development · Windows x64 · Excel not required</sub>
 </p>
