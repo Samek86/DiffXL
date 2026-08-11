@@ -22,7 +22,7 @@ namespace DiffXL.LOGIC.Diff
         public string MaskPath { get; set; }
 
         /// <summary>
-        /// 画像ローカル座標のハイライト領域一覧。
+        /// 元画像ピクセル座標のハイライト領域一覧（ResizeMaxSide 後の比較空間ではない）。
         /// </summary>
         public List<HighlightRegion> Regions { get; set; } = new List<HighlightRegion>();
     }
@@ -141,10 +141,16 @@ namespace DiffXL.LOGIC.Diff
                                 Cv2.MorphologyEx(morph, morph, MorphTypes.Close, kernel);
                             }
 
+                            // 比較は ResizeMaxSide 後の空間。UI は元画像 px で重ねるため戻す。
                             List<HighlightRegion> regions = ExtractRegions(morph, minArea);
-                            result.Regions = regions;
+                            result.Regions = ScaleRegionsToOriginal(
+                                regions,
+                                left.Width,
+                                left.Height,
+                                leftRaw.Width,
+                                leftRaw.Height);
 
-                            if (regions.Count == 0)
+                            if (result.Regions.Count == 0)
                             {
                                 result.IsSame = true;
                                 return result;
@@ -175,6 +181,7 @@ namespace DiffXL.LOGIC.Diff
 
         /// <summary>
         /// 二値マスクから連結成分の外接矩形を抽出する（背景ラベル 0 を除く）。
+        /// 座標は <paramref name="binaryMask"/> のピクセル空間（縮小後の比較空間）。
         /// </summary>
         private static List<HighlightRegion> ExtractRegions(Mat binaryMask, int minArea)
         {
@@ -224,6 +231,90 @@ namespace DiffXL.LOGIC.Diff
             }
 
             return regions;
+        }
+
+        /// <summary>
+        /// 比較空間（ResizeMaxSide 後）の領域を元画像ピクセル座標へ変換する。
+        /// 縮小していない場合は入力をそのまま返す。
+        /// </summary>
+        /// <param name="regions">比較空間の領域</param>
+        /// <param name="compareW">比較時の幅</param>
+        /// <param name="compareH">比較時の高さ</param>
+        /// <param name="originalW">元画像の幅</param>
+        /// <param name="originalH">元画像の高さ</param>
+        /// <returns>元画像座標の領域一覧</returns>
+        public static List<HighlightRegion> ScaleRegionsToOriginal(
+            List<HighlightRegion> regions,
+            int compareW,
+            int compareH,
+            int originalW,
+            int originalH)
+        {
+            if (regions == null || regions.Count == 0)
+            {
+                return regions ?? new List<HighlightRegion>();
+            }
+
+            if (compareW <= 0 || compareH <= 0
+                || originalW <= 0 || originalH <= 0
+                || (compareW == originalW && compareH == originalH))
+            {
+                return regions;
+            }
+
+            double sx = originalW / (double)compareW;
+            double sy = originalH / (double)compareH;
+            var scaled = new List<HighlightRegion>(regions.Count);
+            foreach (HighlightRegion r in regions)
+            {
+                if (r == null)
+                {
+                    continue;
+                }
+
+                int x = (int)Math.Round(r.X * sx);
+                int y = (int)Math.Round(r.Y * sy);
+                int w = Math.Max(1, (int)Math.Round(r.Width * sx));
+                int h = Math.Max(1, (int)Math.Round(r.Height * sy));
+
+                // 元画像境界にクリップ
+                if (x < 0)
+                {
+                    w += x;
+                    x = 0;
+                }
+
+                if (y < 0)
+                {
+                    h += y;
+                    y = 0;
+                }
+
+                if (x + w > originalW)
+                {
+                    w = originalW - x;
+                }
+
+                if (y + h > originalH)
+                {
+                    h = originalH - y;
+                }
+
+                if (w <= 0 || h <= 0)
+                {
+                    continue;
+                }
+
+                scaled.Add(new HighlightRegion
+                {
+                    X = x,
+                    Y = y,
+                    Width = w,
+                    Height = h
+                });
+            }
+
+            return scaled;
         }
     }
 }

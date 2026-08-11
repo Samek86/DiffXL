@@ -23,6 +23,12 @@
 - ルート README / リリース README: **Microsoft Excel インストール不要** を明記
 - 単一 exe 配布向けに OpenCV ネイティブ（x64 の `OpenCvSharpExtern.dll` のみ）を exe へ埋め込み、起動時に `%AppData%\Roaming\DiffXL\native` へ展開するよう変更
 - 動画用 `opencv_videoio_ffmpeg*` は配布・埋め込み対象外（静止画比較のみのため不要）
+- 画像ハイライト領域を比較用縮小空間ではなく **元画像ピクセル座標** に変換して返すよう修正（max-side &gt; 1024 での枠ずれを解消）
+- ツールバー「画像対応」（手動ピン）を非表示・無効化。内容比較時の画像シーケンス対応は自動のみ
+
+### Fixed
+
+- 大画像（最大辺 &gt; 1024）でハイライト矩形が ImagePairView 上にずれて表示される問題
 
 ### Removed
 

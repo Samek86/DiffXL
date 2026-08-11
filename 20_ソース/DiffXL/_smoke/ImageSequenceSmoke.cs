@@ -11,6 +11,7 @@ using DiffXL.LOGIC.Diff;
 /// 1) 8 vs 9 挿入（hash のみ）→ Match×4 SkipRight Match×4
 /// 2) 同一画像・異パス → IsSame
 /// 3) 一部だけ違う合成 PNG → Regions.Count &gt;= 1
+/// 4) max-side &gt; 1024 の部分差 → 領域が元画像座標へ拡大されていること
 /// </summary>
 class Program
 {
@@ -179,6 +180,87 @@ class Program
                         + item.HighlightRegions.Count);
                 }
             }
+
+            // --- 4: 大画像（max side > MaxSide）→ 領域は元画像 px にスケールアップ ---
+            {
+                int ow = 1600;
+                int oh = 1200;
+                // 差分矩形（元画像座標）。縮小後は MaxSide=1024 なので side scale=1024/1600=0.64
+                int rx = 1000;
+                int ry = 700;
+                int rw = 100;
+                int rh = 80;
+                string leftP = Path.Combine(dir, "large_l.png");
+                string rightP = Path.Combine(dir, "large_r.png");
+                WritePartialDiffPairAt(leftP, rightP, ow, oh, rx, ry, rw, rh);
+
+                ImageVisualDiff v = ImageVisualComparer.Compare(
+                    leftP, rightP, dir, "mask_large.png");
+                int rc = v.Regions != null ? v.Regions.Count : 0;
+                Console.WriteLine("case4 large IsSame=" + v.IsSame + " regions=" + rc);
+                if (v.IsSame || rc < 1)
+                {
+                    Console.WriteLine("FAIL case4 expected Regions.Count >= 1 on large partial");
+                    fail++;
+                }
+                else
+                {
+                    // 縮小空間のままなら X は ~640 付近。元画像へ戻せば ~1000 付近。
+                    double downScale = ImageVisualComparer.MaxSide / (double)Math.Max(ow, oh);
+                    int resizedXApprox = (int)Math.Round(rx * downScale);
+                    HighlightRegion best = v.Regions
+                        .OrderByDescending(r => r.Width * r.Height)
+                        .First();
+                    Console.WriteLine(string.Format(
+                        "  best region x={0} y={1} w={2} h={3} (resized-space x would be ~{4})",
+                        best.X, best.Y, best.Width, best.Height, resizedXApprox));
+
+                    // 元画像座標へ拡大されていること: X が縮小空間の推定より明らかに大きい
+                    if (best.X <= resizedXApprox + 40)
+                    {
+                        Console.WriteLine(
+                            "FAIL case4 region.X looks like compare-space (not scaled to original)."
+                            + " x=" + best.X + " resizedApprox=" + resizedXApprox);
+                        fail++;
+                    }
+                    // 目標矩形付近にあること（モルフォで多少膨らむ）
+                    else if (best.X < rx - 80 || best.X > rx + 80
+                        || best.Y < ry - 80 || best.Y > ry + 80)
+                    {
+                        Console.WriteLine(string.Format(
+                            "FAIL case4 region far from expected original rect ({0},{1})",
+                            rx, ry));
+                        fail++;
+                    }
+                    else
+                    {
+                        Console.WriteLine("OK case4 large-image regions scaled to original px");
+                    }
+
+                    // 単位: ScaleRegionsToOriginal が compare < original で拡大すること
+                    var tiny = new List<HighlightRegion>
+                    {
+                        new HighlightRegion { X = 64, Y = 48, Width = 10, Height = 8 }
+                    };
+                    List<HighlightRegion> up = ImageVisualComparer.ScaleRegionsToOriginal(
+                        tiny, 1024, 768, 1600, 1200);
+                    if (up == null || up.Count != 1
+                        || up[0].X < 90 || up[0].Width < 14)
+                    {
+                        Console.WriteLine("FAIL case4 ScaleRegionsToOriginal unit check"
+                            + (up != null && up.Count > 0
+                                ? string.Format(" got x={0} w={1}", up[0].X, up[0].Width)
+                                : " empty"));
+                        fail++;
+                    }
+                    else
+                    {
+                        Console.WriteLine(string.Format(
+                            "OK case4 ScaleRegionsToOriginal unit x={0} w={1}",
+                            up[0].X, up[0].Width));
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -243,6 +325,22 @@ class Program
 
     static void WritePartialDiffPair(string leftPath, string rightPath, int w, int h)
     {
+        WritePartialDiffPairAt(leftPath, rightPath, w, h, w / 2, h / 3, 28, 22);
+    }
+
+    /// <summary>
+    /// 右画像だけ指定矩形に黄色い差分を描いたペアを保存する。
+    /// </summary>
+    static void WritePartialDiffPairAt(
+        string leftPath,
+        string rightPath,
+        int w,
+        int h,
+        int rectX,
+        int rectY,
+        int rectW,
+        int rectH)
+    {
         using (var left = new Bitmap(w, h))
         using (var right = new Bitmap(w, h))
         {
@@ -251,10 +349,9 @@ class Program
             {
                 gl.Clear(Color.FromArgb(255, 40, 40, 180));
                 gr.Clear(Color.FromArgb(255, 40, 40, 180));
-                // 右だけ黄色い矩形を追加（明確な領域差）
                 gr.FillRectangle(
                     new SolidBrush(Color.FromArgb(255, 240, 220, 20)),
-                    new Rectangle(w / 2, h / 3, 28, 22));
+                    new Rectangle(rectX, rectY, rectW, rectH));
             }
 
             left.Save(leftPath, ImageFormat.Png);

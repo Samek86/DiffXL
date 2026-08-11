@@ -1386,104 +1386,23 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// 画像対応（手動ピン留め）。OK 後は Alignment / ScrollMap のみ再構築。
+        /// 旧「画像対応」ボタン。内容ベース比較では ImageSequenceAligner が自動対応するため、
+        /// 手動ピン UI は無効（偽の操作感を出さない）。クリック経路は情報表示のみ。
         /// </summary>
         private void BtnImageLink_Click(object sender, RoutedEventArgs e)
         {
-            if (_session == null || !_session.HasBothPaths)
+            const string msg =
+                "画像の対応付けは内容比較時に自動で行われます。手動ピン留めは現在の比較パイプラインでは使用されません。";
+            if (StatusText != null)
             {
-                MessageBox.Show("比較対象ファイルがありません。", Common.AppDisplayName);
-                return;
+                StatusText.Text = msg;
             }
 
-            if (_session.LastResult == null
-                || _session.LastResult.Alignments == null
-                || _session.LastResult.Alignments.Count == 0)
-            {
-                MessageBox.Show(
-                    "先に比較を実行してください。",
-                    Common.AppDisplayName,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                return;
-            }
-
-            string leftSheet = LeftPane != null ? LeftPane.SelectedSheetName : null;
-            string rightSheet = RightPane != null ? RightPane.SelectedSheetName : null;
-            SheetAlignment alignment = FindAlignmentForSheets(leftSheet, rightSheet);
-            if (alignment == null)
-            {
-                // 先頭 Alignment をフォールバック
-                alignment = _session.LastResult.Alignments.FirstOrDefault(a => a != null);
-            }
-
-            if (alignment == null)
-            {
-                MessageBox.Show(
-                    "表示中シートの対応情報がありません。",
-                    Common.AppDisplayName,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                return;
-            }
-
-            leftSheet = alignment.LeftSheet;
-            rightSheet = alignment.RightSheet;
-
-            List<EmbeddedImage> leftImages = CollectSideImages(alignment.Images, left: true);
-            List<EmbeddedImage> rightImages = CollectSideImages(alignment.Images, left: false);
-            if (leftImages.Count == 0 && rightImages.Count == 0)
-            {
-                MessageBox.Show(
-                    "このシートに画像がありません。",
-                    Common.AppDisplayName,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-                return;
-            }
-
-            List<ManualImagePin> existingForSheet = GetPinsForSheet(leftSheet, rightSheet);
-            var dialog = new ImageLinkDialog(
-                leftSheet,
-                rightSheet,
-                leftImages,
-                rightImages,
-                existingForSheet)
-            {
-                Owner = this
-            };
-
-            if (dialog.ShowDialog() != true || dialog.ResultPins == null)
-            {
-                return;
-            }
-
-            // 当該シートの旧ピンを差し替え
-            if (_session.Options.ManualImagePins == null)
-            {
-                _session.Options.ManualImagePins = new List<ManualImagePin>();
-            }
-
-            _session.Options.ManualImagePins.RemoveAll(p =>
-                p != null
-                && string.Equals(p.LeftSheet, leftSheet, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(p.RightSheet, rightSheet, StringComparison.OrdinalIgnoreCase));
-            _session.Options.ManualImagePins.AddRange(dialog.ResultPins);
-
-            try
-            {
-                RebuildSheetAlignmentForPins(leftSheet, rightSheet, leftImages, rightImages);
-                StatusText.Text = "画像対応を適用しました（マップ再構築）";
-            }
-            catch (Exception ex)
-            {
-                Log.Exception(ex);
-                MessageBox.Show(
-                    "画像対応の適用に失敗しました: " + ex.Message,
-                    Common.AppDisplayName,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-            }
+            MessageBox.Show(
+                msg,
+                Common.AppDisplayName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
 
         /// <summary>

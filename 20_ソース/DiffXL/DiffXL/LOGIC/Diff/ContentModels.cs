@@ -3,27 +3,28 @@ using System.Collections.Generic;
 namespace DiffXL.LOGIC.Diff
 {
     /// <summary>
-    /// 画像ハイライト領域（画像ローカル座標、ピクセル）。
+    /// 画像ハイライト領域（元画像のローカル座標、ピクセル）。
+    /// ImageVisualComparer は内部で縮小比較しても、ここは常に元画像 px で返す。
     /// </summary>
     public sealed class HighlightRegion
     {
         /// <summary>
-        /// 左上 X（ピクセル）。
+        /// 左上 X（元画像ピクセル）。
         /// </summary>
         public int X { get; set; }
 
         /// <summary>
-        /// 左上 Y（ピクセル）。
+        /// 左上 Y（元画像ピクセル）。
         /// </summary>
         public int Y { get; set; }
 
         /// <summary>
-        /// 幅（ピクセル）。
+        /// 幅（元画像ピクセル）。
         /// </summary>
         public int Width { get; set; }
 
         /// <summary>
-        /// 高さ（ピクセル）。
+        /// 高さ（元画像ピクセル）。
         /// </summary>
         public int Height { get; set; }
     }
