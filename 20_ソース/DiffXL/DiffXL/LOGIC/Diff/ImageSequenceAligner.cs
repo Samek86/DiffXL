@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DiffXL.COMMON;
 
 namespace DiffXL.LOGIC.Diff
 {
@@ -15,11 +16,20 @@ namespace DiffXL.LOGIC.Diff
         private const double SkipCost = 0.4;
 
         /// <summary>
-        /// Match に必要な最小類似度（RejectDiffRatio の補数）。
+        /// Match に必要な最小類似度（設定の ImageRejectDiffRatio の補数。未設定時は定数既定）。
         /// </summary>
         private static double MatchThreshold
         {
-            get { return 1.0 - ImageDiffService.RejectDiffRatio; }
+            get
+            {
+                double reject = ImageDiffService.RejectDiffRatio;
+                if (AppSettings.Current != null && AppSettings.Current.Diff != null)
+                {
+                    reject = AppSettings.Current.Diff.ImageRejectDiffRatio;
+                }
+
+                return 1.0 - reject;
+            }
         }
 
         /// <summary>

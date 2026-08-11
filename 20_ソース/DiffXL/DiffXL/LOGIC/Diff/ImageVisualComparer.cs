@@ -38,9 +38,35 @@ namespace DiffXL.LOGIC.Diff
         public const int MaxSide = 1024;
 
         /// <summary>
-        /// 連結成分として残す最小面積（ピクセル）。
+        /// 連結成分として残す最小面積（ピクセル）の既定値。
         /// </summary>
         public const int MinRegionArea = 25;
+
+        /// <summary>
+        /// 設定または既定から absdiff 二値化閾値を得る。
+        /// </summary>
+        private static double ResolveAbsDiffThreshold()
+        {
+            if (AppSettings.Current != null && AppSettings.Current.Diff != null)
+            {
+                return AppSettings.Current.Diff.ImageAbsDiffThreshold;
+            }
+
+            return ImageDiffService.AbsDiffThreshold;
+        }
+
+        /// <summary>
+        /// 設定または既定から最小領域面積を得る。
+        /// </summary>
+        private static int ResolveMinRegionArea()
+        {
+            if (AppSettings.Current != null && AppSettings.Current.Diff != null)
+            {
+                return AppSettings.Current.Diff.ImageMinRegionArea;
+            }
+
+            return MinRegionArea;
+        }
 
         /// <summary>
         /// 左右画像を位置合わせしたうえで視覚差分し、領域矩形を返す。
@@ -74,6 +100,8 @@ namespace DiffXL.LOGIC.Diff
             try
             {
                 NativeBootstrap.EnsureNativeBinaries();
+                double absDiffTh = ResolveAbsDiffThreshold();
+                int minArea = ResolveMinRegionArea();
 
                 using (Mat leftRaw = Cv2.ImRead(leftPath, ImreadModes.Color))
                 using (Mat rightRaw = Cv2.ImRead(rightPath, ImreadModes.Color))
@@ -100,7 +128,7 @@ namespace DiffXL.LOGIC.Diff
                             Cv2.Threshold(
                                 gray,
                                 mask,
-                                ImageDiffService.AbsDiffThreshold,
+                                absDiffTh,
                                 255,
                                 ThresholdTypes.Binary);
 
@@ -113,7 +141,7 @@ namespace DiffXL.LOGIC.Diff
                                 Cv2.MorphologyEx(morph, morph, MorphTypes.Close, kernel);
                             }
 
-                            List<HighlightRegion> regions = ExtractRegions(morph, MinRegionArea);
+                            List<HighlightRegion> regions = ExtractRegions(morph, minArea);
                             result.Regions = regions;
 
                             if (regions.Count == 0)

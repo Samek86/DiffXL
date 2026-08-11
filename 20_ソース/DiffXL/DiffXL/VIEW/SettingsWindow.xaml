@@ -4,10 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     Title="設定"
-    Width="480"
-    Height="500"
-    MinWidth="420"
-    MinHeight="400"
+    Width="500"
+    Height="640"
+    MinWidth="440"
+    MinHeight="480"
     WindowStartupLocation="CenterOwner"
     ResizeMode="CanResizeWithGrip"
     Background="#F9FAFB">
@@ -109,7 +109,110 @@
                     x:Name="HighlightEnabledCheck"
                     Margin="0,0,0,16"
                     Content="起動時に差分強調を表示する"
-                    IsChecked="True" />
+                    IsChecked="True"
+                    ToolTip="Diff.HighlightEnabled — 画像・セル共通の初期 ON/OFF" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,12">
+                    <iconPacks:PackIconPhosphorIcons Kind="Images" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="{StaticResource Brush.Accent}" />
+                    <TextBlock
+                        FontSize="16"
+                        FontWeight="SemiBold"
+                        VerticalAlignment="Center"
+                        Text="画像ハイライト" />
+                </StackPanel>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="枠色 (#AARRGGBB)" />
+                    <TextBox
+                        x:Name="ImageBorderColorTextBox"
+                        Grid.Column="1"
+                        Padding="6,4"
+                        Text="#FFFF0000"
+                        TextChanged="ImageHighlight_Changed"
+                        ToolTip="Diff.ImageHighlightBorderColor — 既定 不透明赤" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="塗り色 (#RRGGBB)" />
+                    <TextBox
+                        x:Name="ImageFillColorTextBox"
+                        Grid.Column="1"
+                        Padding="6,4"
+                        Text="#FFFF00"
+                        TextChanged="ImageHighlight_Changed"
+                        ToolTip="画像塗りの RGB（α は下のスライダー）" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="48" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="塗り不透明度" />
+                    <Slider
+                        x:Name="ImageFillOpacitySlider"
+                        Grid.Column="1"
+                        Minimum="0"
+                        Maximum="100"
+                        Value="50"
+                        TickFrequency="5"
+                        IsSnapToTickEnabled="False"
+                        VerticalAlignment="Center"
+                        ValueChanged="ImageHighlight_Changed" />
+                    <TextBlock
+                        x:Name="ImageFillOpacityLabel"
+                        Grid.Column="2"
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="50%" />
+                </Grid>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="72" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="枠幅 (px)" />
+                    <TextBox
+                        x:Name="ImageBorderThicknessBox"
+                        Grid.Column="1"
+                        Padding="6,4"
+                        Text="3"
+                        ToolTip="Diff.ImageHighlightBorderThickness — 0〜32（既定 3）" />
+                </Grid>
+
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="画像プレビュー" />
+                    <Border
+                        Grid.Column="1"
+                        Height="48"
+                        BorderBrush="#D1D5DB"
+                        BorderThickness="1"
+                        CornerRadius="4"
+                        Background="#FFFFFF">
+                        <Border
+                            x:Name="ImagePreviewBorder"
+                            Margin="8"
+                            BorderThickness="3"
+                            CornerRadius="2">
+                            <Rectangle x:Name="ImagePreviewFill" />
+                        </Border>
+                    </Border>
+                </Grid>
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                     <iconPacks:PackIconPhosphorIcons Kind="ArrowsDownUp" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Foreground="{StaticResource Brush.Accent}" />
@@ -171,7 +274,7 @@
                     <TextBlock
                         Foreground="#6B7280"
                         TextWrapping="Wrap"
-                        Text="設定は %AppData%\Roaming\DiffXL\settings.yaml に保存されます。既定の差分色は黄色・不透明度 50%、保険ポーリング 250ms です。" />
+                        Text="設定は %AppData%\Roaming\DiffXL\settings.yaml に保存されます。セル差分色は黄 50%、画像ハイライトは枠 赤 3px・塗り 黄 50% が既定です。" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

@@ -7,7 +7,7 @@ using DiffXL.LOGIC.Diff;
 namespace DiffXL.VIEW
 {
     /// <summary>
-    /// 設定画面（差分色・不透明度・同期スクロールなど）。
+    /// 設定画面（差分色・画像ハイライト・同期スクロールなど）。
     /// </summary>
     public partial class SettingsWindow : Window
     {
@@ -29,6 +29,7 @@ namespace DiffXL.VIEW
             InitializeComponent();
             LoadFromSettings();
             UpdatePreview();
+            UpdateImagePreview();
             _suppressChangeEvents = false;
         }
 
@@ -59,6 +60,43 @@ namespace DiffXL.VIEW
             if (OpacityLabel != null && OpacitySlider != null)
             {
                 OpacityLabel.Text = ((int)Math.Round(OpacitySlider.Value)).ToString(CultureInfo.InvariantCulture) + "%";
+            }
+
+            // 画像ハイライト
+            if (ImageBorderColorTextBox != null)
+            {
+                ImageBorderColorTextBox.Text = string.IsNullOrWhiteSpace(d.ImageHighlightBorderColor)
+                    ? "#FFFF0000"
+                    : d.ImageHighlightBorderColor;
+            }
+
+            if (ImageBorderThicknessBox != null)
+            {
+                ImageBorderThicknessBox.Text = d.ImageHighlightBorderThickness.ToString(CultureInfo.InvariantCulture);
+            }
+
+            byte fillA, fillR, fillG, fillB;
+            DiffHighlightStyle.ParseHexArgbColor(
+                string.IsNullOrWhiteSpace(d.ImageHighlightFillColor) ? "#80FFFF00" : d.ImageHighlightFillColor,
+                out fillA, out fillR, out fillG, out fillB);
+
+            if (ImageFillColorTextBox != null)
+            {
+                ImageFillColorTextBox.Text = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "#{0:X2}{1:X2}{2:X2}",
+                    fillR, fillG, fillB);
+            }
+
+            if (ImageFillOpacitySlider != null)
+            {
+                ImageFillOpacitySlider.Value = Math.Max(0, Math.Min(100, fillA * 100.0 / 255.0));
+            }
+
+            if (ImageFillOpacityLabel != null && ImageFillOpacitySlider != null)
+            {
+                ImageFillOpacityLabel.Text =
+                    ((int)Math.Round(ImageFillOpacitySlider.Value)).ToString(CultureInfo.InvariantCulture) + "%";
             }
 
             UiSettings ui = (AppSettings.Current != null && AppSettings.Current.Ui != null)
@@ -122,6 +160,25 @@ namespace DiffXL.VIEW
         }
 
         /// <summary>
+        /// 画像ハイライト UI 変更時。
+        /// </summary>
+        private void ImageHighlight_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_suppressChangeEvents)
+            {
+                return;
+            }
+
+            if (ImageFillOpacitySlider != null && ImageFillOpacityLabel != null)
+            {
+                ImageFillOpacityLabel.Text =
+                    ((int)Math.Round(ImageFillOpacitySlider.Value)).ToString(CultureInfo.InvariantCulture) + "%";
+            }
+
+            UpdateImagePreview();
+        }
+
+        /// <summary>
         /// プレビュー矩形を更新する。
         /// </summary>
         private void UpdatePreview()
@@ -141,6 +198,50 @@ namespace DiffXL.VIEW
             style.G = g;
             style.B = b;
             PreviewRect.Fill = style.CreateBrush();
+        }
+
+        /// <summary>
+        /// 画像ハイライトのプレビューを更新する。
+        /// </summary>
+        private void UpdateImagePreview()
+        {
+            if (ImagePreviewBorder == null || ImagePreviewFill == null)
+            {
+                return;
+            }
+
+            DiffHighlightStyle style = BuildImageStyleFromUi();
+            ImagePreviewBorder.BorderBrush = style.CreateImageBorderBrush();
+            ImagePreviewBorder.BorderThickness = new Thickness(Math.Max(0, style.BorderThickness));
+            ImagePreviewFill.Fill = style.CreateImageFillBrush();
+        }
+
+        /// <summary>
+        /// UI 値から画像ハイライトスタイルを組み立てる。
+        /// </summary>
+        /// <returns>スタイル</returns>
+        private DiffHighlightStyle BuildImageStyleFromUi()
+        {
+            var style = new DiffHighlightStyle();
+
+            byte a, r, g, b;
+            string borderHex = ImageBorderColorTextBox != null ? ImageBorderColorTextBox.Text : "#FFFF0000";
+            DiffHighlightStyle.ParseHexArgbColor(borderHex, out a, out r, out g, out b);
+            style.BorderA = a;
+            style.BorderR = r;
+            style.BorderG = g;
+            style.BorderB = b;
+
+            string fillHex = ImageFillColorTextBox != null ? ImageFillColorTextBox.Text : "#FFFF00";
+            DiffHighlightStyle.ParseHexArgbColor(fillHex, out a, out r, out g, out b);
+            style.FillR = r;
+            style.FillG = g;
+            style.FillB = b;
+            double fillOp = ImageFillOpacitySlider != null ? ImageFillOpacitySlider.Value / 100.0 : 0.5;
+            style.FillA = (byte)Math.Max(0, Math.Min(255, (int)Math.Round(fillOp * 255)));
+
+            style.BorderThickness = ParseImageBorderThickness();
+            return style;
         }
 
         /// <summary>
@@ -207,6 +308,13 @@ namespace DiffXL.VIEW
             AppSettings.Current.Diff.HighlightColor = style.ToHexRgb();
             AppSettings.Current.Diff.HighlightOpacity = Math.Max(0, Math.Min(1, opacity));
             AppSettings.Current.Diff.HighlightEnabled = HighlightEnabledCheck != null && HighlightEnabledCheck.IsChecked == true;
+
+            // 画像ハイライト（既存セル色と并存。画像領域はこちら優先）
+            DiffHighlightStyle imageStyle = BuildImageStyleFromUi();
+            AppSettings.Current.Diff.ImageHighlightBorderColor = imageStyle.ToHexArgbBorder();
+            AppSettings.Current.Diff.ImageHighlightFillColor = imageStyle.ToHexArgbFill();
+            AppSettings.Current.Diff.ImageHighlightBorderThickness = imageStyle.BorderThickness;
+
             AppSettings.Current.Ui.SyncScroll = SyncScrollCheck != null && SyncScrollCheck.IsChecked == true;
             AppSettings.Current.Ui.ShowSyncGapOverlay = ShowSyncGapOverlayCheck == null
                 || ShowSyncGapOverlayCheck.IsChecked == true;
@@ -231,7 +339,10 @@ namespace DiffXL.VIEW
 
                 Close();
                 Log.Info("SettingsWindow 保存完了 color=" + AppSettings.Current.Diff.HighlightColor
-                    + " opacity=" + AppSettings.Current.Diff.HighlightOpacity.ToString(CultureInfo.InvariantCulture));
+                    + " opacity=" + AppSettings.Current.Diff.HighlightOpacity.ToString(CultureInfo.InvariantCulture)
+                    + " imgBorder=" + AppSettings.Current.Diff.ImageHighlightBorderColor
+                    + " imgFill=" + AppSettings.Current.Diff.ImageHighlightFillColor
+                    + " imgTh=" + AppSettings.Current.Diff.ImageHighlightBorderThickness.ToString(CultureInfo.InvariantCulture));
                 return true;
             }
             catch (Exception ex)
@@ -248,6 +359,38 @@ namespace DiffXL.VIEW
 
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 画像枠幅を UI から読む（0–32、不正時 3）。
+        /// </summary>
+        private int ParseImageBorderThickness()
+        {
+            int th = 3;
+            if (ImageBorderThicknessBox != null
+                && int.TryParse(
+                    (ImageBorderThicknessBox.Text ?? string.Empty).Trim(),
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out th))
+            {
+                // fall through to clamp
+            }
+            else
+            {
+                th = 3;
+            }
+
+            if (th < 0)
+            {
+                th = 0;
+            }
+            else if (th > 32)
+            {
+                th = 32;
+            }
+
+            return th;
         }
 
         /// <summary>
