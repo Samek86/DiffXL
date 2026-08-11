@@ -6,9 +6,12 @@
 *.suo
 *.cache
 
-# Native / packages
+# Native / packages (restore via NuGet / build output — do not commit binaries)
 **/packages/
 **/TestResults/
+**/*.dll
+**/*.pdb
+**/*.nupkg
 
 # App/runtime noise
 **/_cache_janitor.pid
@@ -17,7 +20,9 @@
 **/_smoke/*.exe
 **/_smoke/*.pdb
 **/_smoke/*.dll
-!20_ソース/DiffXL/DiffXL/_smoke/README.md
+
+# Keep smoke docs only (binaries under _smoke are ignored)
+!20_ソース/DiffXL/_smoke/README.md
 
 # SDD scratch
 .superpowers/sdd/
