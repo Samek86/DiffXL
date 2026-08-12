@@ -742,14 +742,12 @@ namespace DiffXL.VIEW.Controls
                     Fill = fill,
                     Stroke = stroke,
                     StrokeThickness = 1.5,
-                    Tag = item,
+                    Tag = new MiniMapMarkerTag { Item = item, Index = i },
                     ToolTip = BuildTooltip(item),
-                    IsHitTestVisible = true,
+                    // ヒットは MapBorder に任せ、スクロールバー同様ドラッグを阻害しない
+                    IsHitTestVisible = false,
                     Cursor = Cursors.Hand
                 };
-                // インデックスも Tag と一緒に拾えるよう DataContext に index
-                rect.Tag = new MiniMapMarkerTag { Item = item, Index = i };
-                rect.MouseLeftButtonDown += Marker_MouseLeftButtonDown;
                 Canvas.SetLeft(rect, markLeft);
                 Canvas.SetTop(rect, y);
                 Panel.SetZIndex(rect, 20);
@@ -1018,44 +1016,48 @@ namespace DiffXL.VIEW.Controls
             return string.IsNullOrEmpty(head) ? body : head + "\n" + body;
         }
 
-        private void RaiseNavigate(Point p)
+        /// <summary>
+        /// ポインタ Y から内容スクロール比率 0..1 を計算する（スクロールバー同等）。
+        /// </summary>
+        private double PointToContentRatio(Point p)
         {
             double h = Math.Max(1, MapBorder.ActualHeight);
+            double bodyTop = h * SheetHeaderRatio;
+            double bodyH = Math.Max(1, h * (1.0 - SheetHeaderRatio));
+            // サム相当: クリック位置を本文全体の比率にマップ
+            double ratio = (p.Y - bodyTop) / bodyH;
+            return Math.Max(0, Math.Min(1, ratio));
+        }
+
+        private void RaiseNavigate(Point p)
+        {
             if (_orderedItems == null || _orderedItems.Count == 0)
             {
                 RebuildOrderedItems();
             }
 
+            // スクロールバー同様: Y 位置 = 内容のスクロール比率（差分 index に丸めない）
+            double contentRatio = PointToContentRatio(p);
+
             DiffItem item = null;
-            double contentRatio;
-            int n = _orderedItems.Count;
+            int n = _orderedItems != null ? _orderedItems.Count : 0;
             if (n > 0)
             {
-                int idx = CanvasYToIndex(p.Y, h, n);
+                int idx = CanvasYToIndex(p.Y, Math.Max(1, MapBorder.ActualHeight), n);
                 if (idx >= 0 && idx < n)
                 {
                     item = _orderedItems[idx];
                 }
-
-                // 内容ビューへ渡す比率: 選択 index を 0..1 に射影
-                contentRatio = n <= 1 ? 0 : (double)Math.Max(0, idx) / Math.Max(1, n - 1);
-            }
-            else
-            {
-                // 差分ゼロでも本文領域の比率でスクロール可能
-                double bodyTop = h * SheetHeaderRatio;
-                double bodyH = Math.Max(1, h * (1.0 - SheetHeaderRatio));
-                contentRatio = Math.Max(0, Math.Min(1, (p.Y - bodyTop) / bodyH));
             }
 
             _contentViewportRatio = contentRatio;
             UpdateViewportVisuals();
             UpdateHintText();
 
-            // 互換イベント
             SuggestedLeftRow = 1 + (int)Math.Round(contentRatio * 100);
             SuggestedRightRow = SuggestedLeftRow;
             NavigateMapped?.Invoke(contentRatio, SuggestedLeftRow, SuggestedRightRow);
+            // 第2引数はヒント用。スクロール本体は常に ratio
             NavigateRequested?.Invoke(contentRatio, item);
         }
 
@@ -1088,77 +1090,84 @@ namespace DiffXL.VIEW.Controls
             return best;
         }
 
-        private void Marker_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void MiniMapControl_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var rect = sender as Rectangle;
-            DiffItem item = null;
-            int index = -1;
-            var tag = rect != null ? rect.Tag as MiniMapMarkerTag : null;
-            if (tag != null)
-            {
-                item = tag.Item;
-                index = tag.Index;
-            }
-            else
-            {
-                item = rect != null ? rect.Tag as DiffItem : null;
-            }
-
-            if (item == null)
+            // MapBorder 外（タイトル等）は無視
+            if (MapBorder == null)
             {
                 return;
             }
 
-            if (_orderedItems == null || _orderedItems.Count == 0)
-            {
-                RebuildOrderedItems();
-            }
-
-            if (index < 0 && _orderedItems != null)
-            {
-                index = _orderedItems.IndexOf(item);
-            }
-
-            int n = _orderedItems != null ? _orderedItems.Count : 0;
-            double contentRatio = (n <= 1 || index < 0)
-                ? 0.5
-                : (double)index / Math.Max(1, n - 1);
-
-            _contentViewportRatio = contentRatio;
-            _viewportSheet = item.SheetLeft ?? item.SheetRight ?? _viewportSheet;
-            SuggestedLeftRow = 1 + index;
-            SuggestedRightRow = SuggestedLeftRow;
-            UpdateViewportVisuals();
-            UpdateHintText();
-
-            NavigateMapped?.Invoke(contentRatio, SuggestedLeftRow, SuggestedRightRow);
-            NavigateRequested?.Invoke(contentRatio, item);
-            e.Handled = true;
-        }
-
-        private void MiniMapControl_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.Handled)
+            Point p = e.GetPosition(MapBorder);
+            if (p.X < 0 || p.Y < 0 || p.X > MapBorder.ActualWidth || p.Y > MapBorder.ActualHeight)
             {
                 return;
             }
 
             _dragging = true;
+            Focus();
             CaptureMouse();
-            RaiseNavigate(e.GetPosition(MapBorder));
+            RaiseNavigate(p);
             e.Handled = true;
         }
 
         private void MiniMapControl_PreviewMouseMove(object sender, MouseEventArgs e)
         {
+            if (!_dragging || e.LeftButton != MouseButtonState.Pressed)
+            {
+                return;
+            }
+
+            if (MapBorder == null)
+            {
+                return;
+            }
+
+            Point p = e.GetPosition(MapBorder);
+            // ドラッグ中は領域外でも Y をクランプしてスクロール継続
+            p.Y = Math.Max(0, Math.Min(MapBorder.ActualHeight, p.Y));
+            p.X = Math.Max(0, Math.Min(MapBorder.ActualWidth, p.X));
+            RaiseNavigate(p);
+            e.Handled = true;
+        }
+
+        private void MiniMapControl_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!_dragging)
+            {
+                return;
+            }
+
+            _dragging = false;
+            if (IsMouseCaptured)
+            {
+                ReleaseMouseCapture();
+            }
+
+            e.Handled = true;
+        }
+
+        private void MapBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _dragging = true;
+            Focus();
+            CaptureMouse();
+            RaiseNavigate(e.GetPosition(MapBorder));
+            e.Handled = true;
+        }
+
+        private void MapBorder_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
             if (_dragging && e.LeftButton == MouseButtonState.Pressed)
             {
-                RaiseNavigate(e.GetPosition(MapBorder));
+                Point p = e.GetPosition(MapBorder);
+                p.Y = Math.Max(0, Math.Min(MapBorder.ActualHeight, p.Y));
+                RaiseNavigate(p);
                 e.Handled = true;
             }
         }
 
-        private void MiniMapControl_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void MapBorder_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (_dragging)
             {
@@ -1169,30 +1178,6 @@ namespace DiffXL.VIEW.Controls
                 }
 
                 e.Handled = true;
-            }
-        }
-
-        private void MapBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (!e.Handled)
-            {
-                MiniMapControl_PreviewMouseLeftButtonDown(sender, e);
-            }
-        }
-
-        private void MapBorder_PreviewMouseMove(object sender, MouseEventArgs e)
-        {
-            if (!e.Handled)
-            {
-                MiniMapControl_PreviewMouseMove(sender, e);
-            }
-        }
-
-        private void MapBorder_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (!e.Handled)
-            {
-                MiniMapControl_PreviewMouseLeftButtonUp(sender, e);
             }
         }
 

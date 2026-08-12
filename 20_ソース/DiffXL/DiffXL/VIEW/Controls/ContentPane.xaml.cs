@@ -93,6 +93,87 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// ペア行要素の実測高さ（レイアウト後）。未確定時は 0。
+        /// </summary>
+        public double GetPairElementHeight(int index)
+        {
+            if (index < 0 || index >= _pairElements.Count)
+            {
+                return 0;
+            }
+
+            FrameworkElement el = _pairElements[index];
+            if (el == null)
+            {
+                return 0;
+            }
+
+            if (el.ActualHeight > 1)
+            {
+                return el.ActualHeight;
+            }
+
+            return el.DesiredSize.Height > 1 ? el.DesiredSize.Height : 0;
+        }
+
+        /// <summary>
+        /// 各ペア行に MinHeight を設定し、左右の行高を揃える。
+        /// </summary>
+        public void SetPairMinHeights(IList<double> heights)
+        {
+            if (heights == null)
+            {
+                return;
+            }
+
+            int n = Math.Min(_pairElements.Count, heights.Count);
+            for (int i = 0; i < n; i++)
+            {
+                FrameworkElement el = _pairElements[i];
+                if (el == null)
+                {
+                    continue;
+                }
+
+                double h = heights[i];
+                if (h > 1)
+                {
+                    el.MinHeight = h;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 左右 ContentPane の同一 index 行の高さを max に揃える（「この側になし」ずれ防止）。
+        /// </summary>
+        public static void SyncPairHeights(ContentPane left, ContentPane right)
+        {
+            if (left == null || right == null)
+            {
+                return;
+            }
+
+            left.UpdateLayout();
+            right.UpdateLayout();
+            int n = Math.Min(left.PairCount, right.PairCount);
+            if (n <= 0)
+            {
+                return;
+            }
+
+            var heights = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                heights[i] = Math.Max(left.GetPairElementHeight(i), right.GetPairElementHeight(i));
+            }
+
+            left.SetPairMinHeights(heights);
+            right.SetPairMinHeights(heights);
+            left.UpdateLayout();
+            right.UpdateLayout();
+        }
+
+        /// <summary>
         /// 表示中シート名。
         /// </summary>
         public string SheetName { get; private set; }
@@ -203,14 +284,32 @@ namespace DiffXL.VIEW.Controls
                 return;
             }
 
+            // レイアウト直後は extent が 0 のことがある
+            StreamScroll.UpdateLayout();
+            if (StreamHost != null)
+            {
+                StreamHost.UpdateLayout();
+            }
+
             double extent = StreamScroll.ScrollableHeight;
             if (extent <= 0.5)
             {
+                // まだスクロール不可でもオフセット 0 に正規化
+                _suppressScrollEvent = true;
+                try
+                {
+                    StreamScroll.ScrollToVerticalOffset(0);
+                }
+                finally
+                {
+                    _suppressScrollEvent = false;
+                }
+
                 return;
             }
 
             double target = Math.Max(0, Math.Min(1, ratio)) * extent;
-            if (Math.Abs(StreamScroll.VerticalOffset - target) < 1.0)
+            if (Math.Abs(StreamScroll.VerticalOffset - target) < 0.5)
             {
                 return;
             }
@@ -314,6 +413,19 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// スクロールせず選択枠だけ付ける（MiniMap ドラッグ中の位置強調用）。
+        /// </summary>
+        public void HighlightPairIndex(int index)
+        {
+            if (index < 0 || index >= _pairElements.Count)
+            {
+                return;
+            }
+
+            ApplyPairSelection(index);
+        }
+
+        /// <summary>
         /// 選択枠を付け替える（青枠・少し太く）。
         /// </summary>
         private void ApplyPairSelection(int index)
@@ -327,13 +439,20 @@ namespace DiffXL.VIEW.Controls
                 }
 
                 bool selected = i == index;
+                bool isGap = border.Background is SolidColorBrush scb
+                    && scb.Color.R == 0xF3 && scb.Color.G == 0xF4;
                 border.BorderBrush = selected
                     ? new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xEB))
                     : new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB));
                 border.BorderThickness = new Thickness(selected ? 3 : 1);
-                border.Background = selected
-                    ? new SolidColorBrush(Color.FromRgb(0xEF, 0xF6, 0xFF))
-                    : new SolidColorBrush(Color.FromRgb(0xFF, 0xFF, 0xFF));
+                if (selected)
+                {
+                    border.Background = new SolidColorBrush(Color.FromRgb(0xEF, 0xF6, 0xFF));
+                }
+                else if (!isGap)
+                {
+                    border.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xFF, 0xFF));
+                }
             }
 
             _selectedPairIndex = index;
@@ -574,6 +693,17 @@ namespace DiffXL.VIEW.Controls
                         : new SolidColorBrush(Color.FromRgb(0xFF, 0xFF, 0xFF)),
                     Child = blockUi
                 };
+
+                // ギャップは相手ブロック相当の高さで先行確保（左右レイアウト同期後に再調整）
+                if (isGap && partner != null)
+                {
+                    double est = EstimatePartnerBlockHeight(partner);
+                    if (est > 48)
+                    {
+                        wrap.MinHeight = est;
+                    }
+                }
+
                 StreamHost.Children.Add(wrap);
                 _pairElements.Add(wrap);
             }
@@ -644,6 +774,7 @@ namespace DiffXL.VIEW.Controls
 
         /// <summary>
         /// 相手のみ存在する行のギャップ表示。
+        /// 高さは相手ブロックの推定表示高に合わせ、左右の行ずれを防ぐ。
         /// </summary>
         private FrameworkElement CreateGapBlock(ContentStreamPair pair, ContentStreamBlock partner)
         {
@@ -656,27 +787,98 @@ namespace DiffXL.VIEW.Controls
                     partner.Row)
                 : "相手側のみ";
 
-            var panel = new StackPanel
+            double minH = EstimatePartnerBlockHeight(partner);
+            if (minH < 48)
+            {
+                minH = 48;
+            }
+
+            var panel = new Grid
             {
                 Margin = new Thickness(12),
-                MinHeight = 48
+                MinHeight = Math.Max(24, minH - 24)
             };
             panel.Children.Add(new TextBlock
             {
                 Text = "∅ この側になし（" + kind + "）",
                 Foreground = new SolidColorBrush(Color.FromRgb(0xB9, 0x1C, 0x1C)),
                 FontWeight = FontWeights.SemiBold,
-                FontSize = 12
+                FontSize = 12,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Left
             });
             panel.Children.Add(new TextBlock
             {
                 Text = detail + " · 対応を保つための空き行",
                 Foreground = new SolidColorBrush(Color.FromRgb(0x6B, 0x72, 0x80)),
                 FontSize = 11,
-                Margin = new Thickness(0, 4, 0, 0),
-                TextWrapping = TextWrapping.Wrap
+                Margin = new Thickness(0, 22, 0, 0),
+                TextWrapping = TextWrapping.Wrap,
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Left
             });
             return panel;
+        }
+
+        /// <summary>
+        /// 相手ブロックの表示高さを推定する（ImagePairView / 表 / セル行の実 UI に近い値）。
+        /// </summary>
+        private static double EstimatePartnerBlockHeight(ContentStreamBlock partner)
+        {
+            if (partner == null)
+            {
+                return 72;
+            }
+
+            // 外側 Border の内側: CreateBlockUi の margin 8 + kind header ~22
+            const double outerChrome = 16 + 22;
+            switch (partner.Kind)
+            {
+                case ContentBlockKind.Image:
+                    return outerChrome + EstimateImagePairViewHeight(partner.Image);
+                case ContentBlockKind.Table:
+                    {
+                        int rows = partner.Table != null && partner.Table.Rows != null
+                            ? partner.Table.Rows.Count
+                            : 1;
+                        // タイトル帯 + 行（ヘッダ含む）
+                        return outerChrome + 48 + Math.Max(1, rows) * 34 + 12;
+                    }
+                case ContentBlockKind.LooseRow:
+                    {
+                        int cells = partner.Cells != null ? partner.Cells.Count : 1;
+                        return outerChrome + Math.Max(1, cells) * 34 + 8;
+                    }
+                case ContentBlockKind.Shape:
+                    return outerChrome + 48;
+                default:
+                    return outerChrome + 48;
+            }
+        }
+
+        /// <summary>
+        /// ImagePairView 相当の高さ（タイトル・サブタイトル・画像表示枠）。
+        /// </summary>
+        private static double EstimateImagePairViewHeight(EmbeddedImage image)
+        {
+            const double maxW = 320.0;
+            const double maxH = 240.0;
+            int pw = image != null && image.PixelWidth > 0 ? image.PixelWidth : 200;
+            int ph = image != null && image.PixelHeight > 0 ? image.PixelHeight : 140;
+            if (pw < 1)
+            {
+                pw = 1;
+            }
+
+            if (ph < 1)
+            {
+                ph = 1;
+            }
+
+            double scale = Math.Min(1.0, Math.Min(maxW / pw, maxH / ph));
+            double dispH = Math.Max(1.0, Math.Round(ph * scale));
+            // Border padding 8*2 + title ~18 + margin 4 + subtitle ~16 + margin 8 + image + bottom margin 12
+            return 16 + 18 + 4 + 16 + 8 + dispH + 12 + 8;
         }
 
         private UIElement CreateKindHeader(ContentStreamBlock block, AlignOp op)

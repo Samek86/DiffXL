@@ -6,7 +6,7 @@
     MinWidth="88"
     Background="#FFFFFFFF"
     Focusable="True"
-    ToolTip="現在シートの差分。黄=差分位置、青帯=表示範囲。クリックでジャンプ">
+    ToolTip="スクロールバーのようにクリック／ドラッグで内容をスクロール。黄=差分位置、青帯=表示位置">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -67,7 +67,7 @@
                 HorizontalAlignment="Center"
                 FontSize="11"
                 Foreground="#FF374151"
-                Text="クリックで移動"
+                Text="ドラッグでスクロール"
                 TextAlignment="Center"
                 TextWrapping="Wrap" />
         </StackPanel>
