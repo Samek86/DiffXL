@@ -352,6 +352,17 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// 選択中ストリーム index。
+        /// </summary>
+        public int SelectedContentPairIndex
+        {
+            get
+            {
+                return ContentHost != null ? ContentHost.SelectedPairIndex : -1;
+            }
+        }
+
+        /// <summary>
         /// 内容ストリームの縦スクロール変化（ユーザー操作）。
         /// </summary>
         public event Action<double> ContentScrollRatioChanged;

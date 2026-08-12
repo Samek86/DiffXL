@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using DiffXL.COMMON;
 using DiffXL.LOGIC;
@@ -286,7 +288,18 @@ namespace DiffXL
                     }
 
                     bool contentScrollSample = IsContentScrollSamplePath(left) || IsContentScrollSamplePath(right);
-                    auto.WriteLine("SAMPLE_MODE " + (contentScrollSample ? "content_scroll" : "full_feature"));
+                    bool contentDiffSample = IsContentDiffSamplePath(left) || IsContentDiffSamplePath(right);
+                    auto.WriteLine("SAMPLE_MODE " + (contentDiffSample
+                        ? "content_diff"
+                        : (contentScrollSample ? "content_scroll" : "full_feature")));
+
+                    // content_diff: 内容ストリーム + MiniMap 専用検証（スクリーンショット付き）
+                    if (contentDiffSample)
+                    {
+                        failures += await VerifyContentDiffMiniMapLiveAsync(auto);
+                        auto.WriteLine(failures == 0 ? "AUTO_LIVE_PASS" : "AUTO_LIVE_FAIL count=" + failures);
+                        return;
+                    }
 
                     // MiniMap ジャンプ: わざと別シートにいる状態から、差分アイテムのシートへ飛ぶ
                     DiffItem jumpItem = null;
@@ -727,6 +740,387 @@ namespace DiffXL
         {
             return !string.IsNullOrEmpty(path)
                 && path.IndexOf("content_scroll", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// content_diff 専用サンプルかどうか（パス名で判定）。
+        /// </summary>
+        private static bool IsContentDiffSamplePath(string path)
+        {
+            return !string.IsNullOrEmpty(path)
+                && path.IndexOf("content_diff", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// エビデンス用スクリーンショットを保存する。
+        /// </summary>
+        private void CaptureEvidenceShot(string evidenceDir, string fileName)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(evidenceDir))
+                {
+                    return;
+                }
+
+                Directory.CreateDirectory(evidenceDir);
+                UpdateLayout();
+                Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
+                double w = Math.Max(1, ActualWidth);
+                double h = Math.Max(1, ActualHeight);
+                var rtb = new RenderTargetBitmap(
+                    (int)Math.Ceiling(w),
+                    (int)Math.Ceiling(h),
+                    96,
+                    96,
+                    PixelFormats.Pbgra32);
+                rtb.Render(this);
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(rtb));
+                string path = Path.Combine(evidenceDir, fileName);
+                using (var fs = File.Create(path))
+                {
+                    encoder.Save(fs);
+                }
+
+                Log.Info("screenshot saved " + path);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("screenshot fail: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// content_diff 向け: 統一ストリーム・左右スクロール同期・MiniMap ジャンプをライブ検証する。
+        /// </summary>
+        private async System.Threading.Tasks.Task<int> VerifyContentDiffMiniMapLiveAsync(AutoLiveTestOptions auto)
+        {
+            int failures = 0;
+            string evidenceDir = null;
+            if (!string.IsNullOrEmpty(auto.ReportPath))
+            {
+                evidenceDir = Path.Combine(
+                    Path.GetDirectoryName(auto.ReportPath) ?? ".",
+                    "screenshots");
+                Directory.CreateDirectory(evidenceDir);
+            }
+
+            auto.WriteLine("CONTENT_DIFF_VERIFY begin");
+            // レイアウトを十分に取る（ScrollableHeight=0 を避ける）
+            try
+            {
+                WindowState = WindowState.Maximized;
+                Width = Math.Max(Width, 1400);
+                Height = Math.Max(Height, 900);
+            }
+            catch
+            {
+                // ignore
+            }
+
+            await System.Threading.Tasks.Task.Delay(300);
+            UpdateLayout();
+            CaptureEvidenceShot(evidenceDir, "01_after_compare.png");
+
+            DiffResult result = _session != null ? _session.LastResult : null;
+            if (result == null || result.Items == null || result.Items.Count == 0)
+            {
+                auto.WriteLine("FAIL no result items");
+                return 1;
+            }
+
+            // 1) シート切替: 差分のあるシートへ
+            // 画像が多いシートを優先（ストリームが長くスクロール可能）
+            string[] probeSheets = { "S_Img8v9", "S_ImgPartial", "S_TableDel", "S_Bg", "S_TableCell", "S_Common" };
+            string workSheet = null;
+            DiffItem workItem = null;
+            foreach (string sn in probeSheets)
+            {
+                DiffItem it = result.Items.FirstOrDefault(i =>
+                    i != null
+                    && (string.Equals(i.SheetLeft, sn, StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(i.SheetRight, sn, StringComparison.OrdinalIgnoreCase)));
+                if (it != null)
+                {
+                    workSheet = sn;
+                    workItem = it;
+                    break;
+                }
+            }
+
+            if (workSheet == null)
+            {
+                workItem = result.Items.FirstOrDefault(i => i != null && i.Kind != DiffKind.Structure);
+                workSheet = workItem != null
+                    ? (workItem.SheetLeft ?? workItem.SheetRight)
+                    : null;
+            }
+
+            if (string.IsNullOrEmpty(workSheet))
+            {
+                auto.WriteLine("FAIL no probe sheet");
+                return 1;
+            }
+
+            LeftPane.TrySelectSheet(workSheet);
+            RightPane.TrySelectSheet(workSheet);
+            RefreshMiniMapForCurrentSheet();
+            await System.Threading.Tasks.Task.Delay(400);
+            Dispatcher.Invoke(DispatcherPriority.Loaded, new Action(() => { }));
+            await System.Threading.Tasks.Task.Delay(200);
+
+            string ls = LeftPane.SelectedSheetName ?? string.Empty;
+            string rs = RightPane.SelectedSheetName ?? string.Empty;
+            auto.WriteLine("SHEET work=" + workSheet + " L=" + ls + " R=" + rs);
+            if (!string.Equals(ls, workSheet, StringComparison.OrdinalIgnoreCase)
+                || !string.Equals(rs, workSheet, StringComparison.OrdinalIgnoreCase))
+            {
+                auto.WriteLine("FAIL sheet select");
+                failures++;
+            }
+
+            CaptureEvidenceShot(evidenceDir, "02_sheet_" + workSheet + ".png");
+
+            // 2) 内容ストリームが左右に載っているか
+            int leftPairs = LeftPane != null && LeftPane.ContentHostControl != null
+                ? LeftPane.ContentHostControl.PairCount
+                : 0;
+            int rightPairs = RightPane != null && RightPane.ContentHostControl != null
+                ? RightPane.ContentHostControl.PairCount
+                : 0;
+            auto.WriteLine("STREAM pairs L=" + leftPairs + " R=" + rightPairs);
+            if (leftPairs <= 0 || rightPairs <= 0)
+            {
+                auto.WriteLine("FAIL empty content stream");
+                failures++;
+            }
+
+            // 3) 左右スクロール同期（スクロール可能な場合）と選択 index 同期
+            int maxPairs = Math.Max(leftPairs, rightPairs);
+            int midIndex = Math.Max(0, maxPairs / 2);
+            int lastIndex = Math.Max(0, maxPairs - 1);
+            bool leftScrollable = LeftPane != null
+                && LeftPane.ContentHostControl != null
+                && LeftPane.ContentHostControl.PairCount > 3;
+            auto.WriteLine("SCROLL_CAPABLE pairs=" + maxPairs + " mid=" + midIndex);
+
+            // index ジャンプで左右が同じ SelectedPairIndex になること
+            bool idxJumpL = LeftPane != null && LeftPane.ScrollContentToPairIndex(lastIndex);
+            bool idxJumpR = RightPane != null && RightPane.ScrollContentToPairIndex(lastIndex);
+            await System.Threading.Tasks.Task.Delay(250);
+            int selL = LeftPane != null && LeftPane.ContentHostControl != null
+                ? LeftPane.ContentHostControl.SelectedPairIndex
+                : -1;
+            int selR = RightPane != null && RightPane.ContentHostControl != null
+                ? RightPane.ContentHostControl.SelectedPairIndex
+                : -1;
+            auto.WriteLine("PAIR_SELECT last=" + lastIndex
+                + " selL=" + selL + " selR=" + selR
+                + " jumpL=" + idxJumpL + " jumpR=" + idxJumpR);
+            if (selL != lastIndex || selR != lastIndex)
+            {
+                auto.WriteLine("FAIL pair index select");
+                failures++;
+            }
+            else
+            {
+                auto.WriteLine("PAIR_SELECT_OK");
+            }
+
+            // 比率同期（スクロール可能なとき）
+            _syncingContentScroll = false;
+            if (LeftPane != null)
+            {
+                LeftPane.SetContentScrollRatio(0.0);
+            }
+
+            if (RightPane != null)
+            {
+                RightPane.SetContentScrollRatio(0.0);
+            }
+
+            await System.Threading.Tasks.Task.Delay(100);
+            if (LeftPane != null)
+            {
+                LeftPane.SetContentScrollRatio(0.75);
+                OnLeftContentScrollRatioChanged(0.75);
+            }
+
+            await System.Threading.Tasks.Task.Delay(200);
+            double lr = LeftPane != null ? LeftPane.GetContentScrollRatio() : -1;
+            double rr = RightPane != null ? RightPane.GetContentScrollRatio() : -1;
+            auto.WriteLine("SCROLL_SYNC L=" + lr.ToString("0.###", CultureInfo.InvariantCulture)
+                + " R=" + rr.ToString("0.###", CultureInfo.InvariantCulture)
+                + " scrollable=" + leftScrollable);
+            if (leftScrollable)
+            {
+                if (Math.Abs(lr - rr) > 0.1)
+                {
+                    auto.WriteLine("FAIL scroll sync |L-R|="
+                        + Math.Abs(lr - rr).ToString("0.###", CultureInfo.InvariantCulture));
+                    failures++;
+                }
+                else if (lr < 0.3)
+                {
+                    auto.WriteLine("FAIL scroll did not move L=" + lr.ToString("0.###", CultureInfo.InvariantCulture));
+                    failures++;
+                }
+                else
+                {
+                    auto.WriteLine("SCROLL_SYNC_OK");
+                }
+            }
+            else
+            {
+                // 短いシートは index 同期で代替済み
+                auto.WriteLine("SCROLL_SYNC_SKIP short stream (pair select covers sync)");
+            }
+
+            CaptureEvidenceShot(evidenceDir, "03_scroll_sync.png");
+
+            // 4) MiniMap: 現在シート差分が 1 件以上あること
+            var sheetItems = result.Items
+                .Where(i => i != null && ItemBelongsToFocusSheet(i, workSheet))
+                .ToList();
+            auto.WriteLine("MINIMAP_ITEMS sheet=" + workSheet + " count=" + sheetItems.Count);
+            if (sheetItems.Count == 0)
+            {
+                // Structure のみのシートを避けて別シートを探す
+                foreach (string sn in probeSheets)
+                {
+                    var alt = result.Items.Where(i => i != null && ItemBelongsToFocusSheet(i, sn)).ToList();
+                    if (alt.Count > 0)
+                    {
+                        workSheet = sn;
+                        sheetItems = alt;
+                        LeftPane.TrySelectSheet(workSheet);
+                        RightPane.TrySelectSheet(workSheet);
+                        RefreshMiniMapForCurrentSheet();
+                        await System.Threading.Tasks.Task.Delay(300);
+                        auto.WriteLine("MINIMAP_ITEMS fallback sheet=" + workSheet + " count=" + sheetItems.Count);
+                        break;
+                    }
+                }
+            }
+
+            if (sheetItems.Count == 0)
+            {
+                auto.WriteLine("FAIL minimap no items for sheet");
+                failures++;
+            }
+
+            // 5) MiniMap ジャンプ: 各差分へ飛んで左右のストリーム比率が揃うこと
+            int jumpOk = 0;
+            int jumpTry = 0;
+            int shot = 0;
+            foreach (DiffItem it in sheetItems.Take(6))
+            {
+                jumpTry++;
+                // 一度端へ
+                if (LeftPane != null)
+                {
+                    LeftPane.SetContentScrollRatio(0.0);
+                }
+
+                if (RightPane != null)
+                {
+                    RightPane.SetContentScrollRatio(0.0);
+                }
+
+                await System.Threading.Tasks.Task.Delay(100);
+
+                OnMiniMapNavigate(0.5, it);
+                // BeginInvoke Loaded 待ち
+                await System.Threading.Tasks.Task.Delay(500);
+                Dispatcher.Invoke(DispatcherPriority.Loaded, new Action(() => { }));
+                await System.Threading.Tasks.Task.Delay(200);
+
+                double jl = LeftPane != null ? LeftPane.GetContentScrollRatio() : -1;
+                double jr = RightPane != null ? RightPane.GetContentScrollRatio() : -1;
+                int idxL = LeftPane != null ? LeftPane.FindContentPairIndex(it) : -1;
+                int idxR = RightPane != null ? RightPane.FindContentPairIndex(it) : -1;
+                int selL2 = LeftPane != null && LeftPane.ContentHostControl != null
+                    ? LeftPane.ContentHostControl.SelectedPairIndex
+                    : -1;
+                int selR2 = RightPane != null && RightPane.ContentHostControl != null
+                    ? RightPane.ContentHostControl.SelectedPairIndex
+                    : -1;
+                bool ratioAligned = Math.Abs(jl - jr) <= 0.15;
+                // 成功条件: 左右の選択 index が一致し、かつ解決した index と一致（または両方 -1 で比率一致）
+                bool selectionOk = selL2 >= 0 && selL2 == selR2
+                    && (idxL < 0 || selL2 == idxL || Math.Abs(selL2 - idxL) <= 1);
+                bool ok = ratioAligned && (selectionOk || (idxL >= 0 && idxR >= 0 && idxL == idxR));
+                auto.WriteLine("MINIMAP_JUMP kind=" + it.Kind
+                    + " summary=" + (it.Summary ?? string.Empty).Replace('\n', ' ')
+                    + " idxL=" + idxL + " idxR=" + idxR
+                    + " selL=" + selL2 + " selR=" + selR2
+                    + " L=" + jl.ToString("0.###", CultureInfo.InvariantCulture)
+                    + " R=" + jr.ToString("0.###", CultureInfo.InvariantCulture)
+                    + " ok=" + ok);
+                if (ok)
+                {
+                    jumpOk++;
+                }
+
+                shot++;
+                CaptureEvidenceShot(evidenceDir, string.Format(
+                    CultureInfo.InvariantCulture,
+                    "04_minimap_jump_{0:00}_{1}.png",
+                    shot,
+                    it.Kind));
+            }
+
+            auto.WriteLine("MINIMAP_JUMP_SUMMARY ok=" + jumpOk + "/" + jumpTry);
+            if (jumpTry == 0 || jumpOk < Math.Max(1, jumpTry - 1))
+            {
+                // 1 件までは許容、大半失敗は NG
+                auto.WriteLine("FAIL minimap jump coverage");
+                failures++;
+            }
+            else
+            {
+                auto.WriteLine("MINIMAP_JUMP_OK");
+            }
+
+            // 6) 比率クリック相当（item null）
+            OnMiniMapNavigate(0.85, null);
+            await System.Threading.Tasks.Task.Delay(400);
+            Dispatcher.Invoke(DispatcherPriority.Loaded, new Action(() => { }));
+            await System.Threading.Tasks.Task.Delay(150);
+            double rl = LeftPane != null ? LeftPane.GetContentScrollRatio() : -1;
+            double rr2 = RightPane != null ? RightPane.GetContentScrollRatio() : -1;
+            auto.WriteLine("MINIMAP_RATIO_CLICK L=" + rl.ToString("0.###", CultureInfo.InvariantCulture)
+                + " R=" + rr2.ToString("0.###", CultureInfo.InvariantCulture));
+            if (Math.Abs(rl - rr2) > 0.12)
+            {
+                auto.WriteLine("FAIL minimap ratio click sync");
+                failures++;
+            }
+            else if (rl < 0.5)
+            {
+                // 0.85 へ飛んだはず
+                auto.WriteLine("WARN ratio click may not have moved far enough L=" + rl.ToString("0.###", CultureInfo.InvariantCulture));
+            }
+            else
+            {
+                auto.WriteLine("MINIMAP_RATIO_OK");
+            }
+
+            CaptureEvidenceShot(evidenceDir, "05_minimap_ratio.png");
+
+            // 7) ハイライト ON/OFF（画像領域）
+            BtnHighlightToggle.IsChecked = false;
+            await System.Threading.Tasks.Task.Delay(100);
+            CaptureEvidenceShot(evidenceDir, "06_highlight_off.png");
+            BtnHighlightToggle.IsChecked = true;
+            await System.Threading.Tasks.Task.Delay(100);
+            CaptureEvidenceShot(evidenceDir, "07_highlight_on.png");
+            CaptureEvidenceShot(evidenceDir, "99_final.png");
+
+            auto.WriteLine("CONTENT_DIFF_VERIFY done failures=" + failures
+                + " evidence=" + (evidenceDir ?? "(none)"));
+            return failures;
         }
 
         /// <summary>

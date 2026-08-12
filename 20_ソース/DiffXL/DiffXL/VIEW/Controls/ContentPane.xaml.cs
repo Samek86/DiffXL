@@ -51,6 +51,11 @@ namespace DiffXL.VIEW.Controls
         private bool _suppressScrollEvent;
 
         /// <summary>
+        /// 現在選択中のペア index（MiniMap ジャンプ強調用。-1=なし）。
+        /// </summary>
+        private int _selectedPairIndex = -1;
+
+        /// <summary>
         /// コンストラクタ。
         /// </summary>
         public ContentPane()
@@ -231,8 +236,16 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// ペア index の要素を表示領域へスクロールする。
-        /// BringIntoView ではなく VerticalOffset を直接設定して左右同期可能にする。
+        /// 選択中のストリーム index（-1 は未選択）。
+        /// </summary>
+        public int SelectedPairIndex
+        {
+            get { return _selectedPairIndex; }
+        }
+
+        /// <summary>
+        /// ペア index の要素を表示領域へスクロールし、選択枠で強調する。
+        /// ScrollableHeight=0 でも強調は必ず行う。
         /// </summary>
         public bool ScrollToPairIndex(int index)
         {
@@ -247,13 +260,12 @@ namespace DiffXL.VIEW.Controls
                 return false;
             }
 
-            // レイアウト未確定時は遅延実行
-            if (!el.IsLoaded || el.ActualHeight <= 0)
-            {
-                el.UpdateLayout();
-                StreamHost.UpdateLayout();
-                StreamScroll.UpdateLayout();
-            }
+            // レイアウト未確定時は強制更新
+            el.UpdateLayout();
+            StreamHost.UpdateLayout();
+            StreamScroll.UpdateLayout();
+
+            ApplyPairSelection(index);
 
             try
             {
@@ -261,38 +273,70 @@ namespace DiffXL.VIEW.Controls
                 Point top = transform.Transform(new Point(0, 0));
                 double target = Math.Max(0, top.Y - 8);
                 double max = Math.Max(0, StreamScroll.ScrollableHeight);
-                if (target > max)
+                if (max > 0.5)
                 {
-                    target = max;
-                }
+                    if (target > max)
+                    {
+                        target = max;
+                    }
 
-                _suppressScrollEvent = true;
-                try
-                {
-                    StreamScroll.ScrollToVerticalOffset(target);
+                    _suppressScrollEvent = true;
+                    try
+                    {
+                        StreamScroll.ScrollToVerticalOffset(target);
+                    }
+                    finally
+                    {
+                        _suppressScrollEvent = false;
+                    }
                 }
-                finally
+                else
                 {
-                    _suppressScrollEvent = false;
+                    // スクロール不要でも要素を可視域へ
+                    el.BringIntoView();
                 }
 
                 return true;
             }
             catch
             {
-                // Transform 失敗時のフォールバック
-                _suppressScrollEvent = true;
                 try
                 {
                     el.BringIntoView();
                 }
-                finally
+                catch
                 {
-                    _suppressScrollEvent = false;
+                    // ignore
                 }
 
                 return true;
             }
+        }
+
+        /// <summary>
+        /// 選択枠を付け替える（青枠・少し太く）。
+        /// </summary>
+        private void ApplyPairSelection(int index)
+        {
+            for (int i = 0; i < _pairElements.Count; i++)
+            {
+                var border = _pairElements[i] as Border;
+                if (border == null)
+                {
+                    continue;
+                }
+
+                bool selected = i == index;
+                border.BorderBrush = selected
+                    ? new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xEB))
+                    : new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB));
+                border.BorderThickness = new Thickness(selected ? 3 : 1);
+                border.Background = selected
+                    ? new SolidColorBrush(Color.FromRgb(0xEF, 0xF6, 0xFF))
+                    : new SolidColorBrush(Color.FromRgb(0xFF, 0xFF, 0xFF));
+            }
+
+            _selectedPairIndex = index;
         }
 
         /// <summary>
