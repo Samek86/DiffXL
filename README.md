@@ -2,7 +2,7 @@
 
 **2 つの Excel（`.xlsx`）を、見た目ごと並べて差分を見抜く** Windows デスクトップアプリです。
 
-[![Status](https://img.shields.io/badge/status-beta-yellow)](https://github.com/HandaJun/DiffXL)
+[![Status](https://img.shields.io/badge/status-beta-yellow)](https://github.com/Samek86/DiffXL)
 [![Version](https://img.shields.io/badge/version-0.1.0--beta.1-orange)](./VERSION)
 [![Platform](https://img.shields.io/badge/platform-Windows%20x64-blue)](#動作環境)
 [![Excel](https://img.shields.io/badge/Excel-required-red)](#動作環境)
@@ -67,7 +67,7 @@ DiffXL は、セルの値だけでなく **表・図形・埋め込み画像** �
 
 ## 使い方（ベータ）
 
-1. [Releases](https://github.com/HandaJun/DiffXL/releases) から `DiffXL.exe` を取得（または下記ビルド）
+1. [Releases](https://github.com/Samek86/DiffXL/releases) から `DiffXL.exe` を取得（または下記ビルド）
 2. 起動し、左右の `.xlsx` を選んで比較開始
 3. 差分は既定で **黄色・不透明度 50%** のオーバーレイ
 4. ツールバーやショートカットで **差分強調の ON/OFF**（再比較不要）
@@ -161,7 +161,7 @@ msbuild DiffXL.sln /t:Clean,Build /p:Configuration=Release /p:Platform=x64
 
 ## フィードバック
 
-- 不具合・要望: [GitHub Issues](https://github.com/HandaJun/DiffXL/issues)
+- 不具合・要望: [GitHub Issues](https://github.com/Samek86/DiffXL/issues)
 - 大きな変更を入れる場合は、Issue または議論のうえで `feature/*` ブランチを推奨
 
 ---

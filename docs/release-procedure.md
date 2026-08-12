@@ -17,7 +17,7 @@ AI エージェントは本手順を上から順に実行し、途中で省略�
 | 項目 | 要件 |
 |------|------|
 | Git | ローカルリポジトリがクリーン、またはリリース用変更のみ未コミット |
-| GitHub | `origin` が `https://github.com/HandaJun/DiffXL.git`（または同等） |
+| GitHub | `origin` が `https://github.com/Samek86/DiffXL.git`（または同等） |
 | CLI | `gh` がログイン済み（`gh auth status`） |
 | ビルド | Visual Studio 用 MSBuild が使える（.NET Framework 4.8 / WPF / x64） |
 | 環境 | Windows x64。検証時は Microsoft Excel（デスクトップ版）が必要 |
@@ -123,8 +123,8 @@ if ($prev) { git log "$prev..HEAD" --oneline } else { git log --oneline -30 }
 3. ファイル末尾の比較リンクを更新する。
 
 ```markdown
-[Unreleased]: https://github.com/HandaJun/DiffXL/compare/v0.2.0-beta.1...HEAD
-[0.2.0-beta.1]: https://github.com/HandaJun/DiffXL/releases/tag/v0.2.0-beta.1
+[Unreleased]: https://github.com/Samek86/DiffXL/compare/v0.2.0-beta.1...HEAD
+[0.2.0-beta.1]: https://github.com/Samek86/DiffXL/releases/tag/v0.2.0-beta.1
 ```
 
 （前回タグがある場合、前回分の compare リンクも一貫させる。）
@@ -280,7 +280,7 @@ Release 本文のテンプレ:
 
 ### フィードバック
 
-Issue で報告してください: https://github.com/HandaJun/DiffXL/issues
+Issue で報告してください: https://github.com/Samek86/DiffXL/issues
 ```
 
 - [ ] `--prerelease` をベータ／RC で付けた
@@ -355,5 +355,5 @@ Remove-Item release_notes.md -ErrorAction SilentlyContinue
 |------|----|
 | 初回ベータ | `0.1.0-beta.1` |
 | 日付 | 2026-08-12 |
-| リポジトリ | https://github.com/HandaJun/DiffXL |
+| リポジトリ | https://github.com/Samek86/DiffXL |
 | 備考 | リポジトリ公開とドキュメント整備を含む。以降のリリースはこの手順書に従う |

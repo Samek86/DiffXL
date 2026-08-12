@@ -49,5 +49,5 @@
 - 本バージョンは **ベータ版** です。API・比較結果・UI は今後変更される可能性があります。
 - 対象は Windows x64 / Microsoft Excel（デスクトップ版）必須 / `.xlsx` のみです。
 
-[Unreleased]: https://github.com/HandaJun/DiffXL/compare/v0.1.0-beta.1...HEAD
-[0.1.0-beta.1]: https://github.com/HandaJun/DiffXL/releases/tag/v0.1.0-beta.1
+[Unreleased]: https://github.com/Samek86/DiffXL/compare/v0.1.0-beta.1...HEAD
+[0.1.0-beta.1]: https://github.com/Samek86/DiffXL/releases/tag/v0.1.0-beta.1
