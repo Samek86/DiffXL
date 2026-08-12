@@ -231,11 +231,12 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// ペア index の要素を表示領域へ持ってくる。
+        /// ペア index の要素を表示領域へスクロールする。
+        /// BringIntoView ではなく VerticalOffset を直接設定して左右同期可能にする。
         /// </summary>
         public bool ScrollToPairIndex(int index)
         {
-            if (index < 0 || index >= _pairElements.Count)
+            if (index < 0 || index >= _pairElements.Count || StreamScroll == null || StreamHost == null)
             {
                 return false;
             }
@@ -246,27 +247,76 @@ namespace DiffXL.VIEW.Controls
                 return false;
             }
 
-            _suppressScrollEvent = true;
-            try
+            // レイアウト未確定時は遅延実行
+            if (!el.IsLoaded || el.ActualHeight <= 0)
             {
-                el.BringIntoView();
-            }
-            finally
-            {
-                _suppressScrollEvent = false;
+                el.UpdateLayout();
+                StreamHost.UpdateLayout();
+                StreamScroll.UpdateLayout();
             }
 
-            return true;
+            try
+            {
+                GeneralTransform transform = el.TransformToAncestor(StreamHost);
+                Point top = transform.Transform(new Point(0, 0));
+                double target = Math.Max(0, top.Y - 8);
+                double max = Math.Max(0, StreamScroll.ScrollableHeight);
+                if (target > max)
+                {
+                    target = max;
+                }
+
+                _suppressScrollEvent = true;
+                try
+                {
+                    StreamScroll.ScrollToVerticalOffset(target);
+                }
+                finally
+                {
+                    _suppressScrollEvent = false;
+                }
+
+                return true;
+            }
+            catch
+            {
+                // Transform 失敗時のフォールバック
+                _suppressScrollEvent = true;
+                try
+                {
+                    el.BringIntoView();
+                }
+                finally
+                {
+                    _suppressScrollEvent = false;
+                }
+
+                return true;
+            }
         }
 
         /// <summary>
-        /// DiffItem の OrderHint / アドレス行からジャンプする。
+        /// ストリーム比率 0..1 の位置へスクロール（MiniMap 空白クリック）。
+        /// </summary>
+        public void ScrollToStreamRatio(double ratio)
+        {
+            SetVerticalScrollRatio(ratio);
+        }
+
+        /// <summary>
+        /// DiffItem に対応するストリーム行へジャンプする。
         /// </summary>
         public bool ScrollToDiffItem(DiffItem item)
         {
             if (item == null)
             {
                 return false;
+            }
+
+            int index = FindPairIndexForDiffItem(item);
+            if (index >= 0)
+            {
+                return ScrollToPairIndex(index);
             }
 
             if (item.OrderHint > 0)
@@ -286,6 +336,146 @@ namespace DiffXL.VIEW.Controls
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// DiffItem から統一ストリームのペア index を解決する。
+        /// </summary>
+        public int FindPairIndexForDiffItem(DiffItem item)
+        {
+            if (item == null || _pairs == null || _pairs.Count == 0)
+            {
+                return -1;
+            }
+
+            // 1) 画像パス
+            if (item.Kind == DiffKind.Image
+                || item.Kind == DiffKind.ImageOnlyLeft
+                || item.Kind == DiffKind.ImageOnlyRight)
+            {
+                for (int i = 0; i < _pairs.Count; i++)
+                {
+                    ContentStreamPair p = _pairs[i];
+                    if (p == null)
+                    {
+                        continue;
+                    }
+
+                    if (BlockMatchesImage(p.Left, item) || BlockMatchesImage(p.Right, item))
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            // 2) テーブル ID
+            if (item.Kind == DiffKind.TableRowDelete
+                || item.Kind == DiffKind.TableRowInsert
+                || item.Kind == DiffKind.TableCellChange)
+            {
+                for (int i = 0; i < _pairs.Count; i++)
+                {
+                    ContentStreamPair p = _pairs[i];
+                    if (p == null)
+                    {
+                        continue;
+                    }
+
+                    if (BlockMatchesTable(p.Left, item) || BlockMatchesTable(p.Right, item))
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            // 3) 図形
+            if (item.Kind == DiffKind.Shape
+                || item.Kind == DiffKind.ShapeOnlyLeft
+                || item.Kind == DiffKind.ShapeOnlyRight)
+            {
+                for (int i = 0; i < _pairs.Count; i++)
+                {
+                    ContentStreamPair p = _pairs[i];
+                    if (p == null)
+                    {
+                        continue;
+                    }
+
+                    if ((p.Left != null && p.Left.Kind == ContentBlockKind.Shape)
+                        || (p.Right != null && p.Right.Kind == ContentBlockKind.Shape))
+                    {
+                        // 図形は複数あるので OrderHint で絞る
+                        continue;
+                    }
+                }
+            }
+
+            // 4) セル行（アドレスの行）
+            int row = TextDiffService.ParseAnchorRow(item.AddressLeft);
+            if (row <= 0)
+            {
+                row = TextDiffService.ParseAnchorRow(item.AddressRight);
+            }
+
+            if (row > 0)
+            {
+                for (int i = 0; i < _pairs.Count; i++)
+                {
+                    ContentStreamPair p = _pairs[i];
+                    if (p == null)
+                    {
+                        continue;
+                    }
+
+                    if ((p.Left != null && p.Left.Row == row)
+                        || (p.Right != null && p.Right.Row == row))
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            // 5) OrderHint 最近傍
+            if (item.OrderHint > 0)
+            {
+                return ContentStreamBuilder.FindNearestPairIndex(_pairs, item.OrderHint);
+            }
+
+            return -1;
+        }
+
+        private static bool BlockMatchesImage(ContentStreamBlock block, DiffItem item)
+        {
+            if (block == null || block.Kind != ContentBlockKind.Image || block.Image == null || item == null)
+            {
+                return false;
+            }
+
+            string path = block.Image.ExtractedPath;
+            if (string.IsNullOrEmpty(path))
+            {
+                return false;
+            }
+
+            return string.Equals(path, item.LeftImagePath, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(path, item.RightImagePath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool BlockMatchesTable(ContentStreamBlock block, DiffItem item)
+        {
+            if (block == null || block.Kind != ContentBlockKind.Table || block.Table == null || item == null)
+            {
+                return false;
+            }
+
+            string id = block.Table.Id;
+            if (string.IsNullOrEmpty(id))
+            {
+                return true; // 単一表想定
+            }
+
+            return string.Equals(id, item.TableIdLeft, StringComparison.Ordinal)
+                || string.Equals(id, item.TableIdRight, StringComparison.Ordinal);
         }
 
         /// <summary>

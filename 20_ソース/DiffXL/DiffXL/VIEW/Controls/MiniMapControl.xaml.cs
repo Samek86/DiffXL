@@ -553,19 +553,29 @@ namespace DiffXL.VIEW.Controls
                 return 0;
             }
 
-            int r = TextDiffService.ParseAnchorRow(item.AddressLeft ?? item.AddressRight);
+            int r = TextDiffService.ParseAnchorRow(item.AddressLeft);
+            if (r <= 0)
+            {
+                r = TextDiffService.ParseAnchorRow(item.AddressRight);
+            }
+
             if (r > 0)
             {
                 return r;
             }
 
+            // OrderHint は row*1000+col または pair*1000+offset。行は千の位以上を使う。
             if (item.OrderHint > 0)
             {
-                int mod = (int)Math.Round(item.OrderHint) % 1000;
-                if (mod > 0)
+                int oh = (int)Math.Round(item.OrderHint);
+                int asRow = oh / 1000;
+                if (asRow > 0)
                 {
-                    return mod;
+                    return asRow;
                 }
+
+                // 小さい値はそのまま行番号扱い
+                return Math.Max(1, oh);
             }
 
             return 0;

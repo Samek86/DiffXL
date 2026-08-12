@@ -50,7 +50,7 @@
                                     FontSize="11"
                                     Foreground="{Binding MarkerForeground}"
                                     Text="{Binding Marker}"
-                                    ToolTip="{Binding Tooltip}" />
+                                    ToolTip="{Binding RowToolTip}" />
                                 <ItemsControl ItemsSource="{Binding Cells}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

@@ -336,6 +336,22 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// DiffItem の統一ストリーム index（無ければ -1）。
+        /// </summary>
+        public int FindContentPairIndex(DiffItem item)
+        {
+            return ContentHost != null ? ContentHost.FindPairIndexForDiffItem(item) : -1;
+        }
+
+        /// <summary>
+        /// 統一ストリームのペア index へジャンプ。
+        /// </summary>
+        public bool ScrollContentToPairIndex(int index)
+        {
+            return ContentHost != null && ContentHost.ScrollToPairIndex(index);
+        }
+
+        /// <summary>
         /// 内容ストリームの縦スクロール変化（ユーザー操作）。
         /// </summary>
         public event Action<double> ContentScrollRatioChanged;
