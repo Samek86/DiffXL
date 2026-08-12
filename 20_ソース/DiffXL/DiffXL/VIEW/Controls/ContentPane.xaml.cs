@@ -4,40 +4,26 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using DiffXL.LOGIC.Diff;
 
 namespace DiffXL.VIEW.Controls
 {
     /// <summary>
-    /// 1 シート分の内容ベース比較表示ホスト（セル／テーブル／画像／図形タブ）。
-    /// Excel 埋め込みは使わない。
+    /// シート内容をドキュメント順の統一ストリームで表示する（セル・表・画像・図形を 1 本に並べる）。
+    /// 左右は同一アライン列を共有し、スクロール／ジャンプを同期可能にする。
     /// </summary>
     public partial class ContentPane : UserControl
     {
         /// <summary>
-        /// テーブル間マッチの粗類似度しきい値（TableCompareService と揃える）。
+        /// 現在のアライン済みストリーム（左右共通の列）。
         /// </summary>
-        private const double TableMatchThreshold = 0.3;
+        private IList<ContentStreamPair> _pairs = new List<ContentStreamPair>();
 
         /// <summary>
-        /// テーブル Skip コスト。
+        /// 各ペア行のホスト要素（ScrollIntoView 用）。
         /// </summary>
-        private const double TableSkipCost = 0.4;
-
-        /// <summary>
-        /// 現在表示中のシート。
-        /// </summary>
-        private SheetContent _sheet;
-
-        /// <summary>
-        /// 相手側シート（行アライン用。null 可）。
-        /// </summary>
-        private SheetContent _partnerSheet;
-
-        /// <summary>
-        /// 現在シートに紐づく差分。
-        /// </summary>
-        private IList<DiffItem> _sheetDiffs = new List<DiffItem>();
+        private readonly List<FrameworkElement> _pairElements = new List<FrameworkElement>();
 
         /// <summary>
         /// 左ペインかどうか。
@@ -45,14 +31,24 @@ namespace DiffXL.VIEW.Controls
         private bool _isLeft = true;
 
         /// <summary>
-        /// 画像ハイライト（枠・塗り）の表示フラグ。トグルで切替、再比較不要。
+        /// シート差分。
+        /// </summary>
+        private IList<DiffItem> _sheetDiffs = new List<DiffItem>();
+
+        /// <summary>
+        /// 画像ハイライト表示。
         /// </summary>
         private bool _highlightVisible = true;
 
         /// <summary>
-        /// 現在表示中の ImagePairView 一覧（トグル伝播用）。
+        /// 画像ビュー一覧。
         /// </summary>
         private readonly List<ImagePairView> _imagePairViews = new List<ImagePairView>();
+
+        /// <summary>
+        /// スクロール同期中の再入防止。
+        /// </summary>
+        private bool _suppressScrollEvent;
 
         /// <summary>
         /// コンストラクタ。
@@ -63,7 +59,12 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// 画像ハイライトの表示／非表示。画像本体は残し枠・塗りだけ切替（再比較不要）。
+        /// 縦スクロール比率 0..1 が変化した（ユーザー操作）。
+        /// </summary>
+        public event Action<double> VerticalScrollRatioChanged;
+
+        /// <summary>
+        /// 画像ハイライト表示中か。
         /// </summary>
         public bool HighlightVisible
         {
@@ -71,9 +72,29 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// 画像ハイライト表示を全 ImagePairView に伝播する。
+        /// アライン済みペア数。
         /// </summary>
-        /// <param name="visible">表示するなら true</param>
+        public int PairCount
+        {
+            get { return _pairs != null ? _pairs.Count : 0; }
+        }
+
+        /// <summary>
+        /// 現在のストリームペア（読み取り用）。
+        /// </summary>
+        public IList<ContentStreamPair> Pairs
+        {
+            get { return _pairs; }
+        }
+
+        /// <summary>
+        /// 表示中シート名。
+        /// </summary>
+        public string SheetName { get; private set; }
+
+        /// <summary>
+        /// 画像ハイライト表示を伝播する。
+        /// </summary>
         public void SetHighlightVisible(bool visible)
         {
             _highlightVisible = visible;
@@ -87,7 +108,7 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// 設定の画像ハイライト色を全ペアに再適用する。
+        /// 設定の画像ハイライト色を再適用する。
         /// </summary>
         public void RefreshImageHighlightStyle()
         {
@@ -101,381 +122,444 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
-        /// 表示中シート名。
+        /// 互換: 旧 API（相手シートなし）。
         /// </summary>
-        public string SheetName
-        {
-            get { return _sheet != null ? _sheet.Name : null; }
-        }
-
-        /// <summary>
-        /// シート内容と差分を読み込み、各タブを更新する。
-        /// </summary>
-        /// <param name="sheet">シート内容（null 可）</param>
-        /// <param name="sheetDiffs">このシート関連の差分</param>
-        /// <param name="isLeft">左ペインなら true</param>
         public void Load(SheetContent sheet, IList<DiffItem> sheetDiffs, bool isLeft)
         {
             Load(sheet, sheetDiffs, isLeft, partnerSheet: null);
         }
 
         /// <summary>
-        /// シート内容・相手シート・差分を読み込み、各タブを更新する。
+        /// シート内容を統一ストリームとして読み込む。
+        /// 左右は絶対の left/right としてアラインし、自側だけ描画する。
         /// </summary>
-        /// <param name="sheet">シート内容（null 可）</param>
-        /// <param name="sheetDiffs">このシート関連の差分</param>
-        /// <param name="isLeft">左ペインなら true</param>
-        /// <param name="partnerSheet">相手側シート（テーブル行アライン用。null 可）</param>
+        /// <param name="sheet">自側シート</param>
+        /// <param name="sheetDiffs">差分</param>
+        /// <param name="isLeft">左ペインか</param>
+        /// <param name="partnerSheet">相手シート</param>
         public void Load(
             SheetContent sheet,
             IList<DiffItem> sheetDiffs,
             bool isLeft,
             SheetContent partnerSheet)
         {
-            _sheet = sheet;
-            _partnerSheet = partnerSheet;
-            _sheetDiffs = sheetDiffs ?? new List<DiffItem>();
             _isLeft = isLeft;
+            _sheetDiffs = sheetDiffs ?? new List<DiffItem>();
+            SheetName = sheet != null ? sheet.Name : null;
+
+            SheetContent leftSheet = isLeft ? sheet : partnerSheet;
+            SheetContent rightSheet = isLeft ? partnerSheet : sheet;
+
+            IList<ContentStreamBlock> leftBlocks = ContentStreamBuilder.Build(leftSheet);
+            IList<ContentStreamBlock> rightBlocks = ContentStreamBuilder.Build(rightSheet);
+            _pairs = ContentStreamBuilder.Align(leftBlocks, rightBlocks);
 
             string side = isLeft ? "左" : "右";
-            if (sheet == null)
-            {
-                HeaderText.Text = side + " · シートなし";
-                CellsSummary.Text = "セル（テーブル外）: —";
-                TablesSummary.Text = "テーブル: —";
-                ImagesSummary.Text = "画像: —";
-                ShapesSummary.Text = "図形: —";
-                CellsList.ItemsSource = null;
-                ClearTablesHost();
-                ClearImagesHost();
-                ShapesList.ItemsSource = null;
-                return;
-            }
-
-            int cellCount = sheet.LooseCells != null ? sheet.LooseCells.Count : 0;
-            int tableCount = sheet.Tables != null ? sheet.Tables.Count : 0;
-            int imageCount = sheet.Images != null ? sheet.Images.Count : 0;
-            int shapeCount = sheet.Shapes != null ? sheet.Shapes.Count : 0;
-            int diffCount = _sheetDiffs != null ? _sheetDiffs.Count : 0;
-
+            int selfBlocks = isLeft ? leftBlocks.Count : rightBlocks.Count;
+            int diffCount = _sheetDiffs.Count;
             HeaderText.Text = string.Format(
                 CultureInfo.InvariantCulture,
-                "{0} · シート「{1}」 · 差分 {2} 件 · セル{3} / 表{4} / 画像{5} / 図形{6}",
+                "{0} · シート「{1}」 · ブロック {2} · 対応行 {3} · 差分 {4} 件（ドキュメント順・統一表示）",
                 side,
-                sheet.Name ?? "（無名）",
-                diffCount,
-                cellCount,
-                tableCount,
-                imageCount,
-                shapeCount);
+                SheetName ?? "（なし）",
+                selfBlocks,
+                _pairs.Count,
+                diffCount);
 
-            LoadCellsTab(sheet);
-            LoadTablesTab(sheet, partnerSheet);
-            LoadImagesTab(sheet, partnerSheet);
-            LoadShapesTab(sheet);
+            RebuildStream();
         }
 
         /// <summary>
-        /// セルタブ（テーブル外セル＋関連差分のプレースホルダ）。
+        /// 縦スクロール比率 0..1 を取得する。
         /// </summary>
-        private void LoadCellsTab(SheetContent sheet)
+        public double GetVerticalScrollRatio()
         {
-            var lines = new List<string>();
-            int loose = sheet.LooseCells != null ? sheet.LooseCells.Count : 0;
-            CellsSummary.Text = string.Format(
-                CultureInfo.InvariantCulture,
-                "セル（テーブル外）: {0} 件 · 関連差分 {1} 件",
-                loose,
-                CountDiffs(DiffKind.Text, DiffKind.Background));
-
-            if (sheet.LooseCells != null)
+            if (StreamScroll == null)
             {
-                int shown = 0;
-                foreach (CellContent cell in sheet.LooseCells)
-                {
-                    if (cell == null)
-                    {
-                        continue;
-                    }
-
-                    lines.Add(FormatCellLine(cell));
-                    shown++;
-                    if (shown >= 200)
-                    {
-                        lines.Add("… 以降省略（最大 200 件表示）");
-                        break;
-                    }
-                }
+                return 0;
             }
 
-            foreach (DiffItem d in EnumerateDiffs(DiffKind.Text, DiffKind.Background))
+            double extent = StreamScroll.ScrollableHeight;
+            if (extent <= 0.5)
             {
-                lines.Add(FormatDiffLine(d));
+                return 0;
             }
 
-            if (lines.Count == 0)
-            {
-                lines.Add("（セルなし）");
-            }
-
-            CellsList.ItemsSource = lines;
+            return Math.Max(0, Math.Min(1, StreamScroll.VerticalOffset / extent));
         }
 
         /// <summary>
-        /// テーブルタブ: 対応テーブルごとに TableDiffGrid を配置する。
+        /// 縦スクロール比率 0..1 を設定する（同期用。イベントは出さない）。
         /// </summary>
-        private void LoadTablesTab(SheetContent sheet, SheetContent partnerSheet)
+        public void SetVerticalScrollRatio(double ratio)
         {
-            ClearTablesHost();
-
-            IList<TableBlock> selfTables =
-                sheet != null && sheet.Tables != null
-                    ? (IList<TableBlock>)sheet.Tables
-                    : (IList<TableBlock>)Array.Empty<TableBlock>();
-            IList<TableBlock> partnerTables =
-                partnerSheet != null && partnerSheet.Tables != null
-                    ? (IList<TableBlock>)partnerSheet.Tables
-                    : (IList<TableBlock>)Array.Empty<TableBlock>();
-
-            IList<TableBlock> leftTables = _isLeft ? selfTables : partnerTables;
-            IList<TableBlock> rightTables = _isLeft ? partnerTables : selfTables;
-
-            int tableDiffCount = CountDiffs(
-                DiffKind.TableRowDelete,
-                DiffKind.TableRowInsert,
-                DiffKind.TableCellChange);
-
-            TablesSummary.Text = string.Format(
-                CultureInfo.InvariantCulture,
-                "テーブル: 自側 {0} / 相手 {1} · 関連差分 {2} 件（行削除=赤 · 行追加=緑 · 相手欠落=空行 · セル変更=黄）",
-                selfTables.Count,
-                partnerTables.Count,
-                tableDiffCount);
-
-            if (leftTables.Count == 0 && rightTables.Count == 0)
+            if (StreamScroll == null)
             {
-                TablesHost.Children.Add(CreatePlainHint("（テーブルなし）"));
                 return;
             }
 
-            IList<AlignStep> tableSteps = SequenceAligner.Align(
-                leftTables.Count,
-                rightTables.Count,
-                (i, j) => TableSimilarity(leftTables[i], rightTables[j]),
-                TableMatchThreshold,
-                TableSkipCost);
-
-            int grids = 0;
-            foreach (AlignStep step in tableSteps)
+            double extent = StreamScroll.ScrollableHeight;
+            if (extent <= 0.5)
             {
-                if (step == null)
-                {
-                    continue;
-                }
-
-                TableBlock leftT = null;
-                TableBlock rightT = null;
-                if (step.Op == AlignOp.Match
-                    || step.Op == AlignOp.SkipLeft)
-                {
-                    if (step.LeftIndex >= 0 && step.LeftIndex < leftTables.Count)
-                    {
-                        leftT = leftTables[step.LeftIndex];
-                    }
-                }
-
-                if (step.Op == AlignOp.Match
-                    || step.Op == AlignOp.SkipRight)
-                {
-                    if (step.RightIndex >= 0 && step.RightIndex < rightTables.Count)
-                    {
-                        rightT = rightTables[step.RightIndex];
-                    }
-                }
-
-                // 片側のみテーブルでもギャップ行を出す（left/right どちらかがあれば表示）
-                if (leftT == null && rightT == null)
-                {
-                    continue;
-                }
-
-                IList<DiffItem> tableDiffs = FilterDiffsForTable(leftT, rightT);
-                var grid = new TableDiffGrid();
-                grid.Load(leftT, rightT, tableDiffs, _isLeft);
-                TablesHost.Children.Add(grid);
-                grids++;
-            }
-
-            if (grids == 0)
-            {
-                TablesHost.Children.Add(CreatePlainHint("（表示するテーブルなし）"));
-            }
-        }
-
-        /// <summary>
-        /// 画像タブ: AlignStep 順の ImagePairView を配置する。
-        /// Match は部分差領域を赤 3px＋黄 50% で重ね、Skip は片側のみ／ギャップ。
-        /// </summary>
-        private void LoadImagesTab(SheetContent sheet, SheetContent partnerSheet)
-        {
-            ClearImagesHost();
-
-            IList<EmbeddedImage> selfImages =
-                sheet != null && sheet.Images != null
-                    ? (IList<EmbeddedImage>)sheet.Images
-                    : (IList<EmbeddedImage>)Array.Empty<EmbeddedImage>();
-            IList<EmbeddedImage> partnerImages =
-                partnerSheet != null && partnerSheet.Images != null
-                    ? (IList<EmbeddedImage>)partnerSheet.Images
-                    : (IList<EmbeddedImage>)Array.Empty<EmbeddedImage>();
-
-            IList<EmbeddedImage> leftImages = _isLeft ? selfImages : partnerImages;
-            IList<EmbeddedImage> rightImages = _isLeft ? partnerImages : selfImages;
-
-            int imageDiffCount = CountDiffs(
-                DiffKind.Image, DiffKind.ImageOnlyLeft, DiffKind.ImageOnlyRight);
-            int regionTotal = 0;
-            foreach (DiffItem d in EnumerateDiffs(DiffKind.Image))
-            {
-                if (d != null && d.HighlightRegions != null)
-                {
-                    regionTotal += d.HighlightRegions.Count;
-                }
-            }
-
-            ImagesSummary.Text = string.Format(
-                CultureInfo.InvariantCulture,
-                "画像: 自側 {0} / 相手 {1} · 関連差分 {2} 件 · 領域 {3} · ハイライト {4}（赤枠3px＋黄50%・トグル可）",
-                selfImages.Count,
-                partnerImages.Count,
-                imageDiffCount,
-                regionTotal,
-                _highlightVisible ? "ON" : "OFF");
-
-            if (leftImages.Count == 0 && rightImages.Count == 0)
-            {
-                ImagesHost.Children.Add(CreatePlainHint("（画像なし）"));
                 return;
             }
 
-            IList<AlignStep> steps;
+            double target = Math.Max(0, Math.Min(1, ratio)) * extent;
+            if (Math.Abs(StreamScroll.VerticalOffset - target) < 1.0)
+            {
+                return;
+            }
+
+            _suppressScrollEvent = true;
             try
             {
-                steps = ImageSequenceAligner.Align(leftImages, rightImages);
+                StreamScroll.ScrollToVerticalOffset(target);
             }
-            catch
+            finally
             {
-                // アライン失敗時は自側を単純列挙
-                steps = BuildFallbackImageSteps(leftImages.Count, rightImages.Count, _isLeft);
-            }
-
-            int pairs = 0;
-            foreach (AlignStep step in steps)
-            {
-                if (step == null)
-                {
-                    continue;
-                }
-
-                EmbeddedImage leftImg = null;
-                EmbeddedImage rightImg = null;
-                if (step.Op == AlignOp.Match || step.Op == AlignOp.SkipLeft)
-                {
-                    if (step.LeftIndex >= 0 && step.LeftIndex < leftImages.Count)
-                    {
-                        leftImg = leftImages[step.LeftIndex];
-                    }
-                }
-
-                if (step.Op == AlignOp.Match || step.Op == AlignOp.SkipRight)
-                {
-                    if (step.RightIndex >= 0 && step.RightIndex < rightImages.Count)
-                    {
-                        rightImg = rightImages[step.RightIndex];
-                    }
-                }
-
-                if (leftImg == null && rightImg == null)
-                {
-                    continue;
-                }
-
-                DiffItem related = FindImageDiff(leftImg, rightImg, step.Op);
-                var view = new ImagePairView();
-                view.Load(leftImg, rightImg, related, _isLeft, _highlightVisible);
-                ImagesHost.Children.Add(view);
-                _imagePairViews.Add(view);
-                pairs++;
-            }
-
-            if (pairs == 0)
-            {
-                ImagesHost.Children.Add(CreatePlainHint("（表示する画像なし）"));
+                _suppressScrollEvent = false;
             }
         }
 
         /// <summary>
-        /// 画像ホストを空にする。
+        /// OrderHint に最も近いブロックへスクロールする（MiniMap 連携）。
         /// </summary>
-        private void ClearImagesHost()
+        public bool ScrollToOrderHint(double orderHint)
         {
+            int index = ContentStreamBuilder.FindNearestPairIndex(_pairs, orderHint);
+            return ScrollToPairIndex(index);
+        }
+
+        /// <summary>
+        /// ペア index の要素を表示領域へ持ってくる。
+        /// </summary>
+        public bool ScrollToPairIndex(int index)
+        {
+            if (index < 0 || index >= _pairElements.Count)
+            {
+                return false;
+            }
+
+            FrameworkElement el = _pairElements[index];
+            if (el == null)
+            {
+                return false;
+            }
+
+            _suppressScrollEvent = true;
+            try
+            {
+                el.BringIntoView();
+            }
+            finally
+            {
+                _suppressScrollEvent = false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// DiffItem の OrderHint / アドレス行からジャンプする。
+        /// </summary>
+        public bool ScrollToDiffItem(DiffItem item)
+        {
+            if (item == null)
+            {
+                return false;
+            }
+
+            if (item.OrderHint > 0)
+            {
+                return ScrollToOrderHint(item.OrderHint);
+            }
+
+            int row = TextDiffService.ParseAnchorRow(item.AddressLeft);
+            if (row <= 0)
+            {
+                row = TextDiffService.ParseAnchorRow(item.AddressRight);
+            }
+
+            if (row > 0)
+            {
+                return ScrollToOrderHint(row * 1000.0);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// ストリーム UI を再構築する。
+        /// </summary>
+        private void RebuildStream()
+        {
+            StreamHost.Children.Clear();
+            _pairElements.Clear();
             _imagePairViews.Clear();
-            if (ImagesHost != null)
+
+            if (_pairs == null || _pairs.Count == 0)
             {
-                ImagesHost.Children.Clear();
+                StreamHost.Children.Add(CreateHint("（表示する内容がありません）"));
+                return;
+            }
+
+            for (int i = 0; i < _pairs.Count; i++)
+            {
+                ContentStreamPair pair = _pairs[i];
+                if (pair == null)
+                {
+                    continue;
+                }
+
+                ContentStreamBlock self = _isLeft ? pair.Left : pair.Right;
+                ContentStreamBlock partner = _isLeft ? pair.Right : pair.Left;
+                bool isGap = self == null;
+
+                FrameworkElement blockUi;
+                if (isGap)
+                {
+                    blockUi = CreateGapBlock(pair, partner);
+                }
+                else
+                {
+                    blockUi = CreateBlockUi(pair, self, partner);
+                }
+
+                // 外側ラッパで index を保持
+                var wrap = new Border
+                {
+                    Tag = i,
+                    Margin = new Thickness(0, 0, 0, 10),
+                    BorderBrush = isGap
+                        ? new SolidColorBrush(Color.FromRgb(0x4B, 0x55, 0x63))
+                        : new SolidColorBrush(Color.FromRgb(0x37, 0x41, 0x51)),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(6),
+                    Background = isGap
+                        ? new SolidColorBrush(Color.FromRgb(0x0B, 0x12, 0x20))
+                        : new SolidColorBrush(Color.FromRgb(0x11, 0x18, 0x27)),
+                    Child = blockUi
+                };
+                StreamHost.Children.Add(wrap);
+                _pairElements.Add(wrap);
             }
         }
 
         /// <summary>
-        /// Align 失敗時のフォールバック AlignStep 列。
+        /// 自側ブロックの UI を生成する。
         /// </summary>
-        private static IList<AlignStep> BuildFallbackImageSteps(int leftCount, int rightCount, bool isLeft)
+        private FrameworkElement CreateBlockUi(
+            ContentStreamPair pair,
+            ContentStreamBlock self,
+            ContentStreamBlock partner)
         {
-            var steps = new List<AlignStep>();
-            if (isLeft)
+            var panel = new StackPanel { Margin = new Thickness(8) };
+            panel.Children.Add(CreateKindHeader(self, pair.Op));
+
+            switch (self.Kind)
             {
-                for (int i = 0; i < leftCount; i++)
-                {
-                    steps.Add(new AlignStep
+                case ContentBlockKind.LooseRow:
+                    panel.Children.Add(CreateLooseRowUi(self));
+                    break;
+                case ContentBlockKind.Table:
                     {
-                        Op = AlignOp.SkipLeft,
-                        LeftIndex = i,
-                        RightIndex = -1
-                    });
-                }
-            }
-            else
-            {
-                for (int j = 0; j < rightCount; j++)
-                {
-                    steps.Add(new AlignStep
+                        TableBlock leftT = _isLeft ? self.Table : (partner != null ? partner.Table : null);
+                        TableBlock rightT = _isLeft ? (partner != null ? partner.Table : null) : self.Table;
+                        // 片側欠落は partner null
+                        if (!_isLeft)
+                        {
+                            leftT = partner != null ? partner.Table : null;
+                            rightT = self.Table;
+                        }
+                        else
+                        {
+                            leftT = self.Table;
+                            rightT = partner != null ? partner.Table : null;
+                        }
+
+                        IList<DiffItem> tableDiffs = FilterDiffsForTable(leftT, rightT);
+                        var grid = new TableDiffGrid();
+                        grid.Load(leftT, rightT, tableDiffs, _isLeft);
+                        panel.Children.Add(grid);
+                    }
+                    break;
+                case ContentBlockKind.Image:
                     {
-                        Op = AlignOp.SkipRight,
-                        LeftIndex = -1,
-                        RightIndex = j
-                    });
-                }
+                        EmbeddedImage leftImg = _isLeft ? self.Image : (partner != null ? partner.Image : null);
+                        EmbeddedImage rightImg = _isLeft ? (partner != null ? partner.Image : null) : self.Image;
+                        if (!_isLeft)
+                        {
+                            leftImg = partner != null ? partner.Image : null;
+                            rightImg = self.Image;
+                        }
+
+                        DiffItem related = FindImageDiff(leftImg, rightImg, pair.Op);
+                        var view = new ImagePairView();
+                        view.Load(leftImg, rightImg, related, _isLeft, _highlightVisible);
+                        _imagePairViews.Add(view);
+                        panel.Children.Add(view);
+                    }
+                    break;
+                case ContentBlockKind.Shape:
+                    panel.Children.Add(CreateShapeUi(self));
+                    break;
             }
 
-            return steps;
+            return panel;
         }
 
         /// <summary>
-        /// 画像ペア／片側に対応する DiffItem を探す。
+        /// 相手のみ存在する行のギャップ表示。
         /// </summary>
-        private DiffItem FindImageDiff(
-            EmbeddedImage leftImg,
-            EmbeddedImage rightImg,
-            AlignOp op)
+        private FrameworkElement CreateGapBlock(ContentStreamPair pair, ContentStreamBlock partner)
         {
-            if (_sheetDiffs == null)
+            string kind = partner != null ? KindLabel(partner.Kind) : "内容";
+            string detail = partner != null
+                ? string.Format(
+                    CultureInfo.InvariantCulture,
+                    "相手側: {0} (行{1})",
+                    kind,
+                    partner.Row)
+                : "相手側のみ";
+
+            var panel = new StackPanel
             {
-                return null;
+                Margin = new Thickness(12),
+                MinHeight = 48
+            };
+            panel.Children.Add(new TextBlock
+            {
+                Text = "∅ この側になし（" + kind + "）",
+                Foreground = new SolidColorBrush(Color.FromRgb(0xF8, 0xB4, 0xB4)),
+                FontWeight = FontWeights.SemiBold,
+                FontSize = 12
+            });
+            panel.Children.Add(new TextBlock
+            {
+                Text = detail + " · 対応を保つための空き行",
+                Foreground = new SolidColorBrush(Color.FromRgb(0x9C, 0xA3, 0xAF)),
+                FontSize = 11,
+                Margin = new Thickness(0, 4, 0, 0),
+                TextWrapping = TextWrapping.Wrap
+            });
+            return panel;
+        }
+
+        private UIElement CreateKindHeader(ContentStreamBlock block, AlignOp op)
+        {
+            string mark = op == AlignOp.Match ? "＝" : (op == AlignOp.SkipLeft || op == AlignOp.SkipRight ? "±" : "·");
+            string text = string.Format(
+                CultureInfo.InvariantCulture,
+                "{0} {1} · 行{2} 列{3}",
+                mark,
+                KindLabel(block.Kind),
+                block.Row,
+                block.Column);
+            return new TextBlock
+            {
+                Text = text,
+                Foreground = new SolidColorBrush(Color.FromRgb(0x93, 0xC5, 0xFD)),
+                FontSize = 11,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 6)
+            };
+        }
+
+        private static string KindLabel(ContentBlockKind kind)
+        {
+            switch (kind)
+            {
+                case ContentBlockKind.LooseRow:
+                    return "セル行";
+                case ContentBlockKind.Table:
+                    return "テーブル";
+                case ContentBlockKind.Image:
+                    return "画像";
+                case ContentBlockKind.Shape:
+                    return "図形";
+                default:
+                    return kind.ToString();
+            }
+        }
+
+        private UIElement CreateLooseRowUi(ContentStreamBlock block)
+        {
+            var panel = new StackPanel();
+            if (block.Cells == null || block.Cells.Count == 0)
+            {
+                panel.Children.Add(new TextBlock
+                {
+                    Text = "（空行）",
+                    Foreground = Brushes.Gray
+                });
+                return panel;
             }
 
-            string leftPath = leftImg != null ? leftImg.ExtractedPath : null;
-            string rightPath = rightImg != null ? rightImg.ExtractedPath : null;
+            foreach (CellContent cell in block.Cells)
+            {
+                if (cell == null)
+                {
+                    continue;
+                }
 
+                string bg = string.IsNullOrEmpty(cell.BackgroundArgb) ? "" : " bg=" + cell.BackgroundArgb;
+                string line = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "[{0}] {1}{2}",
+                    cell.Address ?? "?",
+                    cell.Text ?? string.Empty,
+                    bg);
+                bool isDiff = IsCellDiff(cell);
+                panel.Children.Add(new Border
+                {
+                    Margin = new Thickness(0, 0, 0, 3),
+                    Padding = new Thickness(8, 4, 8, 4),
+                    Background = isDiff
+                        ? new SolidColorBrush(Color.FromArgb(0x60, 0xFF, 0xFF, 0x00))
+                        : new SolidColorBrush(Color.FromRgb(0x1F, 0x29, 0x37)),
+                    CornerRadius = new CornerRadius(3),
+                    Child = new TextBlock
+                    {
+                        Text = line,
+                        Foreground = Brushes.White,
+                        FontFamily = new FontFamily("Consolas, Yu Gothic UI, sans-serif"),
+                        FontSize = 12,
+                        TextWrapping = TextWrapping.Wrap
+                    }
+                });
+            }
+
+            return panel;
+        }
+
+        private UIElement CreateShapeUi(ContentStreamBlock block)
+        {
+            ShapeContent s = block.Shape;
+            string text = s == null
+                ? "（図形）"
+                : string.Format(
+                    CultureInfo.InvariantCulture,
+                    "図形 {0} · {1} · 「{2}」",
+                    s.Kind ?? "?",
+                    s.Id ?? "",
+                    s.Text ?? "");
+            return new TextBlock
+            {
+                Text = text,
+                Foreground = Brushes.White,
+                FontSize = 12,
+                TextWrapping = TextWrapping.Wrap
+            };
+        }
+
+        private bool IsCellDiff(CellContent cell)
+        {
+            if (cell == null || _sheetDiffs == null)
+            {
+                return false;
+            }
+
+            string addr = cell.Address ?? string.Empty;
             foreach (DiffItem d in _sheetDiffs)
             {
                 if (d == null)
@@ -483,44 +567,108 @@ namespace DiffXL.VIEW.Controls
                     continue;
                 }
 
-                if (op == AlignOp.Match && d.Kind == DiffKind.Image)
+                if (d.Kind != DiffKind.Text && d.Kind != DiffKind.Background
+                    && d.Kind != DiffKind.TableCellChange)
                 {
-                    if (PathsEqual(d.LeftImagePath, leftPath)
-                        && PathsEqual(d.RightImagePath, rightPath))
-                    {
-                        return d;
-                    }
-
-                    // パス不一致でも片側パスが一致すれば候補
-                    if (!string.IsNullOrEmpty(leftPath)
-                        && PathsEqual(d.LeftImagePath, leftPath))
-                    {
-                        return d;
-                    }
-
-                    if (!string.IsNullOrEmpty(rightPath)
-                        && PathsEqual(d.RightImagePath, rightPath))
-                    {
-                        return d;
-                    }
+                    continue;
                 }
-                else if (op == AlignOp.SkipLeft && d.Kind == DiffKind.ImageOnlyLeft)
+
+                if (string.Equals(d.AddressLeft, addr, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(d.AddressRight, addr, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (PathsEqual(d.LeftImagePath, leftPath))
-                    {
-                        return d;
-                    }
+                    return true;
                 }
-                else if (op == AlignOp.SkipRight && d.Kind == DiffKind.ImageOnlyRight)
+
+                if (!string.IsNullOrEmpty(cell.Text)
+                    && d.Summary != null
+                    && d.Summary.IndexOf(cell.Text, StringComparison.Ordinal) >= 0)
                 {
-                    if (PathsEqual(d.RightImagePath, rightPath))
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private IList<DiffItem> FilterDiffsForTable(TableBlock left, TableBlock right)
+        {
+            string idL = left != null ? left.Id : null;
+            string idR = right != null ? right.Id : null;
+            var list = new List<DiffItem>();
+            foreach (DiffItem d in _sheetDiffs)
+            {
+                if (d == null)
+                {
+                    continue;
+                }
+
+                if (d.Kind != DiffKind.TableRowDelete
+                    && d.Kind != DiffKind.TableRowInsert
+                    && d.Kind != DiffKind.TableCellChange)
+                {
+                    continue;
+                }
+
+                bool match =
+                    (!string.IsNullOrEmpty(idL) && string.Equals(d.TableIdLeft, idL, StringComparison.Ordinal))
+                    || (!string.IsNullOrEmpty(idR) && string.Equals(d.TableIdRight, idR, StringComparison.Ordinal));
+                if (match || (string.IsNullOrEmpty(d.TableIdLeft) && string.IsNullOrEmpty(d.TableIdRight)))
+                {
+                    // TableId 未設定の差分も同一シートなら候補（過度に広くしないよう ID 優先）
+                    if (match)
                     {
-                        return d;
+                        list.Add(d);
                     }
                 }
             }
 
-            // DiffItem が無い完全一致 Match は null（ハイライトなし）
+            // ID 一致が無い場合はシート上のテーブル差分をすべて渡す（単一表が多い）
+            if (list.Count == 0)
+            {
+                foreach (DiffItem d in _sheetDiffs)
+                {
+                    if (d != null
+                        && (d.Kind == DiffKind.TableRowDelete
+                            || d.Kind == DiffKind.TableRowInsert
+                            || d.Kind == DiffKind.TableCellChange))
+                    {
+                        list.Add(d);
+                    }
+                }
+            }
+
+            return list;
+        }
+
+        private DiffItem FindImageDiff(EmbeddedImage leftImg, EmbeddedImage rightImg, AlignOp op)
+        {
+            string leftPath = leftImg != null ? leftImg.ExtractedPath : null;
+            string rightPath = rightImg != null ? rightImg.ExtractedPath : null;
+            foreach (DiffItem d in _sheetDiffs)
+            {
+                if (d == null)
+                {
+                    continue;
+                }
+
+                if (d.Kind == DiffKind.Image
+                    && PathsEqual(d.LeftImagePath, leftPath)
+                    && PathsEqual(d.RightImagePath, rightPath))
+                {
+                    return d;
+                }
+
+                if (d.Kind == DiffKind.ImageOnlyLeft && PathsEqual(d.LeftImagePath, leftPath))
+                {
+                    return d;
+                }
+
+                if (d.Kind == DiffKind.ImageOnlyRight && PathsEqual(d.RightImagePath, rightPath))
+                {
+                    return d;
+                }
+            }
+
             if (op == AlignOp.SkipLeft)
             {
                 return new DiffItem
@@ -541,12 +689,23 @@ namespace DiffXL.VIEW.Controls
                 };
             }
 
+            // Match で差分なし → パス片側ヒット
+            foreach (DiffItem d in _sheetDiffs)
+            {
+                if (d == null || d.Kind != DiffKind.Image)
+                {
+                    continue;
+                }
+
+                if (PathsEqual(d.LeftImagePath, leftPath) || PathsEqual(d.RightImagePath, rightPath))
+                {
+                    return d;
+                }
+            }
+
             return null;
         }
 
-        /// <summary>
-        /// 画像パスの緩い一致（null 同士は false）。
-        /// </summary>
         private static bool PathsEqual(string a, string b)
         {
             if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b))
@@ -557,284 +716,34 @@ namespace DiffXL.VIEW.Controls
             return string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// 図形タブのプレースホルダ。
-        /// </summary>
-        private void LoadShapesTab(SheetContent sheet)
-        {
-            var lines = new List<string>();
-            int n = sheet.Shapes != null ? sheet.Shapes.Count : 0;
-            ShapesSummary.Text = string.Format(
-                CultureInfo.InvariantCulture,
-                "図形: {0} 件 · 関連差分 {1} 件",
-                n,
-                CountDiffs(DiffKind.Shape, DiffKind.ShapeOnlyLeft, DiffKind.ShapeOnlyRight));
-
-            if (sheet.Shapes != null)
-            {
-                foreach (ShapeContent s in sheet.Shapes)
-                {
-                    if (s == null)
-                    {
-                        continue;
-                    }
-
-                    string text = s.Text;
-                    if (!string.IsNullOrEmpty(text) && text.Length > 40)
-                    {
-                        text = text.Substring(0, 40) + "…";
-                    }
-
-                    lines.Add(string.Format(
-                        CultureInfo.InvariantCulture,
-                        "[{0}] #{1} kind={2} text={3} hash={4}",
-                        s.Id ?? "?",
-                        s.OrderIndex,
-                        s.Kind ?? "?",
-                        string.IsNullOrEmpty(text) ? "—" : text,
-                        ShortHash(s.ContentHash)));
-                }
-            }
-
-            foreach (DiffItem d in EnumerateDiffs(
-                DiffKind.Shape, DiffKind.ShapeOnlyLeft, DiffKind.ShapeOnlyRight))
-            {
-                lines.Add(FormatDiffLine(d));
-            }
-
-            if (lines.Count == 0)
-            {
-                lines.Add("（図形なし）");
-            }
-
-            ShapesList.ItemsSource = lines;
-        }
-
-        /// <summary>
-        /// テーブルホストを空にする。
-        /// </summary>
-        private void ClearTablesHost()
-        {
-            if (TablesHost != null)
-            {
-                TablesHost.Children.Clear();
-            }
-        }
-
-        /// <summary>
-        /// プレーンなヒント TextBlock を作る。
-        /// </summary>
-        private static TextBlock CreatePlainHint(string text)
+        private static TextBlock CreateHint(string text)
         {
             return new TextBlock
             {
                 Text = text,
-                Foreground = new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromRgb(0x9C, 0xA3, 0xAF)),
-                FontSize = 12,
-                Margin = new Thickness(0, 4, 0, 0)
+                Foreground = new SolidColorBrush(Color.FromRgb(0x9C, 0xA3, 0xAF)),
+                Margin = new Thickness(8),
+                FontSize = 12
             };
         }
 
-        /// <summary>
-        /// テーブル ID に紐づく差分を抽出する。
-        /// </summary>
-        private IList<DiffItem> FilterDiffsForTable(TableBlock leftT, TableBlock rightT)
+        private void StreamScroll_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            string idL = leftT != null ? leftT.Id : null;
-            string idR = rightT != null ? rightT.Id : null;
-            var list = new List<DiffItem>();
-            if (_sheetDiffs == null)
+            if (_suppressScrollEvent)
             {
-                return list;
+                return;
             }
 
-            foreach (DiffItem d in _sheetDiffs)
+            if (e.VerticalChange == 0 && e.ExtentHeightChange == 0)
             {
-                if (d == null)
-                {
-                    continue;
-                }
-
-                if (d.Kind != DiffKind.TableRowDelete
-                    && d.Kind != DiffKind.TableRowInsert
-                    && d.Kind != DiffKind.TableCellChange)
-                {
-                    continue;
-                }
-
-                bool matchL = !string.IsNullOrEmpty(idL)
-                    && string.Equals(d.TableIdLeft, idL, StringComparison.Ordinal);
-                bool matchR = !string.IsNullOrEmpty(idR)
-                    && string.Equals(d.TableIdRight, idR, StringComparison.Ordinal);
-                if (matchL || matchR)
-                {
-                    list.Add(d);
-                }
+                return;
             }
 
-            return list;
-        }
-
-        /// <summary>
-        /// 2 テーブルの粗類似度（行キー多重集合 Jaccard）。TableCompareService と同趣旨。
-        /// </summary>
-        private static double TableSimilarity(TableBlock left, TableBlock right)
-        {
-            List<string> leftKeys = CollectRowKeys(left);
-            List<string> rightKeys = CollectRowKeys(right);
-
-            if (leftKeys.Count == 0 && rightKeys.Count == 0)
+            Action<double> handler = VerticalScrollRatioChanged;
+            if (handler != null)
             {
-                return 1.0;
+                handler(GetVerticalScrollRatio());
             }
-
-            if (leftKeys.Count == 0 || rightKeys.Count == 0)
-            {
-                return 0.0;
-            }
-
-            var leftCount = new Dictionary<string, int>(StringComparer.Ordinal);
-            foreach (string k in leftKeys)
-            {
-                int c;
-                leftCount.TryGetValue(k, out c);
-                leftCount[k] = c + 1;
-            }
-
-            var rightCount = new Dictionary<string, int>(StringComparer.Ordinal);
-            foreach (string k in rightKeys)
-            {
-                int c;
-                rightCount.TryGetValue(k, out c);
-                rightCount[k] = c + 1;
-            }
-
-            int inter = 0;
-            int union = 0;
-            var allKeys = new HashSet<string>(leftCount.Keys, StringComparer.Ordinal);
-            foreach (string k in rightCount.Keys)
-            {
-                allKeys.Add(k);
-            }
-
-            foreach (string k in allKeys)
-            {
-                int lc;
-                int rc;
-                leftCount.TryGetValue(k, out lc);
-                rightCount.TryGetValue(k, out rc);
-                inter += Math.Min(lc, rc);
-                union += Math.Max(lc, rc);
-            }
-
-            if (union == 0)
-            {
-                return 1.0;
-            }
-
-            return (double)inter / union;
-        }
-
-        /// <summary>
-        /// テーブルの行キー一覧。
-        /// </summary>
-        private static List<string> CollectRowKeys(TableBlock table)
-        {
-            var keys = new List<string>();
-            if (table == null || table.Rows == null)
-            {
-                return keys;
-            }
-
-            for (int i = 0; i < table.Rows.Count; i++)
-            {
-                keys.Add(TableRowAligner.MakeRowKey(table.Rows[i]));
-            }
-
-            return keys;
-        }
-
-        /// <summary>
-        /// 指定 Kind の差分件数。
-        /// </summary>
-        private int CountDiffs(params DiffKind[] kinds)
-        {
-            if (_sheetDiffs == null || kinds == null || kinds.Length == 0)
-            {
-                return 0;
-            }
-
-            return _sheetDiffs.Count(d => d != null && kinds.Contains(d.Kind));
-        }
-
-        /// <summary>
-        /// 指定 Kind の差分を列挙する。
-        /// </summary>
-        private IEnumerable<DiffItem> EnumerateDiffs(params DiffKind[] kinds)
-        {
-            if (_sheetDiffs == null || kinds == null)
-            {
-                yield break;
-            }
-
-            foreach (DiffItem d in _sheetDiffs)
-            {
-                if (d != null && kinds.Contains(d.Kind))
-                {
-                    yield return d;
-                }
-            }
-        }
-
-        /// <summary>
-        /// セル 1 行の表示文字列。
-        /// </summary>
-        private static string FormatCellLine(CellContent cell)
-        {
-            string bg = string.IsNullOrEmpty(cell.BackgroundArgb) ? "—" : cell.BackgroundArgb;
-            string text = cell.Text ?? string.Empty;
-            if (text.Length > 60)
-            {
-                text = text.Substring(0, 60) + "…";
-            }
-
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "{0}  \"{1}\"  bg={2}{3}",
-                cell.Address ?? ("R" + cell.Row + "C" + cell.Column),
-                text,
-                bg,
-                cell.HasAnyBorder ? "  border" : string.Empty);
-        }
-
-        /// <summary>
-        /// 差分 1 行の表示文字列。
-        /// </summary>
-        private string FormatDiffLine(DiffItem d)
-        {
-            string addr = _isLeft
-                ? (d.AddressLeft ?? d.AddressRight)
-                : (d.AddressRight ?? d.AddressLeft);
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                "Δ {0}  {1}  {2}",
-                d.Kind,
-                addr ?? string.Empty,
-                d.Summary ?? string.Empty);
-        }
-
-        /// <summary>
-        /// ハッシュの短縮表示。
-        /// </summary>
-        private static string ShortHash(string hash)
-        {
-            if (string.IsNullOrEmpty(hash))
-            {
-                return "—";
-            }
-
-            return hash.Length <= 12 ? hash : hash.Substring(0, 12) + "…";
         }
     }
 }

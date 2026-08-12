@@ -125,6 +125,9 @@ namespace DiffXL
             // イベント駆動の即時同期（ポーリングは保険）
             LeftPane.ScrollInteracted += OnLeftPaneScrollInteracted;
             RightPane.ScrollInteracted += OnRightPaneScrollInteracted;
+            // 内容ストリーム（統一リスト）の左右スクロール同期
+            LeftPane.ContentScrollRatioChanged += OnLeftContentScrollRatioChanged;
+            RightPane.ContentScrollRatioChanged += OnRightContentScrollRatioChanged;
             Startup.StartCompareRequested += OnStartCompareRequested;
             Loaded += MainWindow_Loaded;
             Closed += MainWindow_Closed;
@@ -2588,67 +2591,78 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// MiniMap ナビ。差分アイテムのシートへ切替してから、内容マップ対応の左右別行へジャンプする。
+        /// 内容ストリーム同期の再入防止。
+        /// </summary>
+        private bool _syncingContentScroll;
+
+        /// <summary>
+        /// 左内容ストリームのスクロール → 右へ比率同期。
+        /// </summary>
+        private void OnLeftContentScrollRatioChanged(double ratio)
+        {
+            if (_syncingContentScroll)
+            {
+                return;
+            }
+
+            if (AppSettings.Current.Ui != null && !AppSettings.Current.Ui.SyncScroll)
+            {
+                return;
+            }
+
+            _syncingContentScroll = true;
+            try
+            {
+                if (RightPane != null)
+                {
+                    RightPane.SetContentScrollRatio(ratio);
+                }
+            }
+            finally
+            {
+                _syncingContentScroll = false;
+            }
+        }
+
+        /// <summary>
+        /// 右内容ストリームのスクロール → 左へ比率同期。
+        /// </summary>
+        private void OnRightContentScrollRatioChanged(double ratio)
+        {
+            if (_syncingContentScroll)
+            {
+                return;
+            }
+
+            if (AppSettings.Current.Ui != null && !AppSettings.Current.Ui.SyncScroll)
+            {
+                return;
+            }
+
+            _syncingContentScroll = true;
+            try
+            {
+                if (LeftPane != null)
+                {
+                    LeftPane.SetContentScrollRatio(ratio);
+                }
+            }
+            finally
+            {
+                _syncingContentScroll = false;
+            }
+        }
+
+        /// <summary>
+        /// MiniMap ナビ。シート切替後、左右の統一ストリームを OrderHint / 比率で同期ジャンプする。
         /// </summary>
         private void OnMiniMapNavigate(double ratio, DiffItem item)
         {
             Log.Info("MiniMap click ratio=" + ratio.ToString("0.###", CultureInfo.InvariantCulture)
                 + " item=" + (item != null ? (item.SheetLeft ?? item.SheetRight ?? "?") + "!" + (item.AddressLeft ?? item.AddressRight ?? "-") : "null"));
 
-            int leftRow = 0;
-            int rightRow = 0;
-
-            if (item != null)
-            {
-                leftRow = TextDiffService.ParseAnchorRow(item.AddressLeft);
-                rightRow = TextDiffService.ParseAnchorRow(item.AddressRight);
-                if (leftRow <= 0 && item.OrderHint > 0)
-                {
-                    int mod = (int)Math.Round(item.OrderHint) % 1000;
-                    if (mod > 0 && mod < 500)
-                    {
-                        leftRow = mod;
-                    }
-                }
-
-                if (leftRow <= 0 && rightRow > 0)
-                {
-                    leftRow = _scrollSync != null ? _scrollSync.MapRightToLeft(rightRow) : rightRow;
-                }
-
-                if (rightRow <= 0 && leftRow > 0)
-                {
-                    rightRow = _scrollSync != null ? _scrollSync.MapLeftToRight(leftRow) : leftRow;
-                }
-            }
-
-            // MiniMap 側で Map 経由に解決済みの推奨行を優先
-            if (leftRow <= 0 && MiniMap != null && MiniMap.SuggestedLeftRow > 0)
-            {
-                leftRow = MiniMap.SuggestedLeftRow;
-            }
-
-            if (rightRow <= 0 && MiniMap != null && MiniMap.SuggestedRightRow > 0)
-            {
-                rightRow = MiniMap.SuggestedRightRow;
-            }
-
-            if (leftRow <= 0)
-            {
-                leftRow = 1 + (int)Math.Round(Math.Max(0, Math.Min(1, ratio)) * 120);
-            }
-
-            leftRow = Math.Max(1, leftRow);
-            if (rightRow <= 0)
-            {
-                rightRow = _scrollSync != null ? _scrollSync.MapLeftToRight(leftRow) : leftRow;
-            }
-
-            rightRow = Math.Max(1, rightRow);
-
             string sheetLeft = item != null ? item.SheetLeft : null;
             string sheetRight = item != null ? item.SheetRight : null;
-            // 空白クリック時は現在シート or MiniMap の viewport シート
             if (string.IsNullOrEmpty(sheetLeft) && MiniMap != null && !string.IsNullOrEmpty(_lastMiniMapSheet))
             {
                 sheetLeft = _lastMiniMapSheet;
@@ -2669,126 +2683,91 @@ namespace DiffXL
                 sheetRight = sheetLeft;
             }
 
-            // シート名が分かれば Alignment を MiniMap に渡す
-            ApplyMiniMapAlignmentForSheets(sheetLeft, sheetRight);
-
             bool leftOk = false;
             bool rightOk = false;
             bool sheetLeftOk = true;
             bool sheetRightOk = true;
 
-            if (_scrollSync != null)
-            {
-                _scrollSync.Suspend();
-            }
-
+            _syncingContentScroll = true;
             try
             {
                 // 1) 差分のシートへ切替
-                if (!string.IsNullOrEmpty(sheetLeft))
+                if (!string.IsNullOrEmpty(sheetLeft) && LeftPane != null)
                 {
                     sheetLeftOk = LeftPane.TrySelectSheet(sheetLeft);
                 }
 
-                if (!string.IsNullOrEmpty(sheetRight))
+                if (!string.IsNullOrEmpty(sheetRight) && RightPane != null)
                 {
                     sheetRightOk = RightPane.TrySelectSheet(sheetRight);
                 }
 
-                if ((!string.IsNullOrEmpty(sheetLeft) && sheetLeftOk)
-                    || (!string.IsNullOrEmpty(sheetRight) && sheetRightOk))
-                {
-                    Dispatcher.Invoke(
-                        System.Windows.Threading.DispatcherPriority.Background,
-                        new Action(() => { }));
-                    RefreshScrollSyncActiveSheets();
-                    ApplyMiniMapAlignmentForSheets(sheetLeft, sheetRight);
+                RefreshScrollSyncActiveSheets();
+                RefreshMiniMapForCurrentSheet();
 
-                    // シート切替後に右行を再マップ（アクティブマップが変わった場合）
-                    if (item == null && _scrollSync != null)
+                // 2) 統一ストリーム上の対応ブロックへ左右同時ジャンプ
+                if (item != null)
+                {
+                    leftOk = LeftPane != null && LeftPane.ScrollContentToDiffItem(item);
+                    rightOk = RightPane != null && RightPane.ScrollContentToDiffItem(item);
+                    if (!leftOk && item.OrderHint > 0 && LeftPane != null)
                     {
-                        rightRow = _scrollSync.MapLeftToRight(leftRow);
+                        leftOk = LeftPane.ScrollContentToOrderHint(item.OrderHint);
                     }
-                    else if (item != null
-                        && TextDiffService.ParseAnchorRow(item.AddressRight) <= 0
-                        && _scrollSync != null)
+
+                    if (!rightOk && item.OrderHint > 0 && RightPane != null)
                     {
-                        rightRow = _scrollSync.MapLeftToRight(leftRow);
+                        rightOk = RightPane.ScrollContentToOrderHint(item.OrderHint);
                     }
                 }
 
-                // 2) 左右別行へジャンプ（同一行番号の強制同期はしない）
-                if (_scrollSync != null)
+                // アイテム無しクリック: ストリーム上の比率位置へ同期
+                if (!leftOk && !rightOk)
                 {
-                    _scrollSync.ScrollBothToRows(leftRow, rightRow);
-                    leftOk = LeftPane.IsOpen;
-                    rightOk = RightPane.IsOpen;
-                    // ScrollBothToRows は bool を返さないので実測で確認
-                    int gotL = 0, gotR = 0, gc;
-                    if (LeftPane.IsOpen)
+                    double r = Math.Max(0, Math.Min(1, ratio));
+                    if (LeftPane != null)
                     {
-                        leftOk = LeftPane.TryGetScroll(out gotL, out gc) && Math.Abs(gotL - leftRow) <= 5;
-                        if (!leftOk)
-                        {
-                            leftOk = LeftPane.TryGotoRow(leftRow)
-                                || LeftPane.TrySetScroll(leftRow, 1);
-                        }
+                        LeftPane.SetContentScrollRatio(r);
+                        leftOk = true;
                     }
 
-                    if (RightPane.IsOpen)
+                    if (RightPane != null)
                     {
-                        rightOk = RightPane.TryGetScroll(out gotR, out gc) && Math.Abs(gotR - rightRow) <= 5;
-                        if (!rightOk)
-                        {
-                            rightOk = RightPane.TryGotoRow(rightRow)
-                                || RightPane.TrySetScroll(rightRow, 1);
-                        }
+                        RightPane.SetContentScrollRatio(r);
+                        rightOk = true;
                     }
                 }
-                else
+                else if (leftOk && RightPane != null && !rightOk)
                 {
-                    if (LeftPane.IsOpen)
-                    {
-                        leftOk = LeftPane.TryGotoRow(leftRow)
-                            || LeftPane.TrySetScroll(leftRow, 1);
-                    }
-
-                    if (RightPane.IsOpen)
-                    {
-                        rightOk = RightPane.TryGotoRow(rightRow)
-                            || RightPane.TrySetScroll(rightRow, 1);
-                    }
+                    // 片側だけ成功したら比率で揃える
+                    RightPane.SetContentScrollRatio(LeftPane.GetContentScrollRatio());
+                    rightOk = true;
+                }
+                else if (rightOk && LeftPane != null && !leftOk)
+                {
+                    LeftPane.SetContentScrollRatio(RightPane.GetContentScrollRatio());
+                    leftOk = true;
                 }
 
-                // 3) 同期スクロール基準を更新
-                if (_scrollSync != null)
-                {
-                    int lr = leftRow, rr = rightRow, lc = 1, rc = 1;
-                    if (LeftPane.IsOpen)
-                    {
-                        LeftPane.TryGetScroll(out lr, out lc);
-                    }
-
-                    if (RightPane.IsOpen)
-                    {
-                        RightPane.TryGetScroll(out rr, out rc);
-                    }
-
-                    _scrollSync.NotifyExternalScroll(lr, rr, lc, rc);
-                    MiniMap.SetViewportMapped(
-                        !string.IsNullOrEmpty(sheetLeft) ? sheetLeft : sheetRight,
-                        lr,
-                        rr,
-                        28);
-                }
-                else
+                // 3) MiniMap ビューポート表示を更新
+                double ratioL = LeftPane != null ? LeftPane.GetContentScrollRatio() : ratio;
+                double ratioR = RightPane != null ? RightPane.GetContentScrollRatio() : ratio;
+                int viewRow = item != null && item.OrderHint > 0
+                    ? Math.Max(1, (int)(item.OrderHint / 1000.0))
+                    : 1 + (int)Math.Round(Math.Max(0, Math.Min(1, ratio)) * 100);
+                if (MiniMap != null)
                 {
                     MiniMap.SetViewportMapped(
                         !string.IsNullOrEmpty(sheetLeft) ? sheetLeft : sheetRight,
-                        leftRow,
-                        rightRow,
+                        viewRow,
+                        viewRow,
                         28);
                 }
+
+                Log.Info("MiniMap content-stream jump ratioL="
+                    + ratioL.ToString("0.###", CultureInfo.InvariantCulture)
+                    + " ratioR=" + ratioR.ToString("0.###", CultureInfo.InvariantCulture)
+                    + " L=" + leftOk + " R=" + rightOk);
             }
             catch (Exception ex)
             {
@@ -2798,10 +2777,7 @@ namespace DiffXL
             }
             finally
             {
-                if (_scrollSync != null)
-                {
-                    _scrollSync.Resume();
-                }
+                _syncingContentScroll = false;
             }
 
             string sheetLabel = !string.IsNullOrEmpty(sheetLeft)
@@ -2810,29 +2786,23 @@ namespace DiffXL
             string summary = item != null ? (item.Summary ?? item.Kind.ToString()) : string.Empty;
             if (leftOk || rightOk)
             {
-                StatusText.Text = "MiniMap → "
-                    + (string.IsNullOrEmpty(sheetLabel) ? string.Empty : sheetLabel + "!")
-                    + "L" + leftRow + " · R" + rightRow
-                    + (string.IsNullOrEmpty(summary) ? string.Empty : " / " + summary)
-                    + " (L:" + (leftOk ? "OK" : "NG")
+                StatusText.Text = "MiniMap → 内容ストリーム "
+                    + (string.IsNullOrEmpty(sheetLabel) ? string.Empty : sheetLabel + " ")
+                    + (string.IsNullOrEmpty(summary) ? string.Empty : summary + " ")
+                    + "(L:" + (leftOk ? "OK" : "NG")
                     + " R:" + (rightOk ? "OK" : "NG")
                     + (sheetLeftOk && sheetRightOk ? string.Empty : " sheet切替注意")
                     + ")";
-                Log.Info("MiniMap navigate OK sheet=" + sheetLabel
-                    + " Lrow=" + leftRow + " Rrow=" + rightRow
-                    + " L=" + leftOk + " R=" + rightOk);
                 SyncPairComboSelectionFromPanes();
             }
             else
             {
-                StatusText.Text = "MiniMap: ジャンプ失敗（"
-                    + (string.IsNullOrEmpty(sheetLabel) ? string.Empty : sheetLabel + "!")
-                    + "L" + leftRow + " · R" + rightRow + "）。ログを確認してください。";
-                Log.Error("MiniMap navigate failed sheet=" + sheetLabel
-                    + " Lrow=" + leftRow + " Rrow=" + rightRow + " ratio=" + ratio
-                    + " leftOpen=" + (LeftPane.IsOpen)
-                    + " rightOpen=" + (RightPane.IsOpen)
-                    + " sheetL=" + sheetLeftOk + " sheetR=" + sheetRightOk);
+                StatusText.Text = "MiniMap: 内容ジャンプ失敗（"
+                    + (string.IsNullOrEmpty(sheetLabel) ? "?" : sheetLabel) + "）";
+                Log.Error("MiniMap content navigate failed sheet=" + sheetLabel
+                    + " ratio=" + ratio
+                    + " leftOpen=" + (LeftPane != null && LeftPane.IsOpen)
+                    + " rightOpen=" + (RightPane != null && RightPane.IsOpen));
             }
         }
 

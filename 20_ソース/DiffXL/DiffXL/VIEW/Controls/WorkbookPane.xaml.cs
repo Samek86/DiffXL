@@ -86,6 +86,22 @@ namespace DiffXL.VIEW.Controls
             InitializeComponent();
             Unloaded += WorkbookPane_Unloaded;
             Focusable = true;
+            if (ContentHost != null)
+            {
+                ContentHost.VerticalScrollRatioChanged += OnContentHostScrollRatioChanged;
+            }
+        }
+
+        /// <summary>
+        /// ContentPane スクロールを外側へ中継する。
+        /// </summary>
+        private void OnContentHostScrollRatioChanged(double ratio)
+        {
+            Action<double> handler = ContentScrollRatioChanged;
+            if (handler != null)
+            {
+                handler(ratio);
+            }
         }
 
         /// <summary>
@@ -283,6 +299,46 @@ namespace DiffXL.VIEW.Controls
         {
             get { return ContentHost; }
         }
+
+        /// <summary>
+        /// 内容ストリームの縦スクロール比率 0..1。
+        /// </summary>
+        public double GetContentScrollRatio()
+        {
+            return ContentHost != null ? ContentHost.GetVerticalScrollRatio() : 0;
+        }
+
+        /// <summary>
+        /// 内容ストリームの縦スクロール比率を設定（同期用）。
+        /// </summary>
+        public void SetContentScrollRatio(double ratio)
+        {
+            if (ContentHost != null)
+            {
+                ContentHost.SetVerticalScrollRatio(ratio);
+            }
+        }
+
+        /// <summary>
+        /// DiffItem に対応するストリーム位置へジャンプ。
+        /// </summary>
+        public bool ScrollContentToDiffItem(DiffItem item)
+        {
+            return ContentHost != null && ContentHost.ScrollToDiffItem(item);
+        }
+
+        /// <summary>
+        /// OrderHint に近いストリーム位置へジャンプ。
+        /// </summary>
+        public bool ScrollContentToOrderHint(double orderHint)
+        {
+            return ContentHost != null && ContentHost.ScrollToOrderHint(orderHint);
+        }
+
+        /// <summary>
+        /// 内容ストリームの縦スクロール変化（ユーザー操作）。
+        /// </summary>
+        public event Action<double> ContentScrollRatioChanged;
 
         /// <summary>
         /// 保持中のブック内容。
