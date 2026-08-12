@@ -2617,6 +2617,11 @@ namespace DiffXL
                 {
                     RightPane.SetContentScrollRatio(ratio);
                 }
+
+                if (MiniMap != null)
+                {
+                    MiniMap.SetContentViewportRatio(ratio);
+                }
             }
             finally
             {
@@ -2645,6 +2650,11 @@ namespace DiffXL
                 if (LeftPane != null)
                 {
                     LeftPane.SetContentScrollRatio(ratio);
+                }
+
+                if (MiniMap != null)
+                {
+                    MiniMap.SetContentViewportRatio(ratio);
                 }
             }
             finally
@@ -3370,7 +3380,11 @@ namespace DiffXL
             }
 
             MiniMap.SetCurrentSheet(focusSheet, filtered);
-            ApplyMiniMapAlignmentForSheets(leftSheet, rightSheet);
+            // 内容ビューの現在スクロール位置を青帯に反映
+            double scrollRatio = LeftPane != null
+                ? LeftPane.GetContentScrollRatio()
+                : (RightPane != null ? RightPane.GetContentScrollRatio() : 0);
+            MiniMap.SetContentViewportRatio(scrollRatio);
             _lastMiniMapSheet = focusSheet ?? string.Empty;
             _lastMiniMapLeftRow = -1;
             _lastMiniMapRightRow = -1;

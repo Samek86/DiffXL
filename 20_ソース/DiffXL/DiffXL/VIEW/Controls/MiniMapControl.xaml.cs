@@ -18,6 +18,8 @@ namespace DiffXL.VIEW.Controls
     public partial class MiniMapControl : UserControl
     {
         private readonly List<DiffItem> _items = new List<DiffItem>();
+        /// <summary>描画・クリック用に並べた差分（OrderHint 順）。</summary>
+        private List<DiffItem> _orderedItems = new List<DiffItem>();
         private readonly List<SheetSegment> _segments = new List<SheetSegment>();
         private List<string> _forcedSheetOrder = new List<string>();
         private bool _dragging;
@@ -31,6 +33,8 @@ namespace DiffXL.VIEW.Controls
         private ContentScrollMap _scrollMap;
         private int _mapMaxLeft = DefaultMaxRow;
         private int _mapMaxRight = DefaultMaxRow;
+        /// <summary>内容ストリームの縦スクロール比率 0..1（青帯位置）。</summary>
+        private double _contentViewportRatio;
 
         /// <summary>シート帯の上部をシート名ヘッダに使う比率。</summary>
         private const double SheetHeaderRatio = 0.12;
@@ -82,9 +86,35 @@ namespace DiffXL.VIEW.Controls
 
             // 呼び出し側が現在シート分だけ渡す前提。複数シート名が混在しても先頭 1 枚に縮約する。
             CollapseToSingleSheet();
+            RebuildOrderedItems();
             RebuildSegments();
             UpdateHintText();
             ScheduleRebuild();
+        }
+
+        /// <summary>
+        /// 内容ビューのスクロール比率 0..1 を青帯に反映する。
+        /// </summary>
+        public void SetContentViewportRatio(double ratio)
+        {
+            _contentViewportRatio = Math.Max(0, Math.Min(1, ratio));
+            // 行番号ベースは使わず比率のみ
+            UpdateViewportVisuals();
+            UpdateHintText();
+        }
+
+        /// <summary>
+        /// 描画・クリック用に差分を安定ソートする。
+        /// </summary>
+        private void RebuildOrderedItems()
+        {
+            _orderedItems = _items
+                .Where(i => i != null)
+                .OrderBy(i => i.OrderHint)
+                .ThenBy(i => i.Kind.ToString(), StringComparer.Ordinal)
+                .ThenBy(i => i.Summary ?? string.Empty, StringComparer.Ordinal)
+                .ThenBy(i => i.AddressLeft ?? i.AddressRight ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         /// <summary>
@@ -136,6 +166,7 @@ namespace DiffXL.VIEW.Controls
             _viewportSheet = name;
             // 防御: 混入した他シート差分・複数帯を必ず 1 シートに縮約
             CollapseToSingleSheet();
+            RebuildOrderedItems();
             RebuildSegments();
             UpdateHintText();
             ScheduleRebuild();
@@ -283,17 +314,7 @@ namespace DiffXL.VIEW.Controls
 
         public void SetViewportRatio(double ratio)
         {
-            if (_segments.Count == 0)
-            {
-                return;
-            }
-
-            ratio = Math.Max(0, Math.Min(1, ratio));
-            SheetSegment seg = ResolveSegmentByRatio(ratio);
-            int leftRow;
-            int rightRow;
-            ResolveRowsFromRatio(seg, ratio, out leftRow, out rightRow);
-            SetViewportMapped(seg.Name, leftRow, rightRow, _visibleRows);
+            SetContentViewportRatio(ratio);
         }
 
         private void ScheduleRebuild()
@@ -686,43 +707,108 @@ namespace DiffXL.VIEW.Controls
 
         private void DrawMarkers(double w, double h)
         {
+            if (_orderedItems == null || _orderedItems.Count == 0)
+            {
+                RebuildOrderedItems();
+            }
+
             var fill = new SolidColorBrush(Color.FromArgb(240, 250, 204, 21));
             fill.Freeze();
             var stroke = new SolidColorBrush(Color.FromRgb(202, 138, 4));
             stroke.Freeze();
             double markLeft = 4;
             double markW = Math.Max(8, w - 8);
-
-            // 現在帯内は行順（異名ペアでも単一帯に投影）
-            foreach (DiffItem item in _items
-                .OrderBy(i => GetItemRow(i))
-                .ThenBy(i => i.AddressLeft ?? i.AddressRight ?? string.Empty))
+            int n = _orderedItems.Count;
+            if (n == 0)
             {
-                double ratio;
-                if (!TryMapItemToRatio(item, out ratio))
+                return;
+            }
+
+            // 内容ストリーム方式: 差分を上から等間隔に並べる（Excel 行番号は使わない）
+            double markerH = Math.Max(6, Math.Min(14, h * 0.035));
+            for (int i = 0; i < n; i++)
+            {
+                DiffItem item = _orderedItems[i];
+                if (item == null)
                 {
                     continue;
                 }
 
-                double markerH = Math.Max(4, Math.Min(9, h * 0.012));
-                double y = ratio * Math.Max(1, h - markerH);
+                double y = IndexToCanvasY(i, n, h, markerH);
                 var rect = new Rectangle
                 {
                     Width = markW,
                     Height = markerH,
                     Fill = fill,
                     Stroke = stroke,
-                    StrokeThickness = 1,
+                    StrokeThickness = 1.5,
                     Tag = item,
                     ToolTip = BuildTooltip(item),
                     IsHitTestVisible = true,
                     Cursor = Cursors.Hand
                 };
+                // インデックスも Tag と一緒に拾えるよう DataContext に index
+                rect.Tag = new MiniMapMarkerTag { Item = item, Index = i };
                 rect.MouseLeftButtonDown += Marker_MouseLeftButtonDown;
                 Canvas.SetLeft(rect, markLeft);
                 Canvas.SetTop(rect, y);
+                Panel.SetZIndex(rect, 20);
                 MapCanvas.Children.Add(rect);
             }
+        }
+
+        /// <summary>
+        /// 差分 index → Canvas Y（本文領域内の等間隔配置）。
+        /// </summary>
+        private static double IndexToCanvasY(int index, int count, double canvasH, double markerH)
+        {
+            double bodyTop = canvasH * SheetHeaderRatio;
+            double bodyH = Math.Max(1, canvasH * (1.0 - SheetHeaderRatio));
+            if (count <= 0)
+            {
+                return bodyTop;
+            }
+
+            double t = (index + 0.5) / count;
+            double center = bodyTop + t * bodyH;
+            return Math.Max(bodyTop, Math.Min(canvasH - markerH, center - markerH * 0.5));
+        }
+
+        /// <summary>
+        /// Canvas Y → 差分 index。
+        /// </summary>
+        private static int CanvasYToIndex(double y, double canvasH, int count)
+        {
+            if (count <= 0)
+            {
+                return -1;
+            }
+
+            double bodyTop = canvasH * SheetHeaderRatio;
+            double bodyH = Math.Max(1, canvasH * (1.0 - SheetHeaderRatio));
+            double local = (y - bodyTop) / bodyH;
+            local = Math.Max(0, Math.Min(0.999999, local));
+            int idx = (int)(local * count);
+            if (idx < 0)
+            {
+                idx = 0;
+            }
+
+            if (idx >= count)
+            {
+                idx = count - 1;
+            }
+
+            return idx;
+        }
+
+        /// <summary>
+        /// マーカー用タグ。
+        /// </summary>
+        private sealed class MiniMapMarkerTag
+        {
+            public DiffItem Item;
+            public int Index;
         }
 
         private int SegmentIndexOf(DiffItem item)
@@ -820,38 +906,24 @@ namespace DiffXL.VIEW.Controls
         {
             double h = MapBorder.ActualHeight;
             double w = MapBorder.ActualWidth;
-            if (h < 10 || w < 4 || _segments.Count == 0)
+            if (h < 10 || w < 4)
             {
                 return;
             }
 
-            SheetSegment seg = FindSegment(_viewportSheet) ?? _segments[0];
-            double topRatio = MapRowToRatio(seg, _viewportRow);
-            double endRatio = MapRowToRatio(seg, _viewportRow + _visibleRows);
-            double bandH = Math.Max(10, Math.Abs(endRatio - topRatio) * h);
-            double bodyHpx = Math.Max(8, seg.Height * (1.0 - SheetHeaderRatio) * h);
-            bandH = Math.Max(bodyHpx * 0.15, Math.Min(bodyHpx * 0.7, bandH));
-
-            double y = topRatio * h;
-            double bodyBottom = (seg.Top + seg.Height) * h;
-            double bodyTop = (seg.Top + seg.Height * SheetHeaderRatio) * h;
-            if (y < bodyTop)
-            {
-                y = bodyTop;
-            }
-
-            if (y + bandH > bodyBottom)
-            {
-                y = Math.Max(bodyTop, bodyBottom - bandH);
-            }
+            // 内容ストリーム比率ベースの青帯（Excel 行は使わない）
+            double bodyTop = h * SheetHeaderRatio;
+            double bodyH = Math.Max(8, h * (1.0 - SheetHeaderRatio));
+            double bandH = Math.Max(14, Math.Min(bodyH * 0.2, bodyH * 0.35));
+            double y = bodyTop + _contentViewportRatio * Math.Max(0, bodyH - bandH);
 
             if (_viewportBand == null)
             {
                 _viewportBand = new Rectangle
                 {
-                    Stroke = new SolidColorBrush(Color.FromArgb(250, 96, 165, 250)),
+                    Stroke = new SolidColorBrush(Color.FromArgb(250, 37, 99, 235)),
                     StrokeThickness = 2,
-                    Fill = new SolidColorBrush(Color.FromArgb(80, 59, 130, 246)),
+                    Fill = new SolidColorBrush(Color.FromArgb(70, 59, 130, 246)),
                     IsHitTestVisible = false
                 };
                 MapCanvas.Children.Add(_viewportBand);
@@ -881,18 +953,14 @@ namespace DiffXL.VIEW.Controls
                 MapCanvas.Children.Add(_viewportLabel);
             }
 
-            // ラベル: L7 · R9 形式（内容対応で左右が異なるとき一目で分かる）
-            int lRow = Math.Max(1, _viewportLeftRow > 0 ? _viewportLeftRow : _viewportRow);
-            int rRow = Math.Max(1, _viewportRightRow > 0 ? _viewportRightRow : lRow);
-            string sheetShort = Truncate(string.IsNullOrEmpty(_viewportSheet) ? seg.Name : _viewportSheet, 6);
-            if (lRow == rRow)
-            {
-                _viewportLabel.Text = sheetShort + " · L" + lRow + " · R" + rRow;
-            }
-            else
-            {
-                _viewportLabel.Text = "L" + lRow + " · R" + rRow;
-            }
+            // ラベル: シート名 + スクロール%
+            string sheetShort = Truncate(
+                string.IsNullOrEmpty(_viewportSheet)
+                    ? (_segments.Count > 0 ? _segments[0].Name : "—")
+                    : _viewportSheet,
+                8);
+            int pct = (int)Math.Round(_contentViewportRatio * 100);
+            _viewportLabel.Text = sheetShort + " · " + pct + "%";
 
             Canvas.SetLeft(_viewportLabel, 3);
             Canvas.SetTop(_viewportLabel, Math.Max(0, y + 2));
@@ -905,19 +973,23 @@ namespace DiffXL.VIEW.Controls
 
         private void UpdateHintText()
         {
-            if (_items.Count == 0 && _segments.Count == 0)
+            if (_orderedItems == null || _orderedItems.Count == 0)
             {
-                HintText.Text = "差分なし";
+                RebuildOrderedItems();
+            }
+
+            if (_orderedItems.Count == 0)
+            {
+                HintText.Text = "差分なし\nクリックで移動";
                 return;
             }
 
             string sheet = string.IsNullOrEmpty(_viewportSheet) ? "—" : _viewportSheet;
-            int lRow = Math.Max(1, _viewportLeftRow > 0 ? _viewportLeftRow : _viewportRow);
-            int rRow = Math.Max(1, _viewportRightRow > 0 ? _viewportRightRow : lRow);
-            HintText.Text = "差分 " + _items.Count + " 件\n"
+            int pct = (int)Math.Round(_contentViewportRatio * 100);
+            HintText.Text = "差分 " + _orderedItems.Count + " 件\n"
                 + sheet + "\n"
-                + "L" + lRow + " · R" + rRow + "\n"
-                + "クリックで移動";
+                + "表示 " + pct + "%\n"
+                + "黄=差分 / クリックでジャンプ";
         }
 
         private static string Truncate(string s, int max)
@@ -949,31 +1021,42 @@ namespace DiffXL.VIEW.Controls
         private void RaiseNavigate(Point p)
         {
             double h = Math.Max(1, MapBorder.ActualHeight);
-            double ratio = Math.Max(0, Math.Min(1, p.Y / h));
-            if (_segments.Count == 0)
+            if (_orderedItems == null || _orderedItems.Count == 0)
             {
-                int fallback = Math.Max(1, 1 + (int)Math.Round(ratio * (DefaultMaxRow - 1)));
-                SuggestedLeftRow = fallback;
-                SuggestedRightRow = MapLeftRowToRight(fallback);
-                NavigateMapped?.Invoke(ratio, SuggestedLeftRow, SuggestedRightRow);
-                NavigateRequested?.Invoke(ratio, null);
-                return;
+                RebuildOrderedItems();
             }
 
-            SheetSegment seg = ResolveSegmentByRatio(ratio);
-            int leftRow;
-            int rightRow;
-            ResolveRowsFromRatio(seg, ratio, out leftRow, out rightRow);
-            _viewportSheet = seg.Name;
-            _viewportRow = leftRow;
-            _viewportLeftRow = leftRow;
-            _viewportRightRow = rightRow;
+            DiffItem item = null;
+            double contentRatio;
+            int n = _orderedItems.Count;
+            if (n > 0)
+            {
+                int idx = CanvasYToIndex(p.Y, h, n);
+                if (idx >= 0 && idx < n)
+                {
+                    item = _orderedItems[idx];
+                }
+
+                // 内容ビューへ渡す比率: 選択 index を 0..1 に射影
+                contentRatio = n <= 1 ? 0 : (double)Math.Max(0, idx) / Math.Max(1, n - 1);
+            }
+            else
+            {
+                // 差分ゼロでも本文領域の比率でスクロール可能
+                double bodyTop = h * SheetHeaderRatio;
+                double bodyH = Math.Max(1, h * (1.0 - SheetHeaderRatio));
+                contentRatio = Math.Max(0, Math.Min(1, (p.Y - bodyTop) / bodyH));
+            }
+
+            _contentViewportRatio = contentRatio;
             UpdateViewportVisuals();
             UpdateHintText();
 
-            NavigateMapped?.Invoke(ratio, leftRow, rightRow);
-            DiffItem nearest = FindNearestOnSheet(seg.Name, leftRow);
-            NavigateRequested?.Invoke(ratio, nearest);
+            // 互換イベント
+            SuggestedLeftRow = 1 + (int)Math.Round(contentRatio * 100);
+            SuggestedRightRow = SuggestedLeftRow;
+            NavigateMapped?.Invoke(contentRatio, SuggestedLeftRow, SuggestedRightRow);
+            NavigateRequested?.Invoke(contentRatio, item);
         }
 
         private DiffItem FindNearestOnSheet(string sheet, int row)
@@ -1008,42 +1091,48 @@ namespace DiffXL.VIEW.Controls
         private void Marker_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var rect = sender as Rectangle;
-            var item = rect != null ? rect.Tag as DiffItem : null;
+            DiffItem item = null;
+            int index = -1;
+            var tag = rect != null ? rect.Tag as MiniMapMarkerTag : null;
+            if (tag != null)
+            {
+                item = tag.Item;
+                index = tag.Index;
+            }
+            else
+            {
+                item = rect != null ? rect.Tag as DiffItem : null;
+            }
+
             if (item == null)
             {
                 return;
             }
 
-            double ratio;
-            TryMapItemToRatio(item, out ratio);
-            string sheet = item.SheetLeft ?? item.SheetRight ?? string.Empty;
-            int leftRow = TextDiffService.ParseAnchorRow(item.AddressLeft);
-            int rightRow = TextDiffService.ParseAnchorRow(item.AddressRight);
-            if (leftRow <= 0)
+            if (_orderedItems == null || _orderedItems.Count == 0)
             {
-                leftRow = GetItemRow(item);
+                RebuildOrderedItems();
             }
 
-            if (leftRow <= 0)
+            if (index < 0 && _orderedItems != null)
             {
-                leftRow = 1;
+                index = _orderedItems.IndexOf(item);
             }
 
-            if (rightRow <= 0)
-            {
-                rightRow = MapLeftRowToRight(leftRow);
-            }
+            int n = _orderedItems != null ? _orderedItems.Count : 0;
+            double contentRatio = (n <= 1 || index < 0)
+                ? 0.5
+                : (double)index / Math.Max(1, n - 1);
 
-            SuggestedLeftRow = leftRow;
-            SuggestedRightRow = rightRow;
-            _viewportSheet = sheet;
-            _viewportRow = leftRow;
-            _viewportLeftRow = leftRow;
-            _viewportRightRow = rightRow;
-
+            _contentViewportRatio = contentRatio;
+            _viewportSheet = item.SheetLeft ?? item.SheetRight ?? _viewportSheet;
+            SuggestedLeftRow = 1 + index;
+            SuggestedRightRow = SuggestedLeftRow;
             UpdateViewportVisuals();
-            NavigateMapped?.Invoke(ratio, leftRow, rightRow);
-            NavigateRequested?.Invoke(ratio, item);
+            UpdateHintText();
+
+            NavigateMapped?.Invoke(contentRatio, SuggestedLeftRow, SuggestedRightRow);
+            NavigateRequested?.Invoke(contentRatio, item);
             e.Handled = true;
         }
 
