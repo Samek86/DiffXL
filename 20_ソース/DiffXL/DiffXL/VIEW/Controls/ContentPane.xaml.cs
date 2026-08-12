@@ -331,13 +331,13 @@ namespace DiffXL.VIEW.Controls
                     Tag = i,
                     Margin = new Thickness(0, 0, 0, 10),
                     BorderBrush = isGap
-                        ? new SolidColorBrush(Color.FromRgb(0x4B, 0x55, 0x63))
-                        : new SolidColorBrush(Color.FromRgb(0x37, 0x41, 0x51)),
+                        ? new SolidColorBrush(Color.FromRgb(0xD1, 0xD5, 0xDB))
+                        : new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB)),
                     BorderThickness = new Thickness(1),
                     CornerRadius = new CornerRadius(6),
                     Background = isGap
-                        ? new SolidColorBrush(Color.FromRgb(0x0B, 0x12, 0x20))
-                        : new SolidColorBrush(Color.FromRgb(0x11, 0x18, 0x27)),
+                        ? new SolidColorBrush(Color.FromRgb(0xF3, 0xF4, 0xF6))
+                        : new SolidColorBrush(Color.FromRgb(0xFF, 0xFF, 0xFF)),
                     Child = blockUi
                 };
                 StreamHost.Children.Add(wrap);
@@ -430,14 +430,14 @@ namespace DiffXL.VIEW.Controls
             panel.Children.Add(new TextBlock
             {
                 Text = "∅ この側になし（" + kind + "）",
-                Foreground = new SolidColorBrush(Color.FromRgb(0xF8, 0xB4, 0xB4)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0xB9, 0x1C, 0x1C)),
                 FontWeight = FontWeights.SemiBold,
                 FontSize = 12
             });
             panel.Children.Add(new TextBlock
             {
                 Text = detail + " · 対応を保つための空き行",
-                Foreground = new SolidColorBrush(Color.FromRgb(0x9C, 0xA3, 0xAF)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0x6B, 0x72, 0x80)),
                 FontSize = 11,
                 Margin = new Thickness(0, 4, 0, 0),
                 TextWrapping = TextWrapping.Wrap
@@ -458,7 +458,7 @@ namespace DiffXL.VIEW.Controls
             return new TextBlock
             {
                 Text = text,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x93, 0xC5, 0xFD)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0x1D, 0x4E, 0xD8)),
                 FontSize = 11,
                 FontWeight = FontWeights.SemiBold,
                 Margin = new Thickness(0, 0, 0, 6)
@@ -515,13 +515,15 @@ namespace DiffXL.VIEW.Controls
                     Margin = new Thickness(0, 0, 0, 3),
                     Padding = new Thickness(8, 4, 8, 4),
                     Background = isDiff
-                        ? new SolidColorBrush(Color.FromArgb(0x60, 0xFF, 0xFF, 0x00))
-                        : new SolidColorBrush(Color.FromRgb(0x1F, 0x29, 0x37)),
+                        ? new SolidColorBrush(Color.FromArgb(0x80, 0xFE, 0xF0, 0x8A))
+                        : new SolidColorBrush(Color.FromRgb(0xF3, 0xF4, 0xF6)),
+                    BorderBrush = new SolidColorBrush(Color.FromRgb(0xE5, 0xE7, 0xEB)),
+                    BorderThickness = new Thickness(1),
                     CornerRadius = new CornerRadius(3),
                     Child = new TextBlock
                     {
                         Text = line,
-                        Foreground = Brushes.White,
+                        Foreground = new SolidColorBrush(Color.FromRgb(0x11, 0x18, 0x27)),
                         FontFamily = new FontFamily("Consolas, Yu Gothic UI, sans-serif"),
                         FontSize = 12,
                         TextWrapping = TextWrapping.Wrap
@@ -546,7 +548,7 @@ namespace DiffXL.VIEW.Controls
             return new TextBlock
             {
                 Text = text,
-                Foreground = Brushes.White,
+                Foreground = new SolidColorBrush(Color.FromRgb(0x11, 0x18, 0x27)),
                 FontSize = 12,
                 TextWrapping = TextWrapping.Wrap
             };
@@ -721,7 +723,7 @@ namespace DiffXL.VIEW.Controls
             return new TextBlock
             {
                 Text = text,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x9C, 0xA3, 0xAF)),
+                Foreground = new SolidColorBrush(Color.FromRgb(0x6B, 0x72, 0x80)),
                 Margin = new Thickness(8),
                 FontSize = 12
             };

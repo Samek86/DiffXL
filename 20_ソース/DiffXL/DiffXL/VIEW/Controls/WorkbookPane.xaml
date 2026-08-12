@@ -80,7 +80,7 @@
         <!-- 内容ビュー（Excel 埋め込みは廃止。ContentPane が主表示） -->
         <Border
             Grid.Row="1"
-            Background="#FF0B1220"
+            Background="#FFF9FAFB"
             ClipToBounds="True"
             SnapsToDevicePixels="True">
             <Grid

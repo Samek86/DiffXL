@@ -10,15 +10,15 @@
     <Border
         Margin="0,0,0,12"
         Padding="8"
-        Background="#FF111827"
-        BorderBrush="#FF374151"
+        Background="#FFFFFFFF"
+        BorderBrush="#FFD1D5DB"
         BorderThickness="1"
         CornerRadius="6">
         <StackPanel>
             <TextBlock
                 x:Name="TitleText"
                 Margin="0,0,0,8"
-                Foreground="#FFE5E7EB"
+                Foreground="#FF111827"
                 FontSize="12"
                 FontWeight="SemiBold"
                 TextWrapping="Wrap"
@@ -26,7 +26,7 @@
             <TextBlock
                 x:Name="SubtitleText"
                 Margin="0,0,0,8"
-                Foreground="#FF9CA3AF"
+                Foreground="#FF6B7280"
                 FontSize="11"
                 TextWrapping="Wrap"
                 Text="" />
@@ -39,24 +39,19 @@
                             Background="{Binding RowBackground}"
                             BorderBrush="{Binding RowBorder}"
                             BorderThickness="1"
-                            CornerRadius="3"
-                            ToolTip="{Binding RowToolTip}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="72" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                            CornerRadius="3">
+                            <DockPanel>
                                 <TextBlock
-                                    Grid.Column="0"
+                                    DockPanel.Dock="Left"
+                                    MinWidth="56"
+                                    Margin="0,0,8,0"
                                     VerticalAlignment="Center"
-                                    Margin="2,0,6,0"
-                                    Foreground="{Binding MarkerForeground}"
-                                    FontSize="11"
                                     FontWeight="SemiBold"
-                                    Text="{Binding Marker}" />
-                                <ItemsControl
-                                    Grid.Column="1"
-                                    ItemsSource="{Binding Cells}">
+                                    FontSize="11"
+                                    Foreground="{Binding MarkerForeground}"
+                                    Text="{Binding Marker}"
+                                    ToolTip="{Binding Tooltip}" />
+                                <ItemsControl ItemsSource="{Binding Cells}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Orientation="Horizontal" />
@@ -66,25 +61,23 @@
                                         <DataTemplate>
                                             <Border
                                                 MinWidth="48"
-                                                MaxWidth="160"
                                                 Margin="0,0,3,0"
-                                                Padding="6,4"
+                                                Padding="6,3"
                                                 Background="{Binding CellBackground}"
-                                                BorderBrush="#FF4B5563"
+                                                BorderBrush="#FFE5E7EB"
                                                 BorderThickness="1"
-                                                CornerRadius="2"
-                                                ToolTip="{Binding ToolTip}">
+                                                CornerRadius="2">
                                                 <TextBlock
-                                                    Foreground="{Binding TextForeground}"
                                                     FontFamily="Consolas, Yu Gothic UI, sans-serif"
                                                     FontSize="12"
+                                                    Foreground="{Binding TextForeground}"
                                                     Text="{Binding Text}"
-                                                    TextTrimming="CharacterEllipsis" />
+                                                    TextWrapping="Wrap" />
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                            </Grid>
+                            </DockPanel>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -92,6 +85,7 @@
             <TextBlock
                 x:Name="EmptyHint"
                 Visibility="Collapsed"
+                Margin="0,4,0,0"
                 Foreground="#FF6B7280"
                 FontSize="12"
                 Text="（行なし）" />

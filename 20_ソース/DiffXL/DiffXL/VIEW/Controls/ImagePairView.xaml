@@ -10,15 +10,15 @@
     <Border
         Margin="0,0,0,12"
         Padding="8"
-        Background="#FF111827"
-        BorderBrush="#FF374151"
+        Background="#FFFFFFFF"
+        BorderBrush="#FFD1D5DB"
         BorderThickness="1"
         CornerRadius="6">
         <StackPanel>
             <TextBlock
                 x:Name="TitleText"
                 Margin="0,0,0,4"
-                Foreground="#FFE5E7EB"
+                Foreground="#FF111827"
                 FontSize="12"
                 FontWeight="SemiBold"
                 TextWrapping="Wrap"
@@ -26,7 +26,7 @@
             <TextBlock
                 x:Name="SubtitleText"
                 Margin="0,0,0,8"
-                Foreground="#FF9CA3AF"
+                Foreground="#FF6B7280"
                 FontSize="11"
                 TextWrapping="Wrap"
                 Text="" />
@@ -35,8 +35,8 @@
                 x:Name="GapBox"
                 MinHeight="72"
                 Padding="12"
-                Background="#FF0B1220"
-                BorderBrush="#FF4B5563"
+                Background="#FFF3F4F6"
+                BorderBrush="#FFD1D5DB"
                 BorderThickness="1"
                 CornerRadius="4"
                 Visibility="Collapsed">
@@ -44,7 +44,7 @@
                     x:Name="GapText"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Foreground="#FF9CA3AF"
+                    Foreground="#FF6B7280"
                     FontSize="12"
                     Text="（この側に画像なし）" />
             </Border>
@@ -52,8 +52,8 @@
             <Border
                 x:Name="ImageFrame"
                 HorizontalAlignment="Left"
-                Background="#FF0B1220"
-                BorderBrush="#FF4B5563"
+                Background="#FFF3F4F6"
+                BorderBrush="#FFD1D5DB"
                 BorderThickness="1"
                 CornerRadius="4"
                 ClipToBounds="True">

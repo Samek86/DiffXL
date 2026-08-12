@@ -35,12 +35,12 @@
                             Height="18"
                             VerticalAlignment="Center"
                             Margin="0,0,8,0"
-                            Foreground="{StaticResource Brush.TextInverse}" />
+                            Foreground="{StaticResource Brush.Accent}" />
                         <TextBlock
                             VerticalAlignment="Center"
                             FontSize="16"
                             FontWeight="SemiBold"
-                            Foreground="{StaticResource Brush.TextInverse}"
+                            Foreground="{StaticResource Brush.Text}"
                             Text="DiffXL" />
                     </StackPanel>
                     <StackPanel
@@ -199,7 +199,7 @@
                 Margin="16,0,16,8"
                 Padding="14,8"
                 HorizontalAlignment="Center"
-                Background="#E61F2937"
+                Background="#EE1D4ED8"
                 CornerRadius="8"
                 Visibility="Collapsed"
                 IsHitTestVisible="False">

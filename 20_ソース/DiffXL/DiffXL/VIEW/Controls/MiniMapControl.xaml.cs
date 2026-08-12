@@ -612,14 +612,15 @@ namespace DiffXL.VIEW.Controls
                 double headerH = Math.Max(16, sh * SheetHeaderRatio);
                 double bodyH = Math.Max(4, sh - headerH);
 
-                // 本文（マーカー領域）
+                // 本文（マーカー領域）— ライト
                 var body = new Rectangle
                 {
                     Width = w,
                     Height = bodyH,
-                    Fill = new SolidColorBrush(Color.FromArgb(
-                        (byte)(i % 2 == 0 ? 50 : 32),
-                        30, 41, 59)),
+                    Fill = new SolidColorBrush(Color.FromRgb(
+                        (byte)(i % 2 == 0 ? 0xF3 : 0xE5),
+                        (byte)(i % 2 == 0 ? 0xF4 : 0xE7),
+                        (byte)(i % 2 == 0 ? 0xF6 : 0xEB))),
                     IsHitTestVisible = false
                 };
                 Canvas.SetLeft(body, 0);
@@ -631,8 +632,8 @@ namespace DiffXL.VIEW.Controls
                 {
                     Width = w,
                     Height = headerH,
-                    Fill = new SolidColorBrush(Color.FromRgb(51, 65, 85)),
-                    Stroke = new SolidColorBrush(Color.FromRgb(203, 213, 225)),
+                    Fill = new SolidColorBrush(Color.FromRgb(0xE0, 0xE7, 0xFF)),
+                    Stroke = new SolidColorBrush(Color.FromRgb(0xBF, 0xDB, 0xFE)),
                     StrokeThickness = 1,
                     IsHitTestVisible = false
                 };
@@ -648,7 +649,7 @@ namespace DiffXL.VIEW.Controls
                         X2 = w,
                         Y1 = y,
                         Y2 = y,
-                        Stroke = new SolidColorBrush(Color.FromRgb(248, 250, 252)),
+                        Stroke = new SolidColorBrush(Color.FromRgb(0xD1, 0xD5, 0xDB)),
                         StrokeThickness = 2.5,
                         IsHitTestVisible = false
                     };
@@ -661,7 +662,7 @@ namespace DiffXL.VIEW.Controls
                     Text = Truncate(seg.Name, 10),
                     FontSize = 10,
                     FontWeight = FontWeights.Bold,
-                    Foreground = new SolidColorBrush(Color.FromRgb(248, 250, 252)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x1E, 0x3A, 0x8A)),
                     ToolTip = seg.Name,
                     IsHitTestVisible = false,
                     Width = Math.Max(20, w - 6),
@@ -862,8 +863,8 @@ namespace DiffXL.VIEW.Controls
                 {
                     FontSize = 10,
                     FontWeight = FontWeights.Bold,
-                    Foreground = new SolidColorBrush(Color.FromRgb(240, 249, 255)),
-                    Background = new SolidColorBrush(Color.FromArgb(230, 30, 64, 175)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(0x1E, 0x3A, 0x8A)),
+                    Background = new SolidColorBrush(Color.FromArgb(230, 0xDB, 0xEA, 0xFE)),
                     Padding = new Thickness(4, 1, 4, 1),
                     IsHitTestVisible = false
                 };

@@ -18,85 +18,85 @@ namespace DiffXL.VIEW.Controls
         /// 削除行（自側に内容あり）の背景。
         /// </summary>
         private static readonly SolidColorBrush BrushDeleteRow =
-            CreateFrozenBrush(0x55, 0xEF, 0x44, 0x44);
+            CreateFrozenBrush(0xFF, 0xFE, 0xE2, 0xE2);
 
         /// <summary>
         /// 削除行の枠。
         /// </summary>
         private static readonly SolidColorBrush BrushDeleteBorder =
-            CreateFrozenBrush(0xFF, 0xEF, 0x44, 0x44);
+            CreateFrozenBrush(0xFF, 0xF8, 0x71, 0x71);
 
         /// <summary>
         /// 相手側削除により自側が空く行の背景。
         /// </summary>
         private static readonly SolidColorBrush BrushDeleteGap =
-            CreateFrozenBrush(0x33, 0x7F, 0x1D, 0x1D);
+            CreateFrozenBrush(0xFF, 0xFE, 0xF2, 0xF2);
 
         /// <summary>
         /// 挿入行（自側に内容あり）の背景。
         /// </summary>
         private static readonly SolidColorBrush BrushInsertRow =
-            CreateFrozenBrush(0x55, 0x22, 0xC5, 0x5E);
+            CreateFrozenBrush(0xFF, 0xD1, 0xFA, 0xE5);
 
         /// <summary>
         /// 挿入行の枠。
         /// </summary>
         private static readonly SolidColorBrush BrushInsertBorder =
-            CreateFrozenBrush(0xFF, 0x22, 0xC5, 0x5E);
+            CreateFrozenBrush(0xFF, 0x34, 0xD3, 0x99);
 
         /// <summary>
         /// 相手側挿入により自側が空く行の背景。
         /// </summary>
         private static readonly SolidColorBrush BrushInsertGap =
-            CreateFrozenBrush(0x33, 0x1E, 0x3A, 0x5F);
+            CreateFrozenBrush(0xFF, 0xEC, 0xFD, 0xF5);
 
         /// <summary>
         /// 一致行の背景。
         /// </summary>
         private static readonly SolidColorBrush BrushMatchRow =
-            CreateFrozenBrush(0xFF, 0x1F, 0x29, 0x37);
+            CreateFrozenBrush(0xFF, 0xFF, 0xFF, 0xFF);
 
         /// <summary>
         /// 一致行の枠。
         /// </summary>
         private static readonly SolidColorBrush BrushMatchBorder =
-            CreateFrozenBrush(0xFF, 0x37, 0x41, 0x51);
+            CreateFrozenBrush(0xFF, 0xE5, 0xE7, 0xEB);
 
         /// <summary>
         /// 通常セル背景。
         /// </summary>
         private static readonly SolidColorBrush BrushCellNormal =
-            CreateFrozenBrush(0xFF, 0x0B, 0x12, 0x20);
+            CreateFrozenBrush(0xFF, 0xF9, 0xFA, 0xFB);
 
         /// <summary>
         /// 空ギャップセル背景。
         /// </summary>
         private static readonly SolidColorBrush BrushCellEmpty =
-            CreateFrozenBrush(0x22, 0x9C, 0xA3, 0xAF);
+            CreateFrozenBrush(0xFF, 0xF3, 0xF4, 0xF6);
 
         /// <summary>
         /// マーカー・通常テキスト色。
         /// </summary>
         private static readonly SolidColorBrush BrushText =
-            CreateFrozenBrush(0xFF, 0xF9, 0xFA, 0xFB);
+            CreateFrozenBrush(0xFF, 0x11, 0x18, 0x27);
 
         /// <summary>
         /// 削除マーカー色。
         /// </summary>
         private static readonly SolidColorBrush BrushMarkerDelete =
-            CreateFrozenBrush(0xFF, 0xFC, 0xA5, 0xA5);
+            CreateFrozenBrush(0xFF, 0xB9, 0x1C, 0x1C);
 
         /// <summary>
         /// 挿入マーカー色。
         /// </summary>
         private static readonly SolidColorBrush BrushMarkerInsert =
-            CreateFrozenBrush(0xFF, 0x86, 0xEF, 0xAC);
+            CreateFrozenBrush(0xFF, 0x04, 0x78, 0x57);
 
         /// <summary>
         /// ギャップマーカー色。
         /// </summary>
         private static readonly SolidColorBrush BrushMarkerGap =
-            CreateFrozenBrush(0xFF, 0x9C, 0xA3, 0xAF);
+            CreateFrozenBrush(0xFF, 0x6B, 0x72, 0x80);
 
         /// <summary>
         /// コンストラクタ。
