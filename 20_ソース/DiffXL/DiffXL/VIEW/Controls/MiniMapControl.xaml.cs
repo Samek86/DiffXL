@@ -36,8 +36,8 @@ namespace DiffXL.VIEW.Controls
         /// <summary>内容ストリームの縦スクロール比率 0..1（青帯位置）。</summary>
         private double _contentViewportRatio;
 
-        /// <summary>シート帯の上部をシート名ヘッダに使う比率。</summary>
-        private const double SheetHeaderRatio = 0.12;
+        /// <summary>シート名ヘッダは出さない（マップ全体をスクロール領域にする）。</summary>
+        private const double SheetHeaderRatio = 0.0;
 
         /// <summary>現在シートの最低行スケール（ScrollRow との対応用）。</summary>
         private const int DefaultMaxRow = 120;
@@ -640,14 +640,12 @@ namespace DiffXL.VIEW.Controls
                 SheetSegment seg = _segments[i];
                 double y = seg.Top * h;
                 double sh = Math.Max(10, seg.Height * h);
-                double headerH = Math.Max(16, sh * SheetHeaderRatio);
-                double bodyH = Math.Max(4, sh - headerH);
 
-                // 本文（マーカー領域）— ライト
+                // 本文のみ（シート名ヘッダ・ラベルは出さない）
                 var body = new Rectangle
                 {
                     Width = w,
-                    Height = bodyH,
+                    Height = sh,
                     Fill = new SolidColorBrush(Color.FromRgb(
                         (byte)(i % 2 == 0 ? 0xF3 : 0xE5),
                         (byte)(i % 2 == 0 ? 0xF4 : 0xE7),
@@ -655,22 +653,8 @@ namespace DiffXL.VIEW.Controls
                     IsHitTestVisible = false
                 };
                 Canvas.SetLeft(body, 0);
-                Canvas.SetTop(body, y + headerH);
+                Canvas.SetTop(body, y);
                 MapCanvas.Children.Add(body);
-
-                // シート名ヘッダ（マーカー禁止）
-                var header = new Rectangle
-                {
-                    Width = w,
-                    Height = headerH,
-                    Fill = new SolidColorBrush(Color.FromRgb(0xE0, 0xE7, 0xFF)),
-                    Stroke = new SolidColorBrush(Color.FromRgb(0xBF, 0xDB, 0xFE)),
-                    StrokeThickness = 1,
-                    IsHitTestVisible = false
-                };
-                Canvas.SetLeft(header, 0);
-                Canvas.SetTop(header, y);
-                MapCanvas.Children.Add(header);
 
                 if (i > 0)
                 {
@@ -686,22 +670,6 @@ namespace DiffXL.VIEW.Controls
                     };
                     MapCanvas.Children.Add(sep);
                 }
-
-                // 現在シート名（単一）
-                var label = new TextBlock
-                {
-                    Text = Truncate(seg.Name, 10),
-                    FontSize = 10,
-                    FontWeight = FontWeights.Bold,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0x1E, 0x3A, 0x8A)),
-                    ToolTip = seg.Name,
-                    IsHitTestVisible = false,
-                    Width = Math.Max(20, w - 6),
-                    TextAlignment = TextAlignment.Center
-                };
-                Canvas.SetLeft(label, 3);
-                Canvas.SetTop(label, y + Math.Max(1, (headerH - 14) / 2));
-                MapCanvas.Children.Add(label);
             }
         }
 
@@ -951,14 +919,9 @@ namespace DiffXL.VIEW.Controls
                 MapCanvas.Children.Add(_viewportLabel);
             }
 
-            // ラベル: シート名 + スクロール%
-            string sheetShort = Truncate(
-                string.IsNullOrEmpty(_viewportSheet)
-                    ? (_segments.Count > 0 ? _segments[0].Name : "—")
-                    : _viewportSheet,
-                8);
+            // ラベル: スクロール%のみ（シート名は出さない）
             int pct = (int)Math.Round(_contentViewportRatio * 100);
-            _viewportLabel.Text = sheetShort + " · " + pct + "%";
+            _viewportLabel.Text = pct + "%";
 
             Canvas.SetLeft(_viewportLabel, 3);
             Canvas.SetTop(_viewportLabel, Math.Max(0, y + 2));
@@ -978,16 +941,14 @@ namespace DiffXL.VIEW.Controls
 
             if (_orderedItems.Count == 0)
             {
-                HintText.Text = "差分なし\nクリックで移動";
+                HintText.Text = "差分なし\nドラッグでスクロール";
                 return;
             }
 
-            string sheet = string.IsNullOrEmpty(_viewportSheet) ? "—" : _viewportSheet;
             int pct = (int)Math.Round(_contentViewportRatio * 100);
             HintText.Text = "差分 " + _orderedItems.Count + " 件\n"
-                + sheet + "\n"
                 + "表示 " + pct + "%\n"
-                + "黄=差分 / クリックでジャンプ";
+                + "ドラッグでスクロール";
         }
 
         private static string Truncate(string s, int max)
@@ -1007,13 +968,15 @@ namespace DiffXL.VIEW.Controls
                 return string.Empty;
             }
 
-            string sheet = item.SheetLeft ?? item.SheetRight ?? string.Empty;
+            // シート名は表示しない（種別・要約・番地のみ）
             string addr = item.AddressLeft ?? item.AddressRight ?? string.Empty;
-            string head = string.IsNullOrEmpty(sheet)
-                ? addr
-                : (string.IsNullOrEmpty(addr) ? sheet : sheet + "!" + addr);
             string body = item.Summary ?? item.Kind.ToString();
-            return string.IsNullOrEmpty(head) ? body : head + "\n" + body;
+            if (string.IsNullOrEmpty(addr))
+            {
+                return body;
+            }
+
+            return body + "\n" + addr;
         }
 
         /// <summary>

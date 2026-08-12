@@ -27,13 +27,6 @@
                 FontWeight="SemiBold"
                 Foreground="#FF111827"
                 Text="MiniMap" />
-            <TextBlock
-                Margin="0,2,0,0"
-                HorizontalAlignment="Center"
-                FontSize="10"
-                Foreground="#FF6B7280"
-                Text="現在シート"
-                TextAlignment="Center" />
         </StackPanel>
         <Border
             x:Name="MapBorder"
