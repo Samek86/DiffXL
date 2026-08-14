@@ -4,10 +4,12 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using DiffXL.LOGIC.Diff;
+using DiffXL.VIEW.Dialogs;
 
 namespace DiffXL.VIEW.Controls
 {
@@ -15,6 +17,7 @@ namespace DiffXL.VIEW.Controls
     /// 画像ペア 1 行の表示。自側画像を表示し、差分領域を
     /// 赤枠 3px ＋ 黄 50% 塗り（設定可）で Canvas 重ねする。
     /// HighlightVisible=false でも画像本体は残し、枠・塗りだけ消す。
+    /// 左右両方ある場合のみクリックで重ね合わせ Window を開く。
     /// </summary>
     public partial class ImagePairView : UserControl
     {
@@ -69,12 +72,34 @@ namespace DiffXL.VIEW.Controls
         private double _borderThickness = 3.0;
 
         /// <summary>
+        /// 左画像の抽出パス（オーバーレイ用）。
+        /// </summary>
+        private string _leftPath;
+
+        /// <summary>
+        /// 右画像の抽出パス（オーバーレイ用）。
+        /// </summary>
+        private string _rightPath;
+
+        /// <summary>
+        /// 左画像の表示名。
+        /// </summary>
+        private string _leftLabel;
+
+        /// <summary>
+        /// 右画像の表示名。
+        /// </summary>
+        private string _rightLabel;
+
+        /// <summary>
         /// コンストラクタ。
         /// </summary>
         public ImagePairView()
         {
             InitializeComponent();
             ApplyStyleFromSettings();
+            ImageFrame.MouseLeftButtonUp += ImageFrame_MouseLeftButtonUp;
+            ImageFrame.Cursor = Cursors.Arrow;
         }
 
         /// <summary>
@@ -123,6 +148,16 @@ namespace DiffXL.VIEW.Controls
             _highlightVisible = highlightVisible;
             ApplyStyleFromSettings();
             _regions = new List<HighlightRegion>();
+
+            _leftPath = leftImage != null ? leftImage.ExtractedPath : null;
+            _rightPath = rightImage != null ? rightImage.ExtractedPath : null;
+            _leftLabel = leftImage != null
+                ? (leftImage.FileName ?? leftImage.PackagePath ?? "left")
+                : null;
+            _rightLabel = rightImage != null
+                ? (rightImage.FileName ?? rightImage.PackagePath ?? "right")
+                : null;
+            UpdateOverlayCursor();
 
             EmbeddedImage self = isLeft ? leftImage : rightImage;
             EmbeddedImage partner = isLeft ? rightImage : leftImage;
@@ -205,6 +240,7 @@ namespace DiffXL.VIEW.Controls
             }
 
             RebuildHighlightCanvas();
+            UpdateOverlayCursor();
         }
 
         /// <summary>
@@ -218,6 +254,70 @@ namespace DiffXL.VIEW.Controls
             MainImage.Source = null;
             HighlightCanvas.Children.Clear();
             _regions = new List<HighlightRegion>();
+            UpdateOverlayCursor();
+        }
+
+        /// <summary>
+        /// 左右両方の画像パスが有効なとき true。
+        /// </summary>
+        private bool CanOpenOverlay()
+        {
+            return !string.IsNullOrEmpty(_leftPath) && File.Exists(_leftPath)
+                && !string.IsNullOrEmpty(_rightPath) && File.Exists(_rightPath);
+        }
+
+        /// <summary>
+        /// クリック可能なとき Hand カーソルとツールチップを付ける。
+        /// </summary>
+        private void UpdateOverlayCursor()
+        {
+            if (ImageFrame == null)
+            {
+                return;
+            }
+
+            if (CanOpenOverlay())
+            {
+                ImageFrame.Cursor = Cursors.Hand;
+                ImageFrame.ToolTip = "クリックで重ね合わせ比較を開く（OpenCV 位置合わせ）";
+            }
+            else
+            {
+                ImageFrame.Cursor = Cursors.Arrow;
+                ImageFrame.ToolTip = null;
+            }
+        }
+
+        /// <summary>
+        /// 画像クリック → 左右両方ある場合のみオーバーレイ Window を開く。
+        /// </summary>
+        private void ImageFrame_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!CanOpenOverlay())
+            {
+                return;
+            }
+
+            try
+            {
+                var win = new ImageOverlayWindow(_leftPath, _rightPath, _leftLabel, _rightLabel);
+                Window owner = Window.GetWindow(this);
+                if (owner != null)
+                {
+                    win.Owner = owner;
+                }
+
+                win.Show();
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "重ね合わせウィンドウを開けませんでした。\n" + ex.Message,
+                    "DiffXL",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
         }
 
         /// <summary>
@@ -355,13 +455,19 @@ namespace DiffXL.VIEW.Controls
                 ? relatedDiff.HighlightRegions.Count
                 : 0;
             string kind = relatedDiff != null ? relatedDiff.Kind.ToString() : "Match";
+            bool both = leftImage != null && rightImage != null
+                && !string.IsNullOrEmpty(leftImage.ExtractedPath)
+                && !string.IsNullOrEmpty(rightImage.ExtractedPath)
+                && File.Exists(leftImage.ExtractedPath)
+                && File.Exists(rightImage.ExtractedPath);
             return string.Format(
                 CultureInfo.InvariantCulture,
-                "{0} ↔ {1} · {2} · regions={3}",
+                "{0} ↔ {1} · {2} · regions={3}{4}",
                 leftLabel,
                 rightLabel,
                 kind,
-                regionCount);
+                regionCount,
+                both ? " · クリックで重ね合わせ" : string.Empty);
         }
 
         /// <summary>

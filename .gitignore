@@ -30,3 +30,9 @@
 # OS
 Thumbs.db
 Desktop.ini
+
+# Local generate / build noise
+**/__pycache__/
+*.pyc
+**/_build_err.log
+10_管理資料/テスト/_latest_stream_align_evidence.txt

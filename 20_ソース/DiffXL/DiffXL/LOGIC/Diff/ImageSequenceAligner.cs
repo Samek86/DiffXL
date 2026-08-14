@@ -59,8 +59,9 @@ namespace DiffXL.LOGIC.Diff
 
         /// <summary>
         /// 2 画像の類似度（0..1）。位置情報は使わない。
+        /// ContentStreamBuilder のブロック対応でも同じ基準を使う。
         /// </summary>
-        private static double ImageSimilarity(EmbeddedImage left, EmbeddedImage right)
+        public static double ComputeSimilarity(EmbeddedImage left, EmbeddedImage right)
         {
             if (left == null || right == null)
             {
@@ -79,12 +80,25 @@ namespace DiffXL.LOGIC.Diff
             string rp = right.ExtractedPath;
             if (string.IsNullOrEmpty(lp) || string.IsNullOrEmpty(rp))
             {
+                // パス未抽出時はファイル名一致のみ
+                if (!string.IsNullOrEmpty(left.FileName)
+                    && string.Equals(left.FileName, right.FileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return 0.7;
+                }
+
                 return 0.0;
             }
 
             double? ratio = ImageDiffService.TryGetDiffRatio(lp, rp);
             if (!ratio.HasValue)
             {
+                if (!string.IsNullOrEmpty(left.FileName)
+                    && string.Equals(left.FileName, right.FileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return 0.7;
+                }
+
                 return 0.0;
             }
 
@@ -100,6 +114,14 @@ namespace DiffXL.LOGIC.Diff
             }
 
             return sim;
+        }
+
+        /// <summary>
+        /// 2 画像の類似度（0..1）。位置情報は使わない。
+        /// </summary>
+        private static double ImageSimilarity(EmbeddedImage left, EmbeddedImage right)
+        {
+            return ComputeSimilarity(left, right);
         }
     }
 }

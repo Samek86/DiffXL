@@ -27,7 +27,7 @@
                 Text="内容未読込" />
         </Border>
 
-        <!-- セル／表／画像／図形をドキュメント順に 1 本のストリームで表示 -->
+        <!-- 仮想化: Top/Bottom スペーサ + 可視範囲のみ ViewportHost に生成 -->
         <ScrollViewer
             x:Name="StreamScroll"
             Grid.Row="1"
@@ -35,8 +35,13 @@
             HorizontalScrollBarVisibility="Auto"
             Padding="8"
             Background="#FFF9FAFB"
-            ScrollChanged="StreamScroll_ScrollChanged">
-            <StackPanel x:Name="StreamHost" />
+            ScrollChanged="StreamScroll_ScrollChanged"
+            SizeChanged="StreamScroll_SizeChanged">
+            <StackPanel x:Name="StreamRoot">
+                <FrameworkElement x:Name="TopSpacer" Height="0" Focusable="False" />
+                <StackPanel x:Name="ViewportHost" />
+                <FrameworkElement x:Name="BottomSpacer" Height="0" Focusable="False" />
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </UserControl>

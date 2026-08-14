@@ -195,6 +195,8 @@ namespace DiffXL
             };
 
             MiniMap.NavigateRequested += OnMiniMapNavigate;
+            MiniMap.ScrubStarted += OnMiniMapScrubStarted;
+            MiniMap.ScrubEnded += OnMiniMapScrubEnded;
             AttachMouseWheelFilter();
             AttachLowLevelMouseHook();
             StartViewportTimer();
@@ -2013,9 +2015,9 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// 左右 ContentPane の画像ハイライト表示を切替（再比較不要）。
+        /// 左右 ContentPane の差分強調（画像枠・セル黄ハイライト）を切替（再比較不要）。
         /// </summary>
-        /// <param name="visible">枠・塗りを出すなら true</param>
+        /// <param name="visible">枠・塗り・セル黄を出すなら true</param>
         private void ApplyImageHighlightVisible(bool visible)
         {
             try
@@ -2989,6 +2991,52 @@ namespace DiffXL
         /// </summary>
         private bool _syncingContentScroll;
 
+        /// <summary>MiniMap ドラッグ中。</summary>
+        private bool _miniMapScrubbing;
+
+        /// <summary>Rendering フック済み。</summary>
+        private bool _miniMapFrameHooked;
+
+        /// <summary>次フレームで本文へ反映する。</summary>
+        private bool _miniMapApplyPending;
+
+        /// <summary>MiniMap 目標スクロール比率。</summary>
+        private double _miniMapTargetRatio;
+
+        /// <summary>ドラッグ中の最寄り差分（確定時ハイライト用）。</summary>
+        private DiffItem _miniMapTargetItem;
+
+        /// <summary>
+        /// 左右 ratio 同期の無視閾値（これ未満の差は再適用しない＝微小振動防止）。
+        /// </summary>
+        private const double ContentScrollRatioEpsilon = 0.0005;
+
+        /// <summary>
+        /// 本文のスクロール位置と可視比率を MiniMap 青帯へ渡す。
+        /// </summary>
+        private void PushMiniMapViewport()
+        {
+            if (MiniMap == null)
+            {
+                return;
+            }
+
+            double ratio = 0;
+            double fraction = 1;
+            if (LeftPane != null)
+            {
+                ratio = LeftPane.GetContentScrollRatio();
+                fraction = LeftPane.GetContentVisibleFraction();
+            }
+            else if (RightPane != null)
+            {
+                ratio = RightPane.GetContentScrollRatio();
+                fraction = RightPane.GetContentVisibleFraction();
+            }
+
+            MiniMap.SetContentViewport(ratio, fraction);
+        }
+
         /// <summary>
         /// 左内容ストリームのスクロール → 右へ比率同期。
         /// </summary>
@@ -3001,6 +3049,15 @@ namespace DiffXL
 
             if (AppSettings.Current.Ui != null && !AppSettings.Current.Ui.SyncScroll)
             {
+                PushMiniMapViewport();
+                return;
+            }
+
+            if (RightPane != null
+                && Math.Abs(RightPane.GetContentScrollRatio() - ratio) < ContentScrollRatioEpsilon)
+            {
+                // 相手は既に十分近い。MiniMap 青帯だけ追従。
+                PushMiniMapViewport();
                 return;
             }
 
@@ -3012,10 +3069,7 @@ namespace DiffXL
                     RightPane.SetContentScrollRatio(ratio);
                 }
 
-                if (MiniMap != null)
-                {
-                    MiniMap.SetContentViewportRatio(ratio);
-                }
+                PushMiniMapViewport();
             }
             finally
             {
@@ -3035,6 +3089,14 @@ namespace DiffXL
 
             if (AppSettings.Current.Ui != null && !AppSettings.Current.Ui.SyncScroll)
             {
+                PushMiniMapViewport();
+                return;
+            }
+
+            if (LeftPane != null
+                && Math.Abs(LeftPane.GetContentScrollRatio() - ratio) < ContentScrollRatioEpsilon)
+            {
+                PushMiniMapViewport();
                 return;
             }
 
@@ -3046,10 +3108,7 @@ namespace DiffXL
                     LeftPane.SetContentScrollRatio(ratio);
                 }
 
-                if (MiniMap != null)
-                {
-                    MiniMap.SetContentViewportRatio(ratio);
-                }
+                PushMiniMapViewport();
             }
             finally
             {
@@ -3058,23 +3117,132 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// MiniMap クリック／ドラッグ。スクロールバー同様に比率で左右内容を即時同期スクロールする。
-        /// （遅延 BeginInvoke やシート切替は行わない — ドラッグを阻害するため）
+        /// MiniMap ドラッグ開始。
+        /// </summary>
+        private void OnMiniMapScrubStarted()
+        {
+            _miniMapScrubbing = true;
+        }
+
+        /// <summary>
+        /// MiniMap ドラッグ終了。最終位置をフル描画で確定する。
+        /// </summary>
+        private void OnMiniMapScrubEnded()
+        {
+            _miniMapScrubbing = false;
+            _miniMapApplyPending = false;
+            UnhookMiniMapScrubFrame();
+            ApplyMiniMapTarget(
+                ContentScrollApplyMode.ScrubEnd,
+                applyHighlight: true,
+                updateStatus: true);
+            PushMiniMapViewport();
+        }
+
+        /// <summary>
+        /// MiniMap クリック／ドラッグ。青帯は即時、本文はフレーム統合（ドラッグ中は Scrub）。
         /// </summary>
         private void OnMiniMapNavigate(double ratio, DiffItem item)
         {
-            double r = Math.Max(0, Math.Min(1, ratio));
+            _miniMapTargetRatio = Math.Max(0, Math.Min(1, ratio));
+            _miniMapTargetItem = item;
+
+            // 青帯は軽量なので常に即時（リアルタイム感の主観）
+            try
+            {
+                if (MiniMap != null)
+                {
+                    MiniMap.SetContentViewportRatio(_miniMapTargetRatio);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex);
+            }
+
+            if (_miniMapScrubbing)
+            {
+                _miniMapApplyPending = true;
+                HookMiniMapScrubFrame();
+                return;
+            }
+
+            // スクラブ外（防御）: 通常適用
+            ApplyMiniMapTarget(
+                ContentScrollApplyMode.Normal,
+                applyHighlight: true,
+                updateStatus: true);
+        }
+
+        private void HookMiniMapScrubFrame()
+        {
+            if (_miniMapFrameHooked)
+            {
+                return;
+            }
+
+            CompositionTarget.Rendering += OnMiniMapScrubFrame;
+            _miniMapFrameHooked = true;
+        }
+
+        private void UnhookMiniMapScrubFrame()
+        {
+            if (!_miniMapFrameHooked)
+            {
+                return;
+            }
+
+            CompositionTarget.Rendering -= OnMiniMapScrubFrame;
+            _miniMapFrameHooked = false;
+        }
+
+        private void OnMiniMapScrubFrame(object sender, EventArgs e)
+        {
+            if (!_miniMapApplyPending)
+            {
+                if (!_miniMapScrubbing)
+                {
+                    UnhookMiniMapScrubFrame();
+                }
+
+                return;
+            }
+
+            if (!_miniMapScrubbing)
+            {
+                // Ended が先に処理済み
+                _miniMapApplyPending = false;
+                UnhookMiniMapScrubFrame();
+                return;
+            }
+
+            _miniMapApplyPending = false;
+            ApplyMiniMapTarget(
+                ContentScrollApplyMode.Scrub,
+                applyHighlight: false,
+                updateStatus: false);
+        }
+
+        /// <summary>
+        /// 目標 ratio を左右内容へ適用する。
+        /// </summary>
+        private void ApplyMiniMapTarget(
+            ContentScrollApplyMode mode,
+            bool applyHighlight,
+            bool updateStatus)
+        {
+            double r = _miniMapTargetRatio;
             _syncingContentScroll = true;
             try
             {
                 if (LeftPane != null)
                 {
-                    LeftPane.SetContentScrollRatio(r);
+                    LeftPane.SetContentScrollRatio(r, mode);
                 }
 
                 if (RightPane != null)
                 {
-                    RightPane.SetContentScrollRatio(r);
+                    RightPane.SetContentScrollRatio(r, mode);
                 }
 
                 if (MiniMap != null)
@@ -3082,18 +3250,17 @@ namespace DiffXL
                     MiniMap.SetContentViewportRatio(r);
                 }
 
-                // 最寄り差分の選択枠のみ（スクロール位置は ratio を絶対優先 — ドラッグ用）
-                if (item != null)
+                if (applyHighlight && _miniMapTargetItem != null)
                 {
                     int idx = -1;
                     if (LeftPane != null)
                     {
-                        idx = LeftPane.FindContentPairIndex(item);
+                        idx = LeftPane.FindContentPairIndex(_miniMapTargetItem);
                     }
 
                     if (idx < 0 && RightPane != null)
                     {
-                        idx = RightPane.FindContentPairIndex(item);
+                        idx = RightPane.FindContentPairIndex(_miniMapTargetItem);
                     }
 
                     if (idx >= 0)
@@ -3110,10 +3277,11 @@ namespace DiffXL
                     }
                 }
 
-                int pct = (int)Math.Round(r * 100);
-                string hint = item != null ? (item.Summary ?? item.Kind.ToString()) : string.Empty;
-                if (StatusText != null)
+                if (updateStatus && StatusText != null)
                 {
+                    int pct = (int)Math.Round(r * 100);
+                    DiffItem item = _miniMapTargetItem;
+                    string hint = item != null ? (item.Summary ?? item.Kind.ToString()) : string.Empty;
                     StatusText.Text = "MiniMap スクロール " + pct + "%"
                         + (string.IsNullOrEmpty(hint) ? string.Empty : " · " + hint);
                 }
@@ -3296,6 +3464,9 @@ namespace DiffXL
             {
                 return;
             }
+
+            // 新旧シートで共有レイアウトが混ざらないようキャッシュを破棄
+            ContentStreamBuilder.ClearLayoutCache();
 
             string leftPreferred = null;
             string rightPreferred = null;
@@ -3702,11 +3873,7 @@ namespace DiffXL
             }
 
             MiniMap.SetCurrentSheet(focusSheet, filtered);
-            // 内容ビューの現在スクロール位置を青帯に反映
-            double scrollRatio = LeftPane != null
-                ? LeftPane.GetContentScrollRatio()
-                : (RightPane != null ? RightPane.GetContentScrollRatio() : 0);
-            MiniMap.SetContentViewportRatio(scrollRatio);
+            PushMiniMapViewport();
             _lastMiniMapSheet = focusSheet ?? string.Empty;
             _lastMiniMapLeftRow = -1;
             _lastMiniMapRightRow = -1;

@@ -309,13 +309,29 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// 内容ビューの可視比率 0..1（MiniMap 青帯高さ用）。
+        /// </summary>
+        public double GetContentVisibleFraction()
+        {
+            return ContentHost != null ? ContentHost.GetVisibleFraction() : 1;
+        }
+
+        /// <summary>
         /// 内容ストリームの縦スクロール比率を設定（同期用）。
         /// </summary>
         public void SetContentScrollRatio(double ratio)
         {
+            SetContentScrollRatio(ratio, ContentScrollApplyMode.Normal);
+        }
+
+        /// <summary>
+        /// 内容ストリームの縦スクロール比率を設定（MiniMap スクラブモード対応）。
+        /// </summary>
+        public void SetContentScrollRatio(double ratio, ContentScrollApplyMode mode)
+        {
             if (ContentHost != null)
             {
-                ContentHost.SetVerticalScrollRatio(ratio);
+                ContentHost.SetVerticalScrollRatio(ratio, mode);
             }
         }
 

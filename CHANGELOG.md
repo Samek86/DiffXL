@@ -13,6 +13,11 @@
 
 - 内容ベース比較の必須シナリオ用サンプル `content_diff_left.xlsx` / `content_diff_right.xlsx` と生成スクリプト
 - 内容ベース比較の設計書・実装計画（`docs/superpowers/specs|plans/2026-08-12-content-based-diff*`）
+- 長大シート向け内容ストリーム仮想化（高さマップ＋ビューポート Realize）
+- MiniMap 青帯を可視範囲に比例（下限 16px）し、スクロールバー同様の掴み／ジャンプ操作
+- MiniMap スクラブ中のフレーム統合と軽量 Realize
+- 画像ペアのオーバーレイ比較（位置合わせ＋重ね表示）
+- ストレステストサンプル `stress_suite_left.xlsx` / `stress_suite_right.xlsx`
 
 ### Changed
 

@@ -122,6 +122,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="VIEW\Dialogs\ImageOverlayWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -146,6 +150,7 @@
     <Compile Include="LOGIC\Diff\ImageCorrespondence.cs" />
     <Compile Include="LOGIC\Diff\ImageCorrespondenceService.cs" />
     <Compile Include="LOGIC\Diff\ImageDiffService.cs" />
+    <Compile Include="LOGIC\Diff\ImageOverlayAligner.cs" />
     <Compile Include="LOGIC\Diff\ImageSequenceAligner.cs" />
     <Compile Include="LOGIC\Diff\ImageVisualComparer.cs" />
     <Compile Include="LOGIC\Diff\ScrollSyncService.cs" />
@@ -163,6 +168,7 @@
     <Compile Include="VIEW\Controls\DiffOverlayLayer.xaml.cs">
       <DependentUpon>DiffOverlayLayer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="VIEW\Controls\MiniMapViewportBand.cs" />
     <Compile Include="VIEW\Controls\MiniMapControl.xaml.cs">
       <DependentUpon>MiniMapControl.xaml</DependentUpon>
     </Compile>
@@ -180,6 +186,9 @@
     </Compile>
     <Compile Include="VIEW\Dialogs\ImageLinkDialog.xaml.cs">
       <DependentUpon>ImageLinkDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VIEW\Dialogs\ImageOverlayWindow.xaml.cs">
+      <DependentUpon>ImageOverlayWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="VIEW\Dialogs\SheetMapDialog.xaml.cs">
       <DependentUpon>SheetMapDialog.xaml</DependentUpon>

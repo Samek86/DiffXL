@@ -36,6 +36,16 @@ namespace DiffXL.VIEW.Controls
         /// <summary>内容ストリームの縦スクロール比率 0..1（青帯位置）。</summary>
         private double _contentViewportRatio;
 
+        /// <summary>ビューポートが高さ全体に占める割合 0..1。</summary>
+        private double _visibleFraction = 1;
+
+        /// <summary>ドラッグ開始時の帯上端からの掴み位置。</summary>
+        private double _grabOffset;
+
+        /// <summary>直近描画した青帯の上端・高さ（ヒット用）。</summary>
+        private double _lastBandTop;
+        private double _lastBandH;
+
         /// <summary>シート名ヘッダは出さない（マップ全体をスクロール領域にする）。</summary>
         private const double SheetHeaderRatio = 0.0;
 
@@ -66,6 +76,16 @@ namespace DiffXL.VIEW.Controls
         public event Action<double, DiffItem> NavigateRequested;
 
         /// <summary>
+        /// MiniMap ドラッグ開始（MouseDown / キャプチャ）。
+        /// </summary>
+        public event Action ScrubStarted;
+
+        /// <summary>
+        /// MiniMap ドラッグ終了（MouseUp / キャプチャ解除）。
+        /// </summary>
+        public event Action ScrubEnded;
+
+        /// <summary>
         /// 内容マップ座標系でのナビ（ratio + 左右推奨行）。
         /// </summary>
         public event Action<double, int, int> NavigateMapped;
@@ -93,7 +113,17 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// 内容ビューのスクロール比率と可視比率を青帯に反映する。
+        /// </summary>
+        public void SetContentViewport(double ratio, double visibleFraction)
+        {
+            _visibleFraction = MiniMapViewportBand.Clamp01(visibleFraction);
+            SetContentViewportRatio(ratio);
+        }
+
+        /// <summary>
         /// 内容ビューのスクロール比率 0..1 を青帯に反映する。
+        /// 高さは直近の可視比率を使う。
         /// </summary>
         public void SetContentViewportRatio(double ratio)
         {
@@ -880,8 +910,10 @@ namespace DiffXL.VIEW.Controls
             // 内容ストリーム比率ベースの青帯（Excel 行は使わない）
             double bodyTop = h * SheetHeaderRatio;
             double bodyH = Math.Max(8, h * (1.0 - SheetHeaderRatio));
-            double bandH = Math.Max(14, Math.Min(bodyH * 0.2, bodyH * 0.35));
-            double y = bodyTop + _contentViewportRatio * Math.Max(0, bodyH - bandH);
+            double bandH = MiniMapViewportBand.BandHeight(bodyH, _visibleFraction);
+            double y = MiniMapViewportBand.BandTop(bodyTop, bodyH, bandH, _contentViewportRatio);
+            _lastBandTop = y;
+            _lastBandH = bandH;
 
             if (_viewportBand == null)
             {
@@ -922,6 +954,9 @@ namespace DiffXL.VIEW.Controls
             // ラベル: スクロール%のみ（シート名は出さない）
             int pct = (int)Math.Round(_contentViewportRatio * 100);
             _viewportLabel.Text = pct + "%";
+            _viewportLabel.Visibility = bandH >= MiniMapViewportBand.LabelMinBandHeightPx
+                ? Visibility.Visible
+                : Visibility.Collapsed;
 
             Canvas.SetLeft(_viewportLabel, 3);
             Canvas.SetTop(_viewportLabel, Math.Max(0, y + 2));
@@ -987,9 +1022,30 @@ namespace DiffXL.VIEW.Controls
             double h = Math.Max(1, MapBorder.ActualHeight);
             double bodyTop = h * SheetHeaderRatio;
             double bodyH = Math.Max(1, h * (1.0 - SheetHeaderRatio));
-            // サム相当: クリック位置を本文全体の比率にマップ
-            double ratio = (p.Y - bodyTop) / bodyH;
-            return Math.Max(0, Math.Min(1, ratio));
+            double bandH = MiniMapViewportBand.BandHeight(bodyH, _visibleFraction);
+            return MiniMapViewportBand.RatioFromPointer(p.Y, _grabOffset, bodyTop, bodyH, bandH);
+        }
+
+        /// <summary>
+        /// ダウン時点の掴み位置を決める（帯内=相対、帯外=中心ジャンプ）。
+        /// </summary>
+        private void CaptureGrab(Point p)
+        {
+            double h = Math.Max(1, MapBorder.ActualHeight);
+            double bodyTop = h * SheetHeaderRatio;
+            double bodyH = Math.Max(1, h * (1.0 - SheetHeaderRatio));
+            double bandH = MiniMapViewportBand.BandHeight(bodyH, _visibleFraction);
+            double bandTop = MiniMapViewportBand.BandTop(bodyTop, bodyH, bandH, _contentViewportRatio);
+            _lastBandTop = bandTop;
+            _lastBandH = bandH;
+            if (MiniMapViewportBand.HitTestThumb(p.Y, bandTop, bandH))
+            {
+                _grabOffset = p.Y - bandTop;
+            }
+            else
+            {
+                _grabOffset = bandH * 0.5;
+            }
         }
 
         private void RaiseNavigate(Point p)
@@ -1067,9 +1123,8 @@ namespace DiffXL.VIEW.Controls
                 return;
             }
 
-            _dragging = true;
-            Focus();
-            CaptureMouse();
+            CaptureGrab(p);
+            BeginScrub();
             RaiseNavigate(p);
             e.Handled = true;
         }
@@ -1101,21 +1156,25 @@ namespace DiffXL.VIEW.Controls
                 return;
             }
 
-            _dragging = false;
-            if (IsMouseCaptured)
+            // 最終位置を 1 回出してから終了
+            if (MapBorder != null)
             {
-                ReleaseMouseCapture();
+                Point p = e.GetPosition(MapBorder);
+                p.Y = Math.Max(0, Math.Min(MapBorder.ActualHeight, p.Y));
+                p.X = Math.Max(0, Math.Min(MapBorder.ActualWidth, p.X));
+                RaiseNavigate(p);
             }
 
+            EndScrub();
             e.Handled = true;
         }
 
         private void MapBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _dragging = true;
-            Focus();
-            CaptureMouse();
-            RaiseNavigate(e.GetPosition(MapBorder));
+            Point p = e.GetPosition(MapBorder);
+            CaptureGrab(p);
+            BeginScrub();
+            RaiseNavigate(p);
             e.Handled = true;
         }
 
@@ -1134,13 +1193,52 @@ namespace DiffXL.VIEW.Controls
         {
             if (_dragging)
             {
-                _dragging = false;
-                if (IsMouseCaptured)
+                if (MapBorder != null)
                 {
-                    ReleaseMouseCapture();
+                    Point p = e.GetPosition(MapBorder);
+                    p.Y = Math.Max(0, Math.Min(MapBorder.ActualHeight, p.Y));
+                    RaiseNavigate(p);
                 }
 
+                EndScrub();
                 e.Handled = true;
+            }
+        }
+
+        private void BeginScrub()
+        {
+            if (_dragging)
+            {
+                return;
+            }
+
+            _dragging = true;
+            Focus();
+            CaptureMouse();
+            Action started = ScrubStarted;
+            if (started != null)
+            {
+                started();
+            }
+        }
+
+        private void EndScrub()
+        {
+            if (!_dragging)
+            {
+                return;
+            }
+
+            _dragging = false;
+            if (IsMouseCaptured)
+            {
+                ReleaseMouseCapture();
+            }
+
+            Action ended = ScrubEnded;
+            if (ended != null)
+            {
+                ended();
             }
         }
 

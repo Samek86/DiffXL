@@ -50,12 +50,78 @@ namespace DiffXL.LOGIC.Diff
                 rightKeys[j] = MakeRowKey(right[j]);
             }
 
+            // 同数かつ全行キー一致なら DP 不要（長大・ほぼ同一表の高速パス）
+            if (n == m && n > 0)
+            {
+                bool allEqual = true;
+                for (int i = 0; i < n; i++)
+                {
+                    if (!string.Equals(leftKeys[i], rightKeys[i], StringComparison.Ordinal))
+                    {
+                        allEqual = false;
+                        break;
+                    }
+                }
+
+                if (allEqual)
+                {
+                    var fast = new List<AlignStep>(n);
+                    for (int i = 0; i < n; i++)
+                    {
+                        fast.Add(new AlignStep
+                        {
+                            Op = AlignOp.Match,
+                            LeftIndex = i,
+                            RightIndex = i
+                        });
+                    }
+
+                    return fast;
+                }
+            }
+
             return SequenceAligner.Align(
                 n,
                 m,
                 (i, j) => RowSimilarity(left[i], right[j], leftKeys[i], rightKeys[j]),
                 MatchThreshold,
                 SkipCost);
+        }
+
+        /// <summary>
+        /// 2 テーブルのソフト類似度（0..1）。
+        /// 行 LCS（AlignRows）で Match した行数 / max(左行数, 右行数)。
+        /// 完全一致 Jaccard が低くても、行 ID が揃いセル一部だけ違う表を対応付けられる。
+        /// </summary>
+        public static double SoftTableSimilarity(TableBlock left, TableBlock right)
+        {
+            IList<IList<CellContent>> leftRows =
+                left != null && left.Rows != null ? left.Rows : Array.Empty<IList<CellContent>>();
+            IList<IList<CellContent>> rightRows =
+                right != null && right.Rows != null ? right.Rows : Array.Empty<IList<CellContent>>();
+
+            if (leftRows.Count == 0 && rightRows.Count == 0)
+            {
+                return 1.0;
+            }
+
+            if (leftRows.Count == 0 || rightRows.Count == 0)
+            {
+                return 0.0;
+            }
+
+            IList<AlignStep> steps = AlignRows(leftRows, rightRows);
+            int match = 0;
+            for (int i = 0; i < steps.Count; i++)
+            {
+                if (steps[i] != null && steps[i].Op == AlignOp.Match)
+                {
+                    match++;
+                }
+            }
+
+            int denom = Math.Max(leftRows.Count, rightRows.Count);
+            return denom <= 0 ? 1.0 : (double)match / denom;
         }
 
         /// <summary>

@@ -190,7 +190,8 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// Match 行を min 列で zip し、Text または Bg が異なれば TableCellChange。
+        /// Match 行を min 列で zip し、Text が異なれば TableCellChange。
+        /// 交互行の塗りなど Bg だけの差は差分にしない（表示が全面黄になるのを防ぐ）。
         /// </summary>
         private static void EmitCellChanges(
             IList<CellContent> leftRow,
@@ -213,13 +214,8 @@ namespace DiffXL.LOGIC.Diff
                 CellContent rc = rightRow[c];
                 string lt = GetText(lc);
                 string rt = GetText(rc);
-                string bgL = lc != null ? lc.BackgroundArgb : null;
-                string bgR = rc != null ? rc.BackgroundArgb : null;
 
-                bool textDiff = !string.Equals(lt, rt, StringComparison.Ordinal);
-                bool bgDiff = !string.Equals(bgL ?? string.Empty, bgR ?? string.Empty, StringComparison.Ordinal);
-
-                if (!textDiff && !bgDiff)
+                if (string.Equals(lt, rt, StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -235,8 +231,8 @@ namespace DiffXL.LOGIC.Diff
                     TableIdRight = tableIdR,
                     RowIndexLeft = rowIndexL,
                     RowIndexRight = rowIndexR,
-                    BackgroundLeft = bgL,
-                    BackgroundRight = bgR,
+                    BackgroundLeft = lc != null ? lc.BackgroundArgb : null,
+                    BackgroundRight = rc != null ? rc.BackgroundArgb : null,
                     Summary = string.Format(
                         CultureInfo.InvariantCulture,
                         "テーブルセル変更 [{0}/{1}] 「{2}」→「{3}」",
@@ -318,7 +314,8 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// 2 テーブルの粗類似度（行キー多重集合の Jaccard）。
+        /// 2 テーブルの粗類似度。
+        /// 行キー多重集合 Jaccard と行 LCS ソフト類似度の大きい方（ContentStreamBuilder と揃える）。
         /// </summary>
         private static double TableSimilarity(TableBlock left, TableBlock right)
         {
@@ -371,12 +368,9 @@ namespace DiffXL.LOGIC.Diff
                 union += Math.Max(lc, rc);
             }
 
-            if (union == 0)
-            {
-                return 1.0;
-            }
-
-            return (double)inter / union;
+            double jaccard = union == 0 ? 1.0 : (double)inter / union;
+            double soft = TableRowAligner.SoftTableSimilarity(left, right);
+            return Math.Max(jaccard, soft);
         }
 
         /// <summary>
