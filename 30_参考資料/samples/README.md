@@ -79,6 +79,26 @@ python 30_参考資料/samples/_gen/create_content_diff_samples.py
 
 高解像度 PNG/JPEG（FHD〜4K）を複数埋め込み。画像抽出・OpenCV 比較・MiniMap・メモリ負荷の確認用。
 
+## ストレステストスイート（長大 + 画面キャプチャ）
+
+| 左 (Left) | 右 (Right) | 生成スクリプト |
+|-----------|------------|----------------|
+| `stress_suite_left.xlsx` | `stress_suite_right.xlsx` | `_gen/create_stress_samples.py` |
+
+| シート | 内容 |
+|--------|------|
+| `表紙` | 版テキスト差分 |
+| `長大一覧` | 約 1000 行データ表 + サマリ表 + サムネ画像 + 片側のみセル/画像 + 散在微差 |
+| `画面キャプチャ` | 1600×900 画面キャプチャ風大画像 5 枚（右は一部領域のみ差）+ 片側のみ 1 枚 |
+
+再生成:
+
+```text
+python 30_参考資料/samples/_gen/create_stress_samples.py
+```
+
+中間メディアは `_gen/media_stress/`。
+
 | 画像ID | 左 | 右 | 期待 |
 |--------|----|----|------|
 | BIG-A | FHD PNG 同一 | 同一 | 画像差分なし |
@@ -139,6 +159,7 @@ python 30_参考資料/samples/_gen/create_content_diff_samples.py
 python 30_参考資料/samples/_gen/create_samples.py
 python 30_参考資料/samples/_gen/create_large_image_samples.py
 python 30_参考資料/samples/_gen/create_content_scroll_samples.py
+python 30_参考資料/samples/_gen/create_stress_samples.py
 ```
 
 生成物は `30_参考資料/samples/` 直下に上書き出力されます。  
