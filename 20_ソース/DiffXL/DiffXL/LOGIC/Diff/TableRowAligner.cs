@@ -12,9 +12,8 @@ namespace DiffXL.LOGIC.Diff
     {
         /// <summary>
         /// 行対応の類似度しきい値（これ未満は Match 不可）。
-        /// SequenceAligner は sim &gt;= threshold。ちょうど 0.5（2 列で 1 セル一致）を弾くため半開にする。
         /// </summary>
-        private const double MatchThreshold = 0.5 + 1e-12;
+        private const double MatchThreshold = 0.5;
 
         /// <summary>
         /// SkipLeft / SkipRight 1 回あたりのコスト。
@@ -152,7 +151,8 @@ namespace DiffXL.LOGIC.Diff
 
         /// <summary>
         /// 2 行の類似度（0..1）。キー一致は 1。
-        /// 双方空欄は比較に入れない。非空比較が 2 未満なら 0。それ以外は一致非空 / 比較数。
+        /// 双方空欄は比較に入れない。非空比較が 2 未満なら 0。
+        /// 比較ちょうど 2 かつ一致 1 なら 0（2 列 1 セル一致）。それ以外は equal/compared。
         /// </summary>
         private static double RowSimilarity(
             IList<CellContent> leftRow,
@@ -194,6 +194,12 @@ namespace DiffXL.LOGIC.Diff
             }
 
             if (compared < 2)
+            {
+                return 0;
+            }
+
+            // 2 列で 1 セル一致は 0（[1,A] vs [2,A]）。4 列で 2 一致 = 0.5 は Match 可。
+            if (compared == 2 && equal == 1)
             {
                 return 0;
             }
