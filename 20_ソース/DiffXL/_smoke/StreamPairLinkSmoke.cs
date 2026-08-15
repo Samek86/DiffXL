@@ -161,6 +161,78 @@ internal static class StreamPairLinkSmoke
                 "D both addresses");
         }
 
+        // E: 2 シートとも pair 0。生産経路 AttachExpandedLayouts → Merge で横断マージしない
+        {
+            var s1L = new SheetContent
+            {
+                Name = "S1",
+                LooseCells = new List<CellContent> { Cell(1, 1, "same-s1") }
+            };
+            var s1R = new SheetContent
+            {
+                Name = "S1",
+                LooseCells = new List<CellContent> { Cell(1, 1, "same-s1") }
+            };
+            var s2L = new SheetContent
+            {
+                Name = "S2",
+                LooseCells = new List<CellContent> { Cell(1, 1, "same-s2") }
+            };
+            var s2R = new SheetContent
+            {
+                Name = "S2",
+                LooseCells = new List<CellContent> { Cell(1, 1, "same-s2") }
+            };
+            var result = new DiffResult
+            {
+                LeftContent = new WorkbookContent
+                {
+                    Sheets = new List<SheetContent> { s1L, s2L }
+                },
+                RightContent = new WorkbookContent
+                {
+                    Sheets = new List<SheetContent> { s1R, s2R }
+                },
+                SheetPairs = new List<SheetPair>
+                {
+                    new SheetPair { LeftSheet = "S1", RightSheet = "S1" },
+                    new SheetPair { LeftSheet = "S2", RightSheet = "S2" }
+                }
+            };
+            var s1Left = new DiffItem
+            {
+                Kind = DiffKind.Text,
+                SheetLeft = "S1",
+                SheetRight = "S1",
+                AddressLeft = "A1",
+                Summary = "s1-left"
+            };
+            var s2Right = new DiffItem
+            {
+                Kind = DiffKind.Text,
+                SheetLeft = "S2",
+                SheetRight = "S2",
+                AddressRight = "A1",
+                Summary = "s2-right"
+            };
+            result.Items.Add(s1Left);
+            result.Items.Add(s2Right);
+
+            DiffResultLinker.AttachExpandedLayouts(result);
+            Expect(s1Left.StreamPairIndex == 0, "E S1 pair 0");
+            Expect(s2Right.StreamPairIndex == 0, "E S2 pair 0");
+
+            DiffResultLinker.MergeOneSidedTextsOnSamePair(result);
+            Expect(result.Items.Count == 2, "E no cross-sheet merge");
+            Expect(
+                result.Items.Contains(s1Left) && result.Items.Contains(s2Right),
+                "E both items kept");
+            Expect(
+                string.IsNullOrEmpty(s1Left.AddressRight)
+                    && string.IsNullOrEmpty(s2Right.AddressLeft),
+                "E still one-sided");
+        }
+
         Console.WriteLine(_fails == 0 ? "ALL PASS" : "FAILED " + _fails);
         Environment.Exit(_fails == 0 ? 0 : 1);
     }

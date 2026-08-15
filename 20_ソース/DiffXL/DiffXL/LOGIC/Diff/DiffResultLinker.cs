@@ -79,8 +79,8 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// 同じ StreamPairIndex の片側 Text 2 件を 1 件のテキスト変更にまとめる。
-        /// Structure / Image は対象外。
+        /// 同じシートペアかつ同じ StreamPairIndex の片側 Text 2 件を 1 件にまとめる。
+        /// Structure / Image は対象外。シートをまたぐ同 index は混ぜない。
         /// </summary>
         /// <param name="result">比較結果（null 可）</param>
         public static void MergeOneSidedTextsOnSamePair(DiffResult result)
@@ -90,7 +90,7 @@ namespace DiffXL.LOGIC.Diff
                 return;
             }
 
-            var groups = new Dictionary<int, List<DiffItem>>();
+            var groups = new Dictionary<string, List<DiffItem>>(StringComparer.Ordinal);
             for (int i = 0; i < result.Items.Count; i++)
             {
                 DiffItem item = result.Items[i];
@@ -99,18 +99,19 @@ namespace DiffXL.LOGIC.Diff
                     continue;
                 }
 
+                string key = MergeGroupKey(item);
                 List<DiffItem> list;
-                if (!groups.TryGetValue(item.StreamPairIndex, out list))
+                if (!groups.TryGetValue(key, out list))
                 {
                     list = new List<DiffItem>();
-                    groups[item.StreamPairIndex] = list;
+                    groups[key] = list;
                 }
 
                 list.Add(item);
             }
 
             var drop = new HashSet<DiffItem>();
-            foreach (KeyValuePair<int, List<DiffItem>> kv in groups)
+            foreach (KeyValuePair<string, List<DiffItem>> kv in groups)
             {
                 List<DiffItem> lefts = new List<DiffItem>();
                 List<DiffItem> rights = new List<DiffItem>();
@@ -399,6 +400,20 @@ namespace DiffXL.LOGIC.Diff
 
             return !string.IsNullOrEmpty(leaf)
                 && string.Equals(fileName, leaf, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// シートペア + 局所 StreamPairIndex。シート横断の同 index を混ぜない。
+        /// </summary>
+        private static string MergeGroupKey(DiffItem item)
+        {
+            string left = item.SheetLeft ?? string.Empty;
+            string right = item.SheetRight ?? string.Empty;
+            return left.ToUpperInvariant()
+                + "\0"
+                + right.ToUpperInvariant()
+                + "\0"
+                + item.StreamPairIndex.ToString(CultureInfo.InvariantCulture);
         }
 
         private static bool IsLeftOnlyText(DiffItem item)
