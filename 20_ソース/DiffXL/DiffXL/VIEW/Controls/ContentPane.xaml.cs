@@ -632,6 +632,40 @@ namespace DiffXL.VIEW.Controls
         }
 
         /// <summary>
+        /// 現在シートの差分ペア index（昇順）。Skip 行 ∪ 非 Structure の StreamPairIndex。
+        /// </summary>
+        public IList<int> GetDiffPairIndices()
+        {
+            return GetDiffPairIndices(_sheetDiffs);
+        }
+
+        /// <summary>
+        /// 差分ペア index（昇順）。Skip 行 ∪ 指定アイテムの StreamPairIndex。
+        /// </summary>
+        public IList<int> GetDiffPairIndices(IEnumerable<DiffItem> items)
+        {
+            return DiffPairNavigator.CollectDiffPairIndices(_pairs, items);
+        }
+
+        /// <summary>
+        /// VerticalOffset が指すペア index（ScrollToPairIndex の -8px 余白を補正）。未配置は -1。
+        /// </summary>
+        public int GetPairIndexAtVerticalOffset()
+        {
+            if (_layout == null || _layout.Count == 0)
+            {
+                return -1;
+            }
+
+            if (StreamScroll == null)
+            {
+                return _selectedPairIndex;
+            }
+
+            return _layout.IndexAtOffset(StreamScroll.VerticalOffset + 8);
+        }
+
+        /// <summary>
         /// 選択枠を付け替える（実現中の要素のみ）。
         /// </summary>
         private void ApplyPairSelection(int index)
@@ -2105,6 +2139,92 @@ namespace DiffXL.VIEW.Controls
             {
                 RealizeViewport(force: true);
             }
+        }
+    }
+
+    /// <summary>
+    /// 差分ペア index の集合と前後移動（WPF 非依存。ContentPane から利用）。
+    /// </summary>
+    public static class DiffPairNavigator
+    {
+        /// <summary>
+        /// Skip 行 ∪ 非 Structure かつ StreamPairIndex ≥ 0 の index（昇順・重複なし）。
+        /// </summary>
+        public static IList<int> CollectDiffPairIndices(
+            IList<ContentStreamPair> pairs,
+            IEnumerable<DiffItem> items)
+        {
+            var set = new SortedSet<int>();
+            if (pairs != null)
+            {
+                for (int i = 0; i < pairs.Count; i++)
+                {
+                    if (pairs[i] != null && pairs[i].Op != AlignOp.Match)
+                    {
+                        set.Add(i);
+                    }
+                }
+            }
+
+            if (items != null)
+            {
+                foreach (DiffItem it in items)
+                {
+                    if (it == null || it.Kind == DiffKind.Structure || it.StreamPairIndex < 0)
+                    {
+                        continue;
+                    }
+
+                    if (pairs != null && it.StreamPairIndex >= pairs.Count)
+                    {
+                        continue;
+                    }
+
+                    set.Add(it.StreamPairIndex);
+                }
+            }
+
+            var list = new List<int>(set.Count);
+            foreach (int i in set)
+            {
+                list.Add(i);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// currentPairIndex の次／前の差分 index。端では循環。空なら -1。
+        /// </summary>
+        public static int PickNextDiffPairIndex(IList<int> indices, int currentPairIndex, int delta)
+        {
+            if (indices == null || indices.Count == 0)
+            {
+                return -1;
+            }
+
+            if (delta >= 0)
+            {
+                for (int i = 0; i < indices.Count; i++)
+                {
+                    if (indices[i] > currentPairIndex)
+                    {
+                        return indices[i];
+                    }
+                }
+
+                return indices[0];
+            }
+
+            for (int i = indices.Count - 1; i >= 0; i--)
+            {
+                if (indices[i] < currentPairIndex)
+                {
+                    return indices[i];
+                }
+            }
+
+            return indices[indices.Count - 1];
         }
     }
 }

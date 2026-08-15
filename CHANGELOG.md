@@ -11,6 +11,7 @@
 
 ### Added
 
+- 現在シートの前後差分へ移動（F8 / Shift+F8、ツールバー「前の差分」「次の差分」）。端では循環
 - MIT `LICENSE`（Copyright (c) 2026 DiffXL contributors）
 - 製品の一致定義を README・起動画面に明記（同じ内容が同じ個数・表は枠／Excel 表の行・画像は出現順と見た目。数式・マクロ・ピボット・チャートは対象外）
 - 内容ベース比較の必須シナリオ用サンプル `content_diff_left.xlsx` / `content_diff_right.xlsx` と生成スクリプト

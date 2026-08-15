@@ -2822,6 +2822,14 @@ namespace DiffXL
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.F8)
+            {
+                bool prev = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+                MoveToDiff(prev ? -1 : 1);
+                e.Handled = true;
+                return;
+            }
+
             if (e.Key == Key.H && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
                 BtnHighlightToggle.IsChecked = BtnHighlightToggle.IsChecked != true;
@@ -2833,6 +2841,99 @@ namespace DiffXL
             if (TryHandleKeyboardScroll(e))
             {
                 return;
+            }
+        }
+
+        private void BtnPrevDiff_Click(object sender, RoutedEventArgs e)
+        {
+            MoveToDiff(-1);
+        }
+
+        private void BtnNextDiff_Click(object sender, RoutedEventArgs e)
+        {
+            MoveToDiff(1);
+        }
+
+        /// <summary>
+        /// 現在の VerticalOffset に対応するペアから、次／前の差分へジャンプする。端では循環。
+        /// </summary>
+        private void MoveToDiff(int delta)
+        {
+            ContentPane left = LeftPane != null ? LeftPane.ContentHostControl : null;
+            ContentPane right = RightPane != null ? RightPane.ContentHostControl : null;
+            ContentPane host = left ?? right;
+            if (host == null)
+            {
+                if (StatusText != null)
+                {
+                    StatusText.Text = "差分なし";
+                }
+
+                return;
+            }
+
+            IList<int> indices = host.GetDiffPairIndices();
+            if (indices == null || indices.Count == 0)
+            {
+                if (StatusText != null)
+                {
+                    StatusText.Text = "差分なし";
+                }
+
+                return;
+            }
+
+            int current = host.GetPairIndexAtVerticalOffset();
+            int next = DiffPairNavigator.PickNextDiffPairIndex(indices, current, delta);
+            if (next < 0)
+            {
+                if (StatusText != null)
+                {
+                    StatusText.Text = "差分なし";
+                }
+
+                return;
+            }
+
+            _syncingContentScroll = true;
+            try
+            {
+                if (left != null)
+                {
+                    left.ScrollToPairIndex(next);
+                    left.HighlightPairIndex(next);
+                }
+
+                if (right != null)
+                {
+                    right.ScrollToPairIndex(next);
+                    right.HighlightPairIndex(next);
+                }
+
+                PushMiniMapViewport();
+            }
+            finally
+            {
+                _syncingContentScroll = false;
+            }
+
+            if (StatusText != null)
+            {
+                int pos = 1;
+                for (int i = 0; i < indices.Count; i++)
+                {
+                    if (indices[i] == next)
+                    {
+                        pos = i + 1;
+                        break;
+                    }
+                }
+
+                StatusText.Text = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "差分 {0}/{1}",
+                    pos,
+                    indices.Count);
             }
         }
 
