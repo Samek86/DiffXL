@@ -12,6 +12,7 @@
 **/*.dll
 **/*.pdb
 **/*.nupkg
+**/opencv_videoio_ffmpeg*
 
 # App/runtime noise
 **/_cache_janitor.pid

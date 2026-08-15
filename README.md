@@ -3,7 +3,7 @@
 **2 つの Excel（`.xlsx`）の内容を並べて、どこが違うかを見抜く** Windows デスクトップアプリです。
 
 [![Status](https://img.shields.io/badge/status-beta-yellow)](https://github.com/Samek86/DiffXL)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.1-orange)](./VERSION)
+[![Version](https://img.shields.io/badge/version-0.2.0--beta.1-orange)](./VERSION)
 [![Platform](https://img.shields.io/badge/platform-Windows%20x64-blue)](#動作環境)
 [![Excel](https://img.shields.io/badge/Excel-not%20required-brightgreen)](#動作環境)
 
@@ -134,7 +134,7 @@ msbuild DiffXL.sln /t:Clean,Build /p:Configuration=Release /p:Platform=x64
 | [`CHANGELOG.md`](./CHANGELOG.md) | リリース単位の変更履歴 |
 | [`VERSION`](./VERSION) | 現在のバージョン文字列 |
 
-現在のバージョン: **`0.1.0-beta.1`**（開発中ベータ）
+現在のバージョン: **`0.2.0-beta.1`**（開発中ベータ）
 
 リリースの流れ（要約）:
 

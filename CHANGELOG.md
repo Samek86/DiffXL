@@ -9,6 +9,8 @@
 
 ## [Unreleased]
 
+## [0.2.0-beta.1] - 2026-08-15
+
 ### Added
 
 - 内容ビューの「すべて / 表 / 画像 / セル」チップで、次の差分（F8）の対象を種類で絞る（本文ストリームは隠さない）
@@ -66,7 +68,8 @@
 ### Notes
 
 - 本バージョンは **ベータ版** です。API・比較結果・UI は今後変更される可能性があります。
-- 対象は Windows x64 / `.xlsx` のみです（後続の Unreleased で Excel 必須を撤廃）。
+- 対象は Windows x64 / `.xlsx` のみです（後続の 0.2.0-beta.1 で Excel 必須を撤廃）。
 
-[Unreleased]: https://github.com/Samek86/DiffXL/compare/v0.1.0-beta.1...HEAD
+[Unreleased]: https://github.com/Samek86/DiffXL/compare/v0.2.0-beta.1...HEAD
+[0.2.0-beta.1]: https://github.com/Samek86/DiffXL/releases/tag/v0.2.0-beta.1
 [0.1.0-beta.1]: https://github.com/Samek86/DiffXL/releases/tag/v0.1.0-beta.1
