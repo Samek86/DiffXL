@@ -134,6 +134,9 @@ namespace DiffXL.LOGIC.Diff
         /// 右セル背景色（#AARRGGBB。なしは null）。
         /// </summary>
         public string BackgroundRight { get; set; }
+
+        /// <summary>内容ストリームのペア index。未割当は -1。</summary>
+        public int StreamPairIndex { get; set; } = -1;
     }
 
     /// <summary>

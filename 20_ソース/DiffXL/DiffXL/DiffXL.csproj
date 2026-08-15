@@ -161,6 +161,7 @@
     <Compile Include="LOGIC\Diff\TableRowAligner.cs" />
     <Compile Include="LOGIC\Diff\TextDiffService.cs" />
     <Compile Include="LOGIC\Diff\XlsxPackageReader.cs" />
+    <Compile Include="LOGIC\Diff\DiffResultLinker.cs" />
     <Compile Include="VIEW\Controls\MiniMapViewportBand.cs" />
     <Compile Include="VIEW\Controls\MiniMapControl.xaml.cs">
       <DependentUpon>MiniMapControl.xaml</DependentUpon>
