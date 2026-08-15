@@ -155,6 +155,186 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
+        /// シートに定義された Excel 表（xl/tables）の A1 範囲一覧。
+        /// table XML の解析に失敗しても例外は投げず、空リストを返す。
+        /// </summary>
+        /// <param name="sheetName">シート名</param>
+        /// <returns>A1 範囲（例: A1:D10）。無ければ空</returns>
+        public IList<string> GetDefinedTableRefs(string sheetName)
+        {
+            var result = new List<string>();
+            try
+            {
+                EnsureOpen();
+                if (string.IsNullOrEmpty(sheetName) || !_sheetPaths.ContainsKey(sheetName))
+                {
+                    return result;
+                }
+
+                string sheetPath = _sheetPaths[sheetName];
+                XDocument doc = ReadXmlEntry(sheetPath);
+                if (doc == null)
+                {
+                    return result;
+                }
+
+                string sheetDir = GetPackageDirectory(sheetPath);
+                string sheetFile = Path.GetFileName(sheetPath);
+                string relsPath = sheetDir + "/_rels/" + sheetFile + ".rels";
+                Dictionary<string, string> sheetRels = LoadRelationships(relsPath);
+
+                foreach (XElement part in doc.Descendants())
+                {
+                    if (!string.Equals(part.Name.LocalName, "tablePart", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    string rid = (string)part.Attribute(NsR + "id");
+                    if (string.IsNullOrEmpty(rid))
+                    {
+                        XAttribute idAttr = part.Attributes().FirstOrDefault(a =>
+                            string.Equals(a.Name.LocalName, "id", StringComparison.OrdinalIgnoreCase));
+                        rid = idAttr != null ? idAttr.Value : null;
+                    }
+
+                    if (string.IsNullOrEmpty(rid))
+                    {
+                        continue;
+                    }
+
+                    string target;
+                    if (!sheetRels.TryGetValue(rid, out target) || string.IsNullOrEmpty(target))
+                    {
+                        continue;
+                    }
+
+                    string tablePath = ResolveRelativePackagePath(sheetDir, target);
+                    string tableRef = TryReadTableRef(tablePath);
+                    if (!string.IsNullOrWhiteSpace(tableRef))
+                    {
+                        result.Add(tableRef);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("GetDefinedTableRefs 失敗: " + ex.Message);
+                return new List<string>();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// table*.xml の ref 属性を読む。壊れていても null（例外なし）。
+        /// </summary>
+        private string TryReadTableRef(string tablePath)
+        {
+            try
+            {
+                XDocument tableDoc = ReadXmlEntry(tablePath);
+                if (tableDoc == null || tableDoc.Root == null)
+                {
+                    return null;
+                }
+
+                XAttribute refAttr = tableDoc.Root.Attribute("ref");
+                if (refAttr == null || string.IsNullOrWhiteSpace(refAttr.Value))
+                {
+                    return null;
+                }
+
+                return refAttr.Value.Trim();
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("table XML 解析スキップ: " + tablePath + " " + ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// A1 範囲（A1:D10）を 1 始まり inclusive の行列へ分解する。
+        /// 単一セルは A1:A1 とみなす。逆順は正規化する。
+        /// </summary>
+        public static bool TryParseA1Range(
+            string range,
+            out int row1,
+            out int col1,
+            out int row2,
+            out int col2)
+        {
+            row1 = 0;
+            col1 = 0;
+            row2 = 0;
+            col2 = 0;
+            if (string.IsNullOrWhiteSpace(range))
+            {
+                return false;
+            }
+
+            string s = range.Trim().Replace("$", string.Empty);
+            int colon = s.IndexOf(':');
+            string left;
+            string right;
+            if (colon < 0)
+            {
+                left = s;
+                right = s;
+            }
+            else
+            {
+                left = s.Substring(0, colon).Trim();
+                right = s.Substring(colon + 1).Trim();
+                if (right.IndexOf(':') >= 0)
+                {
+                    return false;
+                }
+            }
+
+            int rA, cA, rB, cB;
+            if (!TryParseCellRef(left, out rA, out cA)
+                || !TryParseCellRef(right, out rB, out cB))
+            {
+                return false;
+            }
+
+            row1 = Math.Min(rA, rB);
+            row2 = Math.Max(rA, rB);
+            col1 = Math.Min(cA, cB);
+            col2 = Math.Max(cA, cB);
+            return true;
+        }
+
+        /// <summary>
+        /// 単一 A1 参照を 1 始まり行列へ。
+        /// </summary>
+        private static bool TryParseCellRef(string address, out int row, out int column)
+        {
+            row = 0;
+            column = 0;
+            if (string.IsNullOrEmpty(address))
+            {
+                return false;
+            }
+
+            Match m = CellRefRegex.Match(address);
+            if (!m.Success)
+            {
+                return false;
+            }
+
+            column = ColumnLettersToIndex(m.Groups[1].Value);
+            if (!int.TryParse(m.Groups[2].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out row))
+            {
+                return false;
+            }
+
+            return row >= 1 && column >= 1;
+        }
+
+        /// <summary>
         /// 指定シートのセルを列挙する（テキスト互換。背景・ボーダーは含まない）。
         /// </summary>
         /// <param name="sheetName">シート名</param>

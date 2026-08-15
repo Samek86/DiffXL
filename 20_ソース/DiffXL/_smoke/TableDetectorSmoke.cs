@@ -90,6 +90,17 @@ class Program
             {
                 Console.WriteLine("OK case1 table matrix");
             }
+
+            if (t.DetectionSource != "Border")
+            {
+                Console.WriteLine("FAIL case1 DetectionSource expected=Border actual="
+                    + (t.DetectionSource ?? "(null)"));
+                fail++;
+            }
+            else
+            {
+                Console.WriteLine("OK case1 DetectionSource=Border");
+            }
         }
 
         if (!result.LooseCells.Any(c => c.Text == "Hello"))
@@ -163,6 +174,140 @@ class Program
         else
         {
             Console.WriteLine("OK case3 empty/null");
+        }
+
+        // --- ケース4: 罫線なし 3x3 + defined B2:D4 → ExcelTable。外の Hello は Loose ---
+        var noBorder = new List<CellContent>();
+        for (int r = 2; r <= 4; r++)
+        {
+            for (int c = 2; c <= 4; c++)
+            {
+                noBorder.Add(new CellContent
+                {
+                    Address = Addr(r, c),
+                    Row = r,
+                    Column = c,
+                    Text = "N" + r + c,
+                    HasAnyBorder = false
+                });
+            }
+        }
+
+        noBorder.Add(new CellContent
+        {
+            Address = "A1",
+            Row = 1,
+            Column = 1,
+            Text = "Hello",
+            HasAnyBorder = false
+        });
+
+        TableDetectResult r5 = TableDetector.Detect(noBorder, new List<string> { "B2:D4" });
+        Console.WriteLine("case4 Tables=" + r5.Tables.Count + " Loose=" + r5.LooseCells.Count);
+        if (r5.Tables.Count != 1)
+        {
+            Console.WriteLine("FAIL case4 Tables.Count expected=1 actual=" + r5.Tables.Count);
+            fail++;
+        }
+        else
+        {
+            TableBlock t = r5.Tables[0];
+            if (t.DetectionSource != "ExcelTable")
+            {
+                Console.WriteLine("FAIL case4 DetectionSource expected=ExcelTable actual="
+                    + (t.DetectionSource ?? "(null)"));
+                fail++;
+            }
+            else if (t.RowStart != 2 || t.RowEnd != 4 || t.ColStart != 2 || t.ColEnd != 4)
+            {
+                Console.WriteLine("FAIL case4 bounds expected R2:4 C2:4");
+                fail++;
+            }
+            else
+            {
+                Console.WriteLine("OK case4 ExcelTable B2:D4");
+            }
+        }
+
+        if (!r5.LooseCells.Any(c => c.Text == "Hello") || r5.LooseCells.Count != 1)
+        {
+            Console.WriteLine("FAIL case4 Loose expected Hello only, count=" + r5.LooseCells.Count);
+            fail++;
+        }
+        else
+        {
+            Console.WriteLine("OK case4 Loose is outside defined table");
+        }
+
+        // 罫線なし・ref なし → 表にしない
+        TableDetectResult r5b = TableDetector.Detect(noBorder);
+        if (r5b.Tables.Count != 0)
+        {
+            Console.WriteLine("FAIL case4b no-border without ref should yield 0 tables, actual="
+                + r5b.Tables.Count);
+            fail++;
+        }
+        else
+        {
+            Console.WriteLine("OK case4b no-border without ref is loose");
+        }
+
+        // --- ケース5: Excel 表の残りセルは罫線 flood ---
+        var mixed = new List<CellContent>();
+        for (int r = 2; r <= 4; r++)
+        {
+            for (int c = 2; c <= 4; c++)
+            {
+                mixed.Add(new CellContent
+                {
+                    Address = Addr(r, c),
+                    Row = r,
+                    Column = c,
+                    Text = "E" + r + c,
+                    HasAnyBorder = false
+                });
+            }
+        }
+
+        for (int r = 6; r <= 7; r++)
+        {
+            for (int c = 6; c <= 7; c++)
+            {
+                mixed.Add(new CellContent
+                {
+                    Address = Addr(r, c),
+                    Row = r,
+                    Column = c,
+                    Text = "B" + r + c,
+                    HasAnyBorder = true
+                });
+            }
+        }
+
+        TableDetectResult r6 = TableDetector.Detect(mixed, new List<string> { "B2:D4" });
+        Console.WriteLine("case5 Tables=" + r6.Tables.Count);
+        bool hasExcel = r6.Tables.Any(t =>
+            t.DetectionSource == "ExcelTable"
+            && t.RowStart == 2 && t.RowEnd == 4 && t.ColStart == 2 && t.ColEnd == 4);
+        bool hasBorder = r6.Tables.Any(t =>
+            t.DetectionSource == "Border"
+            && t.RowStart == 6 && t.RowEnd == 7 && t.ColStart == 6 && t.ColEnd == 7);
+        if (r6.Tables.Count != 2 || !hasExcel || !hasBorder)
+        {
+            Console.WriteLine("FAIL case5 expected ExcelTable B2:D4 + Border F6:G7");
+            foreach (TableBlock t in r6.Tables)
+            {
+                Console.WriteLine(string.Format(
+                    "  src={0} R{1}:{2} C{3}:{4}",
+                    t.DetectionSource ?? "(null)",
+                    t.RowStart, t.RowEnd, t.ColStart, t.ColEnd));
+            }
+
+            fail++;
+        }
+        else
+        {
+            Console.WriteLine("OK case5 leftover border flood");
         }
 
         if (fail > 0)

@@ -190,6 +190,9 @@ namespace DiffXL.VIEW.Controls
             string rightId = rightTable != null ? rightTable.Id : null;
 
             TitleText.Text = BuildTitle(self, partner, isLeft, leftId, rightId);
+            TitleText.ToolTip = self != null
+                ? DetectionSourceTooltip(self.DetectionSource)
+                : null;
             SubtitleText.Text = BuildSubtitle(tableDiffs, leftTable, rightTable);
 
             IList<IList<CellContent>> leftRows =
@@ -505,6 +508,16 @@ namespace DiffXL.VIEW.Controls
                 side,
                 selfLabel,
                 pairLabel);
+        }
+
+        /// <summary>
+        /// 表ヘッダーの検出元ツールチップ。
+        /// </summary>
+        private static string DetectionSourceTooltip(string source)
+        {
+            return string.Equals(source, TableDetector.SourceExcelTable, StringComparison.Ordinal)
+                ? "検出: Excel 表"
+                : "検出: 罫線";
         }
 
         /// <summary>

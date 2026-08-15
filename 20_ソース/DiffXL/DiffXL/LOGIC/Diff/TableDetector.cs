@@ -22,13 +22,19 @@ namespace DiffXL.LOGIC.Diff
     }
 
     /// <summary>
-    /// セルのボーダー有無から表ブロックを検出する。
+    /// Excel 表定義（xl/tables）を優先し、残りを罫線 flood で検出する。
     /// HasAnyBorder のセルを格子点とし、4 近傍連結成分の bounding box を表とする。
     /// </summary>
     public static class TableDetector
     {
+        /// <summary>Excel 表定義由来。</summary>
+        public const string SourceExcelTable = "ExcelTable";
+
+        /// <summary>罫線 flood 由来。</summary>
+        public const string SourceBorder = "Border";
+
         /// <summary>
-        /// 表とみなす最小サイズ（行数・列数ともにこの値以上）。
+        /// 表とみなす最小サイズ（行数・列数ともにこの値以上）。Excel 定義範囲には適用しない。
         /// </summary>
         private const int MinDimension = 2;
 
@@ -39,35 +45,77 @@ namespace DiffXL.LOGIC.Diff
         /// <returns>検出結果</returns>
         public static TableDetectResult Detect(IList<CellContent> cells)
         {
+            return Detect(cells, null);
+        }
+
+        /// <summary>
+        /// 定義済み A1 範囲を先に表にし、残りセルだけ罫線 flood する。
+        /// </summary>
+        /// <param name="cells">同一シートのセル内容一覧</param>
+        /// <param name="definedRefsOrNull">xl/tables の A1 範囲。null / 空なら罫線のみ</param>
+        /// <returns>検出結果</returns>
+        public static TableDetectResult Detect(IList<CellContent> cells, IList<string> definedRefsOrNull)
+        {
             var result = new TableDetectResult();
-            if (cells == null || cells.Count == 0)
+            bool hasCells = cells != null && cells.Count > 0;
+            bool hasRefs = definedRefsOrNull != null && definedRefsOrNull.Count > 0;
+            if (!hasCells && !hasRefs)
             {
                 return result;
             }
 
             // 位置 → セル（同一位置は後勝ち）
             var byPos = new Dictionary<long, CellContent>();
-            foreach (CellContent c in cells)
+            if (hasCells)
             {
-                if (c == null || c.Row < 1 || c.Column < 1)
+                foreach (CellContent c in cells)
                 {
-                    continue;
-                }
+                    if (c == null || c.Row < 1 || c.Column < 1)
+                    {
+                        continue;
+                    }
 
-                byPos[Pack(c.Row, c.Column)] = c;
+                    byPos[Pack(c.Row, c.Column)] = c;
+                }
             }
 
-            // 1. HasAnyBorder のセルを格子点として収集
+            var claimed = new HashSet<long>();
+            var tableBoxes = new List<DetectedBox>();
+
+            // 1. Excel 表定義を優先
+            if (hasRefs)
+            {
+                foreach (string raw in definedRefsOrNull)
+                {
+                    int r1, c1, r2, c2;
+                    if (!XlsxPackageReader.TryParseA1Range(raw, out r1, out c1, out r2, out c2))
+                    {
+                        continue;
+                    }
+
+                    tableBoxes.Add(new DetectedBox
+                    {
+                        RowStart = r1,
+                        RowEnd = r2,
+                        ColStart = c1,
+                        ColEnd = c2,
+                        Source = SourceExcelTable
+                    });
+                    ClaimBox(claimed, r1, r2, c1, c2);
+                }
+            }
+
+            // 2. 未割当の HasAnyBorder を格子点として収集
             var borderKeys = new HashSet<long>();
             foreach (KeyValuePair<long, CellContent> kv in byPos)
             {
-                if (kv.Value.HasAnyBorder)
+                if (kv.Value.HasAnyBorder && !claimed.Contains(kv.Key))
                 {
                     borderKeys.Add(kv.Key);
                 }
             }
 
-            // 2. 4 近傍で連結成分
+            // 3. 4 近傍で連結成分（定義表のセルには広がらない）
             var visited = new HashSet<long>();
             var components = new List<List<long>>();
             foreach (long key in borderKeys)
@@ -87,7 +135,6 @@ namespace DiffXL.LOGIC.Diff
                     comp.Add(cur);
                     int r, col;
                     Unpack(cur, out r, out col);
-                    // 上下左右
                     TryEnqueueNeighbor(r - 1, col, borderKeys, visited, queue);
                     TryEnqueueNeighbor(r + 1, col, borderKeys, visited, queue);
                     TryEnqueueNeighbor(r, col - 1, borderKeys, visited, queue);
@@ -97,8 +144,7 @@ namespace DiffXL.LOGIC.Diff
                 components.Add(comp);
             }
 
-            // 3. 成分の bounding box を TableBlock 候補にする（min 2x2）
-            var tableBoxes = new List<int[]>(); // [rowStart, rowEnd, colStart, colEnd]
+            // 4. 成分の bounding box を Border 表候補にする（min 2x2）
             foreach (List<long> comp in components)
             {
                 int rMin = int.MaxValue, rMax = int.MinValue;
@@ -117,31 +163,37 @@ namespace DiffXL.LOGIC.Diff
                 int width = cMax - cMin + 1;
                 if (height < MinDimension || width < MinDimension)
                 {
-                    // 閾値未満は表としない（格子点は Loose 側へ落ちうる）
                     continue;
                 }
 
-                tableBoxes.Add(new[] { rMin, rMax, cMin, cMax });
+                tableBoxes.Add(new DetectedBox
+                {
+                    RowStart = rMin,
+                    RowEnd = rMax,
+                    ColStart = cMin,
+                    ColEnd = cMax,
+                    Source = SourceBorder
+                });
             }
 
-            // 6. OrderIndex = RowStart, ColStart でソート
+            // 5. OrderIndex = RowStart, ColStart でソート
             tableBoxes.Sort((a, b) =>
             {
-                int cmp = a[0].CompareTo(b[0]);
-                return cmp != 0 ? cmp : a[2].CompareTo(b[2]);
+                int cmp = a.RowStart.CompareTo(b.RowStart);
+                return cmp != 0 ? cmp : a.ColStart.CompareTo(b.ColStart);
             });
 
             // 表内に含まれる位置集合
             var inTable = new HashSet<long>();
             for (int ti = 0; ti < tableBoxes.Count; ti++)
             {
-                int[] box = tableBoxes[ti];
-                int rowStart = box[0];
-                int rowEnd = box[1];
-                int colStart = box[2];
-                int colEnd = box[3];
+                DetectedBox box = tableBoxes[ti];
+                int rowStart = box.RowStart;
+                int rowEnd = box.RowEnd;
+                int colStart = box.ColStart;
+                int colEnd = box.ColEnd;
 
-                // 4. ボックス内の全セル（border なし含む）を Rows に行列配置
+                // ボックス内の全セル（border なし含む）を Rows に行列配置
                 var rows = new List<IList<CellContent>>();
                 for (int r = rowStart; r <= rowEnd; r++)
                 {
@@ -157,7 +209,6 @@ namespace DiffXL.LOGIC.Diff
                         }
                         else
                         {
-                            // 入力に無い格子は空セルで埋める
                             rowCells.Add(new CellContent
                             {
                                 Address = ToAddress(r, col),
@@ -181,7 +232,8 @@ namespace DiffXL.LOGIC.Diff
                     RowEnd = rowEnd,
                     ColStart = colStart,
                     ColEnd = colEnd,
-                    Rows = rows
+                    Rows = rows,
+                    DetectionSource = box.Source
                 });
             }
 
@@ -213,6 +265,32 @@ namespace DiffXL.LOGIC.Diff
             });
 
             return result;
+        }
+
+        /// <summary>
+        /// 検出中の bounding box。
+        /// </summary>
+        private sealed class DetectedBox
+        {
+            public int RowStart;
+            public int RowEnd;
+            public int ColStart;
+            public int ColEnd;
+            public string Source;
+        }
+
+        /// <summary>
+        /// ボックス内の全格子を割当済みにする。
+        /// </summary>
+        private static void ClaimBox(HashSet<long> claimed, int rowStart, int rowEnd, int colStart, int colEnd)
+        {
+            for (int r = rowStart; r <= rowEnd; r++)
+            {
+                for (int col = colStart; col <= colEnd; col++)
+                {
+                    claimed.Add(Pack(r, col));
+                }
+            }
         }
 
         /// <summary>

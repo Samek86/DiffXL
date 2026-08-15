@@ -160,6 +160,80 @@ class Program
             }
         }
 
+        // defined 範囲が罫線 flood より優先（B2:D4、罫線なし 9 セル）
+        {
+            var cells = new List<CellContent>();
+            for (int r = 2; r <= 4; r++)
+            {
+                for (int c = 2; c <= 4; c++)
+                {
+                    cells.Add(new CellContent
+                    {
+                        Address = ((char)('A' + c - 1)).ToString() + r.ToString(),
+                        Row = r,
+                        Column = c,
+                        Text = "N" + r + c,
+                        HasAnyBorder = false
+                    });
+                }
+            }
+
+            cells.Add(new CellContent
+            {
+                Address = "A1",
+                Row = 1,
+                Column = 1,
+                Text = "Hello",
+                HasAnyBorder = false
+            });
+
+            TableDetectResult det = TableDetector.Detect(cells, new List<string> { "B2:D4" });
+            Console.WriteLine("case6 defined-range Tables=" + det.Tables.Count
+                + " Loose=" + det.LooseCells.Count);
+            if (det.Tables.Count != 1
+                || det.Tables[0].DetectionSource != "ExcelTable"
+                || det.Tables[0].RowStart != 2 || det.Tables[0].RowEnd != 4
+                || det.Tables[0].ColStart != 2 || det.Tables[0].ColEnd != 4
+                || det.LooseCells.Count != 1
+                || !det.LooseCells.Any(c => c.Text == "Hello"))
+            {
+                Console.WriteLine("FAIL case6 defined B2:D4 should win as ExcelTable, Loose=Hello");
+                fail++;
+            }
+            else
+            {
+                Console.WriteLine("OK case6 defined range wins (ExcelTable)");
+            }
+        }
+
+        // TryParseA1Range: B2:D4 / 逆順 / 不正
+        {
+            int r1, c1, r2, c2;
+            if (!XlsxPackageReader.TryParseA1Range("B2:D4", out r1, out c1, out r2, out c2)
+                || r1 != 2 || c1 != 2 || r2 != 4 || c2 != 4)
+            {
+                Console.WriteLine("FAIL case7 TryParseA1Range B2:D4");
+                fail++;
+            }
+            else if (!XlsxPackageReader.TryParseA1Range("D4:B2", out r1, out c1, out r2, out c2)
+                || r1 != 2 || c1 != 2 || r2 != 4 || c2 != 4)
+            {
+                Console.WriteLine("FAIL case7 TryParseA1Range inverted D4:B2");
+                fail++;
+            }
+            else if (XlsxPackageReader.TryParseA1Range("not-a-range", out r1, out c1, out r2, out c2)
+                || XlsxPackageReader.TryParseA1Range(null, out r1, out c1, out r2, out c2)
+                || XlsxPackageReader.TryParseA1Range("", out r1, out c1, out r2, out c2))
+            {
+                Console.WriteLine("FAIL case7 invalid range must be false");
+                fail++;
+            }
+            else
+            {
+                Console.WriteLine("OK case7 TryParseA1Range");
+            }
+        }
+
         if (fail == 0)
         {
             Console.WriteLine("PASS TableTruthSmoke");

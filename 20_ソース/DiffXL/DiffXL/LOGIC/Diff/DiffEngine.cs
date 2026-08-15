@@ -278,7 +278,18 @@ namespace DiffXL.LOGIC.Diff
                     cells = new List<CellContent>();
                 }
 
-                TableDetectResult detect = TableDetector.Detect(cells);
+                IList<string> definedRefs = null;
+                try
+                {
+                    definedRefs = reader.GetDefinedTableRefs(sheetName);
+                }
+                catch (Exception ex)
+                {
+                    Log.Debug("GetDefinedTableRefs 失敗 [" + sheetName + "]: " + ex.Message);
+                    definedRefs = null;
+                }
+
+                TableDetectResult detect = TableDetector.Detect(cells, definedRefs);
 
                 List<EmbeddedImage> sheetImages = allImages
                     .Where(i => i != null

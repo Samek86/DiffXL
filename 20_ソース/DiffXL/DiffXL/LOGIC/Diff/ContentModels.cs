@@ -77,6 +77,11 @@ namespace DiffXL.LOGIC.Diff
         public string Id { get; set; }
 
         /// <summary>
+        /// 検出元。"ExcelTable"（xl/tables）または "Border"（罫線 flood）。
+        /// </summary>
+        public string DetectionSource { get; set; }
+
+        /// <summary>
         /// シート内の出現順インデックス。
         /// </summary>
         public int OrderIndex { get; set; }

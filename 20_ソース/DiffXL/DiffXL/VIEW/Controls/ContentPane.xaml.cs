@@ -1435,6 +1435,11 @@ namespace DiffXL.VIEW.Controls
                 : "（なし）";
             string mark = op == AlignOp.Match ? "＝" : "±";
             var panel = new StackPanel();
+            if (selfT != null)
+            {
+                panel.ToolTip = DetectionSourceTooltip(selfT.DetectionSource);
+            }
+
             panel.Children.Add(new TextBlock
             {
                 Text = string.Format(
@@ -1461,6 +1466,16 @@ namespace DiffXL.VIEW.Controls
                 Margin = new Thickness(0, 2, 0, 0)
             });
             return panel;
+        }
+
+        /// <summary>
+        /// 表ヘッダーの検出元ツールチップ。
+        /// </summary>
+        private static string DetectionSourceTooltip(string source)
+        {
+            return string.Equals(source, TableDetector.SourceExcelTable, StringComparison.Ordinal)
+                ? "検出: Excel 表"
+                : "検出: 罫線";
         }
 
         private UIElement CreateTableRowUi(
