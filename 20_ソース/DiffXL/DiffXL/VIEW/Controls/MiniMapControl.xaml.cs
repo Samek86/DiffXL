@@ -742,8 +742,8 @@ namespace DiffXL.VIEW.Controls
                     StrokeThickness = 1.5,
                     Tag = new MiniMapMarkerTag { Item = item, Index = i },
                     ToolTip = BuildTooltip(item),
-                    // ヒットは MapBorder に任せ、スクロールバー同様ドラッグを阻害しない
-                    IsHitTestVisible = false,
+                    // クリックでその差分へジャンプ。ドラッグ開始は阻害しない（MouseDown で分岐）
+                    IsHitTestVisible = true,
                     Cursor = Cursors.Hand
                 };
                 Canvas.SetLeft(rect, markLeft);
@@ -1109,8 +1109,37 @@ namespace DiffXL.VIEW.Controls
             return best;
         }
 
+        /// <summary>
+        /// 黄マーカー上ならその DiffItem へジャンプし、スクラブは開始しない。
+        /// </summary>
+        private bool TryJumpFromMarker(MouseButtonEventArgs e)
+        {
+            var rect = e.OriginalSource as Rectangle;
+            var tag = rect != null ? rect.Tag as MiniMapMarkerTag : null;
+            if (tag == null || tag.Item == null)
+            {
+                return false;
+            }
+
+            double ratio = _contentViewportRatio;
+            if (_orderedItems != null && _orderedItems.Count > 0 && tag.Index >= 0)
+            {
+                ratio = (tag.Index + 0.5) / _orderedItems.Count;
+                ratio = Math.Max(0, Math.Min(1, ratio));
+            }
+
+            NavigateRequested?.Invoke(ratio, tag.Item);
+            return true;
+        }
+
         private void MiniMapControl_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (TryJumpFromMarker(e))
+            {
+                e.Handled = true;
+                return;
+            }
+
             // MapBorder 外（タイトル等）は無視
             if (MapBorder == null)
             {
@@ -1171,6 +1200,12 @@ namespace DiffXL.VIEW.Controls
 
         private void MapBorder_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (TryJumpFromMarker(e))
+            {
+                e.Handled = true;
+                return;
+            }
+
             Point p = e.GetPosition(MapBorder);
             CaptureGrab(p);
             BeginScrub();
