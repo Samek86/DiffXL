@@ -76,8 +76,42 @@ namespace DiffXL.LOGIC.Diff
                     }
                 }
 
-                result.LeftOnlySheets.AddRange(left.Where(s => !usedLeft.Contains(s)));
-                result.RightOnlySheets.AddRange(right.Where(s => !usedRight.Contains(s)));
+                foreach (string name in left)
+                {
+                    if (usedLeft.Contains(name))
+                    {
+                        continue;
+                    }
+
+                    string match = right.FirstOrDefault(r =>
+                        !usedRight.Contains(r)
+                        && string.Equals(r, name, StringComparison.OrdinalIgnoreCase));
+                    if (match != null)
+                    {
+                        result.Pairs.Add(new SheetPair
+                        {
+                            LeftSheet = name,
+                            RightSheet = match,
+                            IsManual = false
+                        });
+                        usedLeft.Add(name);
+                        usedRight.Add(match);
+                    }
+                    else
+                    {
+                        result.LeftOnlySheets.Add(name);
+                        usedLeft.Add(name);
+                    }
+                }
+
+                foreach (string name in right)
+                {
+                    if (!usedRight.Contains(name))
+                    {
+                        result.RightOnlySheets.Add(name);
+                    }
+                }
+
                 return result;
             }
 
