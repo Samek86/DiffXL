@@ -20,6 +20,7 @@ namespace DiffXL.VIEW.Controls
         private readonly List<DiffItem> _items = new List<DiffItem>();
         /// <summary>描画・クリック用に並べた差分（OrderHint 順）。</summary>
         private List<DiffItem> _orderedItems = new List<DiffItem>();
+        private StreamKindFilter _kindFilter = StreamKindFilter.All;
         private readonly List<SheetSegment> _segments = new List<SheetSegment>();
         private List<string> _forcedSheetOrder = new List<string>();
         private bool _dragging;
@@ -89,6 +90,25 @@ namespace DiffXL.VIEW.Controls
         /// 内容マップ座標系でのナビ（ratio + 左右推奨行）。
         /// </summary>
         public event Action<double, int, int> NavigateMapped;
+
+        /// <summary>
+        /// 種類チップと同じフィルタ。マーカー描画だけを絞る（本文は変えない）。
+        /// </summary>
+        public StreamKindFilter KindFilter
+        {
+            get { return _kindFilter; }
+            set
+            {
+                if (_kindFilter == value)
+                {
+                    return;
+                }
+
+                _kindFilter = value;
+                UpdateHintText();
+                ScheduleRebuild();
+            }
+        }
 
         /// <summary>直近ナビの推奨左行（Map 経由）。</summary>
         public int SuggestedLeftRow { get; private set; } = 1;
@@ -710,13 +730,14 @@ namespace DiffXL.VIEW.Controls
                 RebuildOrderedItems();
             }
 
+            List<DiffItem> visible = GetVisibleMarkers();
             var fill = new SolidColorBrush(Color.FromArgb(240, 250, 204, 21));
             fill.Freeze();
             var stroke = new SolidColorBrush(Color.FromRgb(202, 138, 4));
             stroke.Freeze();
             double markLeft = 4;
             double markW = Math.Max(8, w - 8);
-            int n = _orderedItems.Count;
+            int n = visible.Count;
             if (n == 0)
             {
                 return;
@@ -726,7 +747,7 @@ namespace DiffXL.VIEW.Controls
             double markerH = Math.Max(6, Math.Min(14, h * 0.035));
             for (int i = 0; i < n; i++)
             {
-                DiffItem item = _orderedItems[i];
+                DiffItem item = visible[i];
                 if (item == null)
                 {
                     continue;
@@ -751,6 +772,72 @@ namespace DiffXL.VIEW.Controls
                 Panel.SetZIndex(rect, 20);
                 MapCanvas.Children.Add(rect);
             }
+        }
+
+        /// <summary>
+        /// 種類フィルタ後のマーカー列。
+        /// </summary>
+        private List<DiffItem> GetVisibleMarkers()
+        {
+            if (_orderedItems == null)
+            {
+                RebuildOrderedItems();
+            }
+
+            if (_kindFilter == StreamKindFilter.All)
+            {
+                return _orderedItems ?? new List<DiffItem>();
+            }
+
+            var list = new List<DiffItem>();
+            if (_orderedItems == null)
+            {
+                return list;
+            }
+
+            for (int i = 0; i < _orderedItems.Count; i++)
+            {
+                DiffItem item = _orderedItems[i];
+                if (ItemMatchesKindFilter(item, _kindFilter))
+                {
+                    list.Add(item);
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// MiniMap マーカー用の種類判定（F8 と同じ表／画像、セルは Text / Background）。
+        /// </summary>
+        private static bool ItemMatchesKindFilter(DiffItem item, StreamKindFilter filter)
+        {
+            if (item == null || filter == StreamKindFilter.All)
+            {
+                return item != null;
+            }
+
+            if (filter == StreamKindFilter.Table)
+            {
+                return item.Kind == DiffKind.TableRowDelete
+                    || item.Kind == DiffKind.TableRowInsert
+                    || item.Kind == DiffKind.TableCellChange;
+            }
+
+            if (filter == StreamKindFilter.Image)
+            {
+                return item.Kind == DiffKind.Image
+                    || item.Kind == DiffKind.ImageOnlyLeft
+                    || item.Kind == DiffKind.ImageOnlyRight;
+            }
+
+            if (filter == StreamKindFilter.Cell)
+            {
+                return item.Kind == DiffKind.Text
+                    || item.Kind == DiffKind.Background;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -974,14 +1061,15 @@ namespace DiffXL.VIEW.Controls
                 RebuildOrderedItems();
             }
 
-            if (_orderedItems.Count == 0)
+            List<DiffItem> visible = GetVisibleMarkers();
+            if (visible.Count == 0)
             {
                 HintText.Text = "差分なし\nドラッグでスクロール";
                 return;
             }
 
             int pct = (int)Math.Round(_contentViewportRatio * 100);
-            HintText.Text = "差分 " + _orderedItems.Count + " 件\n"
+            HintText.Text = "差分 " + visible.Count + " 件\n"
                 + "表示 " + pct + "%\n"
                 + "ドラッグでスクロール";
         }
@@ -1059,13 +1147,14 @@ namespace DiffXL.VIEW.Controls
             double contentRatio = PointToContentRatio(p);
 
             DiffItem item = null;
-            int n = _orderedItems != null ? _orderedItems.Count : 0;
+            List<DiffItem> visible = GetVisibleMarkers();
+            int n = visible.Count;
             if (n > 0)
             {
                 int idx = CanvasYToIndex(p.Y, Math.Max(1, MapBorder.ActualHeight), n);
                 if (idx >= 0 && idx < n)
                 {
-                    item = _orderedItems[idx];
+                    item = visible[idx];
                 }
             }
 
@@ -1122,9 +1211,10 @@ namespace DiffXL.VIEW.Controls
             }
 
             double ratio = _contentViewportRatio;
-            if (_orderedItems != null && _orderedItems.Count > 0 && tag.Index >= 0)
+            List<DiffItem> visible = GetVisibleMarkers();
+            if (visible.Count > 0 && tag.Index >= 0)
             {
-                ratio = (tag.Index + 0.5) / _orderedItems.Count;
+                ratio = (tag.Index + 0.5) / visible.Count;
                 ratio = Math.Max(0, Math.Min(1, ratio));
             }
 

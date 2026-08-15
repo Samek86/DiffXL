@@ -1414,8 +1414,10 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// 画像類似度。<see cref="ImageSequenceAligner.ComputeSimilarity"/> をそのまま返す。
-        /// Match 判定は <see cref="MatchThreshold"/>（0.55）とエンジン側 1 - RejectDiffRatio が同じ数字。
+        /// 画像類似度。<see cref="ImageSequenceAligner.ComputeSimilarity"/> をそのまま使い、
+        /// Match 可否は <see cref="ImageSequenceAligner.MatchFloor"/> と揃える。
+        /// SequenceAligner は <see cref="MatchThreshold"/> 固定なので、フロア未満は Match 不可、
+        /// フロア以上は Match になるよう写す。
         /// </summary>
         private static double ImageSimilarity(EmbeddedImage a, EmbeddedImage b)
         {
@@ -1424,7 +1426,19 @@ namespace DiffXL.LOGIC.Diff
                 return 0;
             }
 
-            return ImageSequenceAligner.ComputeSimilarity(a, b);
+            double sim = ImageSequenceAligner.ComputeSimilarity(a, b);
+            double floor = ImageSequenceAligner.MatchFloor;
+            if (sim < floor)
+            {
+                return sim < MatchThreshold ? sim : 0;
+            }
+
+            if (sim < MatchThreshold)
+            {
+                return MatchThreshold;
+            }
+
+            return sim;
         }
 
         private static double ShapeSimilarity(ShapeContent a, ShapeContent b)

@@ -235,13 +235,9 @@ namespace DiffXL.LOGIC.Diff
                 }
             }
 
-            int row = TextDiffService.ParseAnchorRow(item.AddressLeft);
-            if (row <= 0)
-            {
-                row = TextDiffService.ParseAnchorRow(item.AddressRight);
-            }
-
-            if (row > 0)
+            int leftRow = TextDiffService.ParseAnchorRow(item.AddressLeft);
+            int rightRow = TextDiffService.ParseAnchorRow(item.AddressRight);
+            if (leftRow > 0 || rightRow > 0)
             {
                 for (int i = 0; i < pairs.Count; i++)
                 {
@@ -251,8 +247,19 @@ namespace DiffXL.LOGIC.Diff
                         continue;
                     }
 
-                    if ((p.Left != null && p.Left.Kind == ContentBlockKind.LooseRow && p.Left.Row == row)
-                        || (p.Right != null && p.Right.Kind == ContentBlockKind.LooseRow && p.Right.Row == row))
+                    if (leftRow > 0
+                        && p.Left != null
+                        && p.Left.Kind == ContentBlockKind.LooseRow
+                        && p.Left.Row == leftRow)
+                    {
+                        return i;
+                    }
+
+                    if (leftRow <= 0
+                        && rightRow > 0
+                        && p.Right != null
+                        && p.Right.Kind == ContentBlockKind.LooseRow
+                        && p.Right.Row == rightRow)
                     {
                         return i;
                     }

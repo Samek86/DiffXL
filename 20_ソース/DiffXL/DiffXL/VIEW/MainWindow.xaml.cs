@@ -2893,6 +2893,11 @@ namespace DiffXL
                 {
                     right.KindFilter = filter;
                 }
+
+                if (MiniMap != null)
+                {
+                    MiniMap.KindFilter = filter;
+                }
             }
             finally
             {

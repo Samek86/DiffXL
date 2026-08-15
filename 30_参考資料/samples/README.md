@@ -19,7 +19,7 @@ Microsoft Excel のインストールは不要です（OOXML 抽出＋自前内�
 | `S_Cells` | セル位置無視（左 A1 / 右 A2 の Hello） | Text 差なし |
 | `S_Bg` | 同一テキスト・背景色のみ差 | Background |
 | `S_TableDel` | 表の行 12345 vs 1245 | TableRowDelete（行 3） |
-| `S_TableCell` | 表内 1 セル文言変更 | TableCellChange |
+| `S_TableCell` | 表内 1 セル文言変更 | TableCellChange → Delete+Insert（H2 2列） |
 | `S_ImgSame` | 同見た目画像・異位置（B5 vs D20） | Image 差なし |
 | `S_Img8v9` | 画像 8 枚 vs 9 枚（5 枚目が余分） | ImageOnlyRight×1、以降再同期 |
 | `S_ImgPartial` | 画像の部分差 | Image ＋ HighlightRegions≥1（赤枠＋黄塗り） |

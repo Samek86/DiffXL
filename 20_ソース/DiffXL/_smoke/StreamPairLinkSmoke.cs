@@ -233,6 +233,37 @@ internal static class StreamPairLinkSmoke
                 "E still one-sided");
         }
 
+        // F: AddressLeft は左 LooseRow だけ、AddressRight は右 LooseRow だけ
+        {
+            var pairs = new List<ContentStreamPair>
+            {
+                new ContentStreamPair
+                {
+                    Op = AlignOp.SkipRight,
+                    Right = new ContentStreamBlock { Kind = ContentBlockKind.LooseRow, Row = 5 }
+                },
+                new ContentStreamPair
+                {
+                    Op = AlignOp.SkipLeft,
+                    Left = new ContentStreamBlock { Kind = ContentBlockKind.LooseRow, Row = 5 }
+                },
+                new ContentStreamPair
+                {
+                    Op = AlignOp.Match,
+                    Left = new ContentStreamBlock { Kind = ContentBlockKind.LooseRow, Row = 10 },
+                    Right = new ContentStreamBlock { Kind = ContentBlockKind.LooseRow, Row = 10 }
+                }
+            };
+            var leftOnly = new DiffItem { Kind = DiffKind.Text, AddressLeft = "A5" };
+            var rightOnly = new DiffItem { Kind = DiffKind.Text, AddressRight = "A5" };
+            var result = new DiffResult();
+            result.Items.Add(leftOnly);
+            result.Items.Add(rightOnly);
+            DiffResultLinker.Attach(result, pairs);
+            Expect(leftOnly.StreamPairIndex == 1, "F AddressLeft → left LooseRow pair");
+            Expect(rightOnly.StreamPairIndex == 0, "F AddressRight → right LooseRow pair");
+        }
+
         Console.WriteLine(_fails == 0 ? "ALL PASS" : "FAILED " + _fails);
         Environment.Exit(_fails == 0 ? 0 : 1);
     }

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using DiffXL.COMMON;
 using DiffXL.LOGIC.Diff;
 
 /// <summary>
@@ -343,6 +344,59 @@ class Program
                 else
                 {
                     Console.WriteLine("OK case5 stream Match for identical hash");
+                }
+            }
+
+            // --- 6: 実行時フロアは ImageRejectDiffRatio と揃える（0.85 → 下限 0.15 なら sim 0.20 は両方 Match） ---
+            {
+                string pL = Path.Combine(dir, "sim20rt_l.png");
+                string pR = Path.Combine(dir, "sim20rt_r.png");
+                WriteSameRatioPair(pL, pR, 10, 10, 20);
+                var lowL = ImgPath("sim20rtL", "hash-low-rt-L", pL, 1);
+                var lowR = ImgPath("sim20rtR", "hash-low-rt-R", pR, 1);
+                double prevReject = 0.45;
+                if (AppSettings.Current != null && AppSettings.Current.Diff != null)
+                {
+                    prevReject = AppSettings.Current.Diff.ImageRejectDiffRatio;
+                    AppSettings.Current.Diff.ImageRejectDiffRatio = 0.85;
+                }
+
+                try
+                {
+                    double floor = ImageSequenceAligner.MatchFloor;
+                    Console.WriteLine("case6 floor=" + floor.ToString("0.####")
+                        + " (expect 0.15)");
+                    IList<AlignStep> engineLoose = ImageSequenceAligner.Align(
+                        new List<EmbeddedImage> { lowL },
+                        new List<EmbeddedImage> { lowR });
+                    IList<ContentStreamPair> streamLoose = ContentStreamBuilder.Align(
+                        ContentStreamBuilder.Build(SheetWith(lowL)),
+                        ContentStreamBuilder.Build(SheetWith(lowR)));
+                    bool engineMatch = engineLoose.Count == 1 && engineLoose[0].Op == AlignOp.Match;
+                    bool streamMatch = streamLoose.Count == 1 && streamLoose[0].Op == AlignOp.Match;
+                    Console.WriteLine("case6 reject=0.85 engine=" + FormatOps(engineLoose)
+                        + " stream=" + FormatStreamOps(streamLoose));
+                    if (Math.Abs(floor - 0.15) > 0.001)
+                    {
+                        Console.WriteLine("FAIL case6 MatchFloor should be 0.15 got " + floor);
+                        fail++;
+                    }
+                    else if (!engineMatch || !streamMatch)
+                    {
+                        Console.WriteLine("FAIL case6 both should Match sim 0.20 when reject=0.85");
+                        fail++;
+                    }
+                    else
+                    {
+                        Console.WriteLine("OK case6 engine+stream same floor (Match at reject 0.85)");
+                    }
+                }
+                finally
+                {
+                    if (AppSettings.Current != null && AppSettings.Current.Diff != null)
+                    {
+                        AppSettings.Current.Diff.ImageRejectDiffRatio = prevReject;
+                    }
                 }
             }
         }

@@ -16,13 +16,14 @@ namespace DiffXL.LOGIC.Diff
         private const double SkipCost = 0.4;
 
         /// <summary>
-        /// Match に必要な最小類似度（設定の ImageRejectDiffRatio の補数。未設定時は定数既定）。
+        /// Match に必要な最小類似度（1 - ImageRejectDiffRatio。未設定時は 0.55）。
+        /// ContentStreamBuilder の画像 Match も同じフロアを使う。
         /// </summary>
-        private static double MatchThreshold
+        public static double MatchFloor
         {
             get
             {
-                double reject = ImageDiffService.RejectDiffRatio;
+                double reject = 0.45;
                 if (AppSettings.Current != null && AppSettings.Current.Diff != null)
                 {
                     reject = AppSettings.Current.Diff.ImageRejectDiffRatio;
@@ -53,7 +54,7 @@ namespace DiffXL.LOGIC.Diff
                 n,
                 m,
                 (i, j) => ImageSimilarity(leftList[i], rightList[j]),
-                MatchThreshold,
+                MatchFloor,
                 SkipCost);
         }
 

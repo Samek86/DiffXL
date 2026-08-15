@@ -44,6 +44,7 @@ $names = @(
     'ContentStreamSmoke',
     'MiniMapViewportBandSmoke',
     'ImageOverlayAlignSmoke',
+    'ImageSequenceSmoke',
     'SheetMatcherSmoke',
     'StreamPairLinkSmoke',
     'TableTruthSmoke',
@@ -65,7 +66,8 @@ $fail = 0
 foreach ($name in $names) {
     $src = Join-Path $smoke "$name.cs"
     if (-not (Test-Path $src)) {
-        Write-Host "SKIP $name (missing $src)"
+        Write-Host "FAIL $name (missing $src)"
+        $fail++
         continue
     }
 

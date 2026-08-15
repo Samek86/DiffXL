@@ -267,6 +267,12 @@ namespace DiffXL.COMMON
             model.Diff.ImageRejectDiffRatio = Math.Round(
                 model.Diff.ImageRejectDiffRatio, 4, MidpointRounding.AwayFromZero);
 
+            // 旧既定 0.85（Match 下限 0.15）は 0.45 に寄せ、既存テスターの閾値を統一する
+            if (Math.Abs(model.Diff.ImageRejectDiffRatio - 0.85) < 0.00005)
+            {
+                model.Diff.ImageRejectDiffRatio = 0.45;
+            }
+
             if (model.Diff.ImageAbsDiffThreshold < 0)
             {
                 model.Diff.ImageAbsDiffThreshold = 0;
