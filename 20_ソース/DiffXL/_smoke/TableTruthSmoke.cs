@@ -99,6 +99,67 @@ class Program
             }
         }
 
+        // 余列: 左 A B C / 右 A B C NEW → 4 列目を TableCellChange として残す
+        {
+            var left = new TableBlock
+            {
+                Id = "Tx",
+                OrderIndex = 0,
+                Rows = new List<IList<CellContent>> { Row(1, "A", "B", "C") }
+            };
+            var right = new TableBlock
+            {
+                Id = "Tx",
+                OrderIndex = 0,
+                Rows = new List<IList<CellContent>> { Row(1, "A", "B", "C", "NEW") }
+            };
+            var pair = new SheetPair { LeftSheet = "Sheet1", RightSheet = "Sheet1" };
+
+            IList<DiffItem> items = TableCompareService.Compare(
+                new[] { left },
+                new[] { right },
+                pair);
+
+            int changes = items.Count(i => i.Kind == DiffKind.TableCellChange);
+            Console.WriteLine("case5 extra-col TableCellChange count=" + changes);
+            foreach (DiffItem d in items)
+            {
+                Console.WriteLine(string.Format(
+                    "  {0} addrL={1} addrR={2} | {3}",
+                    d.Kind,
+                    d.AddressLeft ?? "-",
+                    d.AddressRight ?? "-",
+                    d.Summary));
+            }
+
+            if (changes < 1)
+            {
+                Console.WriteLine("FAIL case5 expected >=1 TableCellChange for extra column NEW");
+                fail++;
+            }
+            else
+            {
+                DiffItem ch = items.First(i => i.Kind == DiffKind.TableCellChange);
+                bool addrOk = (ch.AddressRight != null
+                               && ch.AddressRight.IndexOf("D", StringComparison.Ordinal) >= 0)
+                              || (ch.AddressLeft != null
+                                  && ch.AddressLeft.IndexOf("D", StringComparison.Ordinal) >= 0);
+                bool summaryOk = ch.Summary != null
+                                 && ch.Summary.IndexOf("NEW", StringComparison.Ordinal) >= 0;
+                if (!addrOk && !summaryOk)
+                {
+                    Console.WriteLine(
+                        "FAIL case5 Summary/Address should point at 4th col NEW: "
+                        + ch.AddressLeft + "/" + ch.AddressRight + " " + ch.Summary);
+                    fail++;
+                }
+                else
+                {
+                    Console.WriteLine("OK case5 extra column TableCellChange");
+                }
+            }
+        }
+
         if (fail == 0)
         {
             Console.WriteLine("PASS TableTruthSmoke");

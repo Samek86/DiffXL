@@ -190,7 +190,8 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// Match 行を min 列で zip し、Text が異なれば TableCellChange。
+        /// Match 行を max 列で zip し、Text が異なれば TableCellChange。
+        /// 片方にだけある余列は空文字 vs テキストとして残す。
         /// 交互行の塗りなど Bg だけの差は差分にしない（表示が全面黄になるのを防ぐ）。
         /// </summary>
         private static void EmitCellChanges(
@@ -206,12 +207,12 @@ namespace DiffXL.LOGIC.Diff
         {
             int leftLen = leftRow != null ? leftRow.Count : 0;
             int rightLen = rightRow != null ? rightRow.Count : 0;
-            int n = Math.Min(leftLen, rightLen);
+            int n = Math.Max(leftLen, rightLen);
 
             for (int c = 0; c < n; c++)
             {
-                CellContent lc = leftRow[c];
-                CellContent rc = rightRow[c];
+                CellContent lc = c < leftLen ? leftRow[c] : null;
+                CellContent rc = c < rightLen ? rightRow[c] : null;
                 string lt = GetText(lc);
                 string rt = GetText(rc);
 

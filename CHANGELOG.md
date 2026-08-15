@@ -37,6 +37,8 @@
 ### Fixed
 
 - 大画像（最大辺 &gt; 1024）でハイライト矩形が ImagePairView 上にずれて表示される問題
+- 表内の対応行で列数が違うとき、余列を `TableCellChange` として残す（`min` 切り捨てをやめる）
+- 表内の塗り分け（zebra）は差分にしない
 
 ### Removed
 
