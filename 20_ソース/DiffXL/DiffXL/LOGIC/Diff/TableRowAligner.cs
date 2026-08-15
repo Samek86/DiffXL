@@ -12,8 +12,9 @@ namespace DiffXL.LOGIC.Diff
     {
         /// <summary>
         /// 行対応の類似度しきい値（これ未満は Match 不可）。
+        /// SequenceAligner は sim &gt;= threshold。ちょうど 0.5（2 列で 1 セル一致）を弾くため半開にする。
         /// </summary>
-        private const double MatchThreshold = 0.5;
+        private const double MatchThreshold = 0.5 + 1e-12;
 
         /// <summary>
         /// SkipLeft / SkipRight 1 回あたりのコスト。
@@ -22,7 +23,7 @@ namespace DiffXL.LOGIC.Diff
 
         /// <summary>
         /// 左右の行系列をアラインし、Match / SkipLeft / SkipRight のステップ列を返す。
-        /// 行キー完全一致は類似度 1。不一致時はセル Text の一致割合（最大列数で正規化）。
+        /// 行キー完全一致は類似度 1。不一致時は非空セル一致割合（双方空欄は除外、比較 2 未満は 0）。
         /// </summary>
         /// <param name="leftRows">左テーブルの行一覧</param>
         /// <param name="rightRows">右テーブルの行一覧</param>
@@ -150,7 +151,8 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// 2 行の類似度（0..1）。キー一致は 1。否则はセル Text 一致数 / max(列数)。
+        /// 2 行の類似度（0..1）。キー一致は 1。
+        /// 双方空欄は比較に入れない。非空比較が 2 未満なら 0。それ以外は一致非空 / 比較数。
         /// </summary>
         private static double RowSimilarity(
             IList<CellContent> leftRow,
@@ -165,25 +167,38 @@ namespace DiffXL.LOGIC.Diff
 
             int leftLen = leftRow != null ? leftRow.Count : 0;
             int rightLen = rightRow != null ? rightRow.Count : 0;
-            int maxLen = Math.Max(leftLen, rightLen);
-            if (maxLen == 0)
+            if (leftLen == 0 && rightLen == 0)
             {
                 return 1.0;
             }
 
-            int minLen = Math.Min(leftLen, rightLen);
+            int compared = 0;
             int equal = 0;
-            for (int c = 0; c < minLen; c++)
+            int maxCols = Math.Max(leftLen, rightLen);
+            for (int c = 0; c < maxCols; c++)
             {
-                string lt = GetText(leftRow[c]);
-                string rt = GetText(rightRow[c]);
-                if (string.Equals(lt, rt, StringComparison.Ordinal))
+                string lt = c < leftLen ? GetText(leftRow[c]) : string.Empty;
+                string rt = c < rightLen ? GetText(rightRow[c]) : string.Empty;
+                bool le = string.IsNullOrEmpty(lt);
+                bool re = string.IsNullOrEmpty(rt);
+                if (le && re)
+                {
+                    continue;
+                }
+
+                compared++;
+                if (!le && !re && string.Equals(lt, rt, StringComparison.Ordinal))
                 {
                     equal++;
                 }
             }
 
-            return (double)equal / maxLen;
+            if (compared < 2)
+            {
+                return 0;
+            }
+
+            return (double)equal / compared;
         }
 
         /// <summary>

@@ -90,15 +90,16 @@ class Program
 
         // --- 2: 対応行内 1 セル変更 → TableCellChange ---
         {
-            // 同じ 2 行構造。2 行目の 2 列目だけ文言が違う
+            // 3 列で非空一致 2 以上（2 列 1 一致は Match 禁止のためアンカー列を持つ）
+            // 2 行目の 2 列目だけ文言が違う
             var left = new TableBlock
             {
                 Id = "T2",
                 OrderIndex = 0,
                 Rows = new List<IList<CellContent>>
                 {
-                    Row(1, new[] { "A", "B" }),
-                    Row(2, new[] { "Hello", "World" })
+                    Row(1, new[] { "A", "B", "K" }),
+                    Row(2, new[] { "Hello", "World", "K" })
                 }
             };
             var right = new TableBlock
@@ -107,8 +108,8 @@ class Program
                 OrderIndex = 0,
                 Rows = new List<IList<CellContent>>
                 {
-                    Row(1, new[] { "A", "B" }),
-                    Row(2, new[] { "Hello", "Changed" })
+                    Row(1, new[] { "A", "B", "K" }),
+                    Row(2, new[] { "Hello", "Changed", "K" })
                 }
             };
 
@@ -155,7 +156,7 @@ class Program
             }
         }
 
-        // --- 3: Bg のみ差でも TableCellChange ---
+        // --- 3: Bg のみ差は TableCellChange にしない（zebra 等の塗り分けを差分にしない）---
         {
             var left = new TableBlock
             {
@@ -185,22 +186,15 @@ class Program
                 new[] { right },
                 pair);
 
-            if (items.Count != 1 || items[0].Kind != DiffKind.TableCellChange)
+            if (items.Count != 0)
             {
-                Console.WriteLine("FAIL case3 expected 1 TableCellChange for bg-only");
-                Dump(items);
-                fail++;
-            }
-            else if (items[0].BackgroundLeft != "#FFFF0000"
-                     || items[0].BackgroundRight != "#FFFFFFFF")
-            {
-                Console.WriteLine("FAIL case3 BackgroundLeft/Right");
+                Console.WriteLine("FAIL case3 expected 0 diffs for bg-only (text same)");
                 Dump(items);
                 fail++;
             }
             else
             {
-                Console.WriteLine("OK case3 bg-only TableCellChange");
+                Console.WriteLine("OK case3 bg-only ignored");
             }
         }
 
