@@ -106,10 +106,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="VIEW\Controls\DiffOverlayLayer.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="VIEW\Controls\MiniMapControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -165,9 +161,6 @@
     <Compile Include="LOGIC\Diff\TableRowAligner.cs" />
     <Compile Include="LOGIC\Diff\TextDiffService.cs" />
     <Compile Include="LOGIC\Diff\XlsxPackageReader.cs" />
-    <Compile Include="VIEW\Controls\DiffOverlayLayer.xaml.cs">
-      <DependentUpon>DiffOverlayLayer.xaml</DependentUpon>
-    </Compile>
     <Compile Include="VIEW\Controls\MiniMapViewportBand.cs" />
     <Compile Include="VIEW\Controls\MiniMapControl.xaml.cs">
       <DependentUpon>MiniMapControl.xaml</DependentUpon>

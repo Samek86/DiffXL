@@ -92,21 +92,6 @@
                                 <TextBlock Text="シート対応" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <!-- 内容ベース比較では ImageSequenceAligner が自動対応。手動ピンは無効（偽の操作感を出さない）。 -->
-                        <Button
-                            x:Name="BtnImageLink"
-                            Style="{StaticResource ToolBarButtonStyle}"
-                            MinWidth="88"
-                            Margin="0,0,6,0"
-                            IsEnabled="False"
-                            Visibility="Collapsed"
-                            Click="BtnImageLink_Click"
-                            ToolTip="画像の対応付けは内容比較時に自動です（手動ピンは未使用）">
-                            <StackPanel Orientation="Horizontal">
-                                <iconPacks:PackIconPhosphorIcons Kind="Images" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
-                                <TextBlock Text="画像対応" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
                         <Button x:Name="BtnReplaceLeft" Style="{StaticResource ToolBarButtonStyle}" MinWidth="80" Margin="0,0,6,0" Click="BtnReplaceLeft_Click">
                             <StackPanel Orientation="Horizontal">
                                 <iconPacks:PackIconPhosphorIcons Kind="ArrowFatLeft" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />

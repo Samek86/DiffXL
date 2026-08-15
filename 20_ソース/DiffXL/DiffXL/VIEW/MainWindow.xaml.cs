@@ -1785,26 +1785,6 @@ namespace DiffXL
         }
 
         /// <summary>
-        /// 旧「画像対応」ボタン。内容ベース比較では ImageSequenceAligner が自動対応するため、
-        /// 手動ピン UI は無効（偽の操作感を出さない）。クリック経路は情報表示のみ。
-        /// </summary>
-        private void BtnImageLink_Click(object sender, RoutedEventArgs e)
-        {
-            const string msg =
-                "画像の対応付けは内容比較時に自動で行われます。手動ピン留めは現在の比較パイプラインでは使用されません。";
-            if (StatusText != null)
-            {
-                StatusText.Text = msg;
-            }
-
-            MessageBox.Show(
-                msg,
-                Common.AppDisplayName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
-
-        /// <summary>
         /// 手動ピン適用後、指定シートの Match + SheetAlignment のみ再構築する。
         /// </summary>
         private void RebuildSheetAlignmentForPins(
