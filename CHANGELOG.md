@@ -11,6 +11,8 @@
 
 ### Added
 
+- MIT `LICENSE`（Copyright (c) 2026 DiffXL contributors）
+- 製品の一致定義を README・起動画面に明記（同じ内容が同じ個数・表は枠／Excel 表の行・画像は出現順と見た目。数式・マクロ・ピボット・チャートは対象外）
 - 内容ベース比較の必須シナリオ用サンプル `content_diff_left.xlsx` / `content_diff_right.xlsx` と生成スクリプト
 - 内容ベース比較の設計書・実装計画（`docs/superpowers/specs|plans/2026-08-12-content-based-diff*`）
 - 長大シート向け内容ストリーム仮想化（高さマップ＋ビューポート Realize）
@@ -21,6 +23,7 @@
 
 ### Changed
 
+- README の配布表記を「Release で Costura 確認時のみ原則 1 exe」に修正（単一 exe の断定をやめる）
 - **比較・表示方針を内容ベースへ統一**（セル位置・画像アンカーを比較キーにしない）
 - 表示を自前の内容ビュー（WPF）に変更。Excel COM 埋め込みは廃止
 - 要件定義を版 0.5 に改訂（Excel ビュー最優先 → 内容差分の正確さ・分かりやすさ・安定性）

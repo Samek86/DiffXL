@@ -25,11 +25,10 @@
                         VerticalAlignment="Center"
                         Text="DiffXL" />
                 </StackPanel>
-                <TextBlock
-                    Margin="0,0,0,20"
-                    Foreground="{StaticResource Brush.TextMuted}"
-                    TextWrapping="Wrap"
-                    Text="比較する 2 つの Excel ファイル（.xlsx）を選択してください。" />
+                <TextBlock Margin="0,0,0,8" Foreground="{StaticResource Brush.TextMuted}" TextWrapping="Wrap"
+                    Text="比較する 2 つの .xlsx を選んでください。Excel のインストールは不要です。" />
+                <TextBlock Margin="0,0,0,20" Foreground="{StaticResource Brush.TextMuted}" TextWrapping="Wrap" FontSize="12"
+                    Text="画面は Excel を再現しません。同じ内容が同じ個数あれば一致、表は枠（または Excel 表）の行、画像は出現順と見た目で合わせます。数式・マクロ・ピボット・チャートは見ません。" />
 
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                     <iconPacks:PackIconPhosphorIcons Kind="FileXls" Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="{StaticResource Brush.Text}" />
