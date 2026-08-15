@@ -1,0 +1,15 @@
+name: logic-smokes
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  smokes:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+      - name: Run logic smokes
+        shell: pwsh
+        run: ./10_管理資料/テスト/run-logic-smokes.ps1
