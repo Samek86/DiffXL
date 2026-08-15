@@ -1,25 +1,19 @@
-# DiffXL smoke harnesses (shipped code)
+# DiffXL smoke harnesses
 
-These tools call the **real** `DiffXL.exe` types (`DiffEngine`, `ExcelWorkbookSession`, `AppSettings`), not reimplementations.
+These tools reference types inside the built `DiffXL.exe` (`DiffEngine`, `ContentStreamBuilder`, `AppSettings`).
 
 ## Prerequisites
 
 - Built `DiffXL\bin\x64\Debug\DiffXL.exe`
-- Excel desktop installed (x64)
+- Microsoft Excel is **not** required
 
-## SmokeGoto
+## Logic smokes (current)
 
-```powershell
-# After Debug build + csc (see goal evidence scripts)
-.\SmokeGoto.exe path\to\left.xlsx path\to\right.xlsx
-```
+Compile with `csc /r:DiffXL.exe` and run from the Debug output directory.
 
-Exercises `DiffEngine.Compare` and `TryGotoRow` / `TrySetScroll` / `TryGetScroll`.
+- `ContentDiffSmoke` — content-based compare scenarios
+- `ContentStreamSmoke` — stream align + layout
+- `MiniMapViewportBandSmoke` — MiniMap thumb math
+- `ImageOverlayAlignSmoke` — overlay aligner
 
-## SmokeEmbedGoto / DualEmbed
-
-WPF hosts that `Attach` Excel into `ExcelHostControl` then jump rows (proves MiniMap path after embed).
-
-## SettingsSmoke
-
-Persists highlight color/opacity via `AppSettings` YAML under `%AppData%\Roaming\DiffXL`.
+Excel COM embed smokes (`SmokeGoto`, `SmokeEmbedGoto`, `DualEmbed`) are **retired**. Do not compile them.
