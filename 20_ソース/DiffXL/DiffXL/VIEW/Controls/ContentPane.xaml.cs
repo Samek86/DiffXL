@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using DiffXL.COMMON;
 using DiffXL.LOGIC.Diff;
 
 namespace DiffXL.VIEW.Controls
@@ -1012,7 +1013,10 @@ namespace DiffXL.VIEW.Controls
                 }
             }
 
+            var swRealize = System.Diagnostics.Stopwatch.StartNew();
             RealizeViewport(force: true);
+            swRealize.Stop();
+            Log.Info("表示Realize=" + swRealize.ElapsedMilliseconds + "ms sheet=" + (SheetName ?? ""));
         }
 
         private void ClearRealized()

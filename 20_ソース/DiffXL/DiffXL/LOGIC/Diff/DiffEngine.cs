@@ -74,6 +74,8 @@ namespace DiffXL.LOGIC.Diff
                 result.Alignments = new List<SheetAlignment>();
 
                 Report(progress, "ブックを読み込んでいます...");
+                bool lazy = options != null && options.LazySheets;
+                result.IsLazy = lazy;
                 using (XlsxPackageReader leftReader = XlsxPackageReader.Open(leftPath))
                 using (XlsxPackageReader rightReader = XlsxPackageReader.Open(rightPath))
                 {
@@ -108,22 +110,40 @@ namespace DiffXL.LOGIC.Diff
                         });
                     }
 
-                    // 全シートの SheetContent を構築
-                    Report(progress, "内容モデルを構築しています...");
+                    List<SheetPair> pairsToCompare = ResolvePairsToCompare(match.Pairs, options, lazy);
+                    List<string> leftNeed = CollectSheetNames(pairsToCompare, left: true);
+                    List<string> rightNeed = CollectSheetNames(pairsToCompare, left: false);
+
+                    Report(progress, lazy
+                        ? "内容モデルを構築しています（このシート）..."
+                        : "内容モデルを構築しています...");
+                    var swRead = Stopwatch.StartNew();
                     WorkbookContent leftContent = BuildWorkbookContent(
-                        leftReader, leftPath, leftMediaDir);
+                        leftReader, leftPath, leftMediaDir, leftSheets, leftNeed);
                     WorkbookContent rightContent = BuildWorkbookContent(
-                        rightReader, rightPath, rightMediaDir);
+                        rightReader, rightPath, rightMediaDir, rightSheets, rightNeed);
+                    swRead.Stop();
                     result.LeftContent = leftContent;
                     result.RightContent = rightContent;
+                    result.Timings.ReadMs = swRead.ElapsedMilliseconds;
 
                     Dictionary<string, SheetContent> leftByName = IndexSheets(leftContent);
                     Dictionary<string, SheetContent> rightByName = IndexSheets(rightContent);
+
+                    var swTable = Stopwatch.StartNew();
+                    var swImage = Stopwatch.StartNew();
+                    long tableAcc = 0;
+                    long imageAcc = 0;
 
                     int pairIndex = 0;
                     foreach (SheetPair pair in match.Pairs)
                     {
                         pairIndex++;
+                        if (!ContainsPair(pairsToCompare, pair))
+                        {
+                            continue;
+                        }
+
                         Report(progress, string.Format(
                             CultureInfo.InvariantCulture,
                             "シート比較中 ({0}/{1}): {2} ↔ {3}",
@@ -144,56 +164,24 @@ namespace DiffXL.LOGIC.Diff
                             rightSheet = new SheetContent { Name = pair.RightSheet };
                         }
 
-                        double baseHint = pairIndex * 1000.0;
-
-                        // 1) テーブル外セル（多重集合・位置無視）
-                        foreach (DiffItem item in CellBagComparer.Compare(
-                            leftSheet.LooseCells, rightSheet.LooseCells, pair))
-                        {
-                            if (item == null)
-                            {
-                                continue;
-                            }
-
-                            item.OrderHint = baseHint + Math.Max(0, item.OrderHint);
-                            result.Items.Add(item);
-                        }
-
-                        // 2) テーブル系列＋行 LCS
-                        foreach (DiffItem item in TableCompareService.Compare(
-                            leftSheet.Tables, rightSheet.Tables, pair))
-                        {
-                            if (item == null)
-                            {
-                                continue;
-                            }
-
-                            item.OrderHint = baseHint + 200 + Math.Max(0, item.OrderHint);
-                            result.Items.Add(item);
-                        }
-
-                        // 3) 画像出現順 DP + 視覚差分
-                        AddImageDiffItems(
-                            leftSheet.Images,
-                            rightSheet.Images,
+                        long pairTable;
+                        long pairImage;
+                        AppendPairContentDiffs(
+                            result,
+                            leftSheet,
+                            rightSheet,
                             pair,
                             maskDir,
-                            result.Items,
-                            pairIndex);
-
-                        // 4) 図形系列
-                        foreach (DiffItem item in ShapeCompareService.Compare(
-                            leftSheet.Shapes, rightSheet.Shapes, pair))
-                        {
-                            if (item == null)
-                            {
-                                continue;
-                            }
-
-                            item.OrderHint = baseHint + 700 + Math.Max(0, item.OrderHint);
-                            result.Items.Add(item);
-                        }
+                            pairIndex,
+                            out pairTable,
+                            out pairImage);
+                        tableAcc += pairTable;
+                        imageAcc += pairImage;
+                        RememberCompared(result, pair);
                     }
+
+                    result.Timings.TableMs = tableAcc;
+                    result.Timings.ImageMs = imageAcc;
                 }
 
                 // 安定した並び
@@ -204,16 +192,24 @@ namespace DiffXL.LOGIC.Diff
                     .ToList();
 
                 // 展開済みストリームへ付着し、同一 pair の片側 Text を 1 件にまとめる
+                var swLayout = Stopwatch.StartNew();
                 DiffResultLinker.AttachExpandedLayouts(result);
                 DiffResultLinker.MergeOneSidedTextsOnSamePair(result);
+                swLayout.Stop();
+                result.Timings.LayoutMs = swLayout.ElapsedMilliseconds;
 
                 sw.Stop();
                 result.Elapsed = sw.Elapsed;
+                result.Timings.TotalMs = sw.ElapsedMilliseconds;
                 Log.Info(string.Format(
                     CultureInfo.InvariantCulture,
-                    "比較完了: 差分 {0} 件 / {1} ms / cache={2}",
+                    "比較段階: 読込={0}ms 表={1}ms 画像={2}ms 配置={3}ms 合計={4}ms / 差分 {5} 件 / cache={6}",
+                    result.Timings.ReadMs,
+                    result.Timings.TableMs,
+                    result.Timings.ImageMs,
+                    result.Timings.LayoutMs,
+                    result.Timings.TotalMs,
                     result.Items.Count,
-                    sw.ElapsedMilliseconds,
                     result.CacheDirectory));
                 Report(progress, "比較完了");
                 return result;
@@ -230,13 +226,152 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// Reader から全シートの SheetContent を構築する。
-        /// EnumerateCellContents → TableDetector、画像・図形は出現順（行→列）でソート。
+        /// シートペアキー（"左\t右"）。
+        /// </summary>
+        public static string MakePairKey(string leftSheet, string rightSheet)
+        {
+            return (leftSheet ?? string.Empty) + "\t" + (rightSheet ?? string.Empty);
+        }
+
+        /// <summary>
+        /// そのペアの内容比較が済んでいるか。
+        /// </summary>
+        public static bool IsPairCompared(DiffResult result, string leftSheet, string rightSheet)
+        {
+            if (result == null || result.ComparedPairKeys == null)
+            {
+                return false;
+            }
+
+            string key = MakePairKey(leftSheet, rightSheet);
+            for (int i = 0; i < result.ComparedPairKeys.Count; i++)
+            {
+                if (string.Equals(result.ComparedPairKeys[i], key, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 既存結果に 1 ペア分の内容比較を追加する（遅延シート切替用）。
+        /// </summary>
+        public void CompareSheetPair(
+            DiffResult result,
+            string leftPath,
+            string rightPath,
+            SheetPair pair,
+            CompareOptions options,
+            IProgress<string> progress)
+        {
+            if (result == null || pair == null)
+            {
+                return;
+            }
+
+            if (IsPairCompared(result, pair.LeftSheet, pair.RightSheet))
+            {
+                return;
+            }
+
+            ValidateXlsx(leftPath, "左");
+            ValidateXlsx(rightPath, "右");
+            Report(progress, "シートを読み込んでいます...");
+
+            string cacheRoot = result.CacheDirectory;
+            if (string.IsNullOrEmpty(cacheRoot))
+            {
+                cacheRoot = Path.Combine(
+                    AppPaths.CacheDir,
+                    DateTime.Now.ToString("yyyyMMdd_HHmmss_fff", CultureInfo.InvariantCulture)
+                    + "_" + Guid.NewGuid().ToString("N").Substring(0, 8));
+                result.CacheDirectory = cacheRoot;
+            }
+
+            string leftMediaDir = Path.Combine(cacheRoot, "media", "left");
+            string rightMediaDir = Path.Combine(cacheRoot, "media", "right");
+            string maskDir = Path.Combine(cacheRoot, "masks");
+            Directory.CreateDirectory(leftMediaDir);
+            Directory.CreateDirectory(rightMediaDir);
+            Directory.CreateDirectory(maskDir);
+
+            var sw = Stopwatch.StartNew();
+            using (XlsxPackageReader leftReader = XlsxPackageReader.Open(leftPath))
+            using (XlsxPackageReader rightReader = XlsxPackageReader.Open(rightPath))
+            {
+                var only = new List<SheetPair> { pair };
+                List<string> leftNeed = CollectSheetNames(only, left: true);
+                List<string> rightNeed = CollectSheetNames(only, left: false);
+                var swRead = Stopwatch.StartNew();
+                WorkbookContent leftPart = BuildWorkbookContent(
+                    leftReader, leftPath, leftMediaDir, leftReader.GetSheetNames(), leftNeed);
+                WorkbookContent rightPart = BuildWorkbookContent(
+                    rightReader, rightPath, rightMediaDir, rightReader.GetSheetNames(), rightNeed);
+                swRead.Stop();
+                MergePopulatedSheets(result.LeftContent, leftPart);
+                MergePopulatedSheets(result.RightContent, rightPart);
+
+                SheetContent leftSheet = FindSheet(IndexSheets(result.LeftContent), pair.LeftSheet)
+                    ?? new SheetContent { Name = pair.LeftSheet };
+                SheetContent rightSheet = FindSheet(IndexSheets(result.RightContent), pair.RightSheet)
+                    ?? new SheetContent { Name = pair.RightSheet };
+
+                RemoveContentItemsForPair(result, pair);
+                int pairIndex = 1;
+                if (result.SheetPairs != null)
+                {
+                    for (int i = 0; i < result.SheetPairs.Count; i++)
+                    {
+                        if (SamePair(result.SheetPairs[i], pair))
+                        {
+                            pairIndex = i + 1;
+                            break;
+                        }
+                    }
+                }
+
+                long pairTable;
+                long pairImage;
+                AppendPairContentDiffs(
+                    result, leftSheet, rightSheet, pair, maskDir, pairIndex,
+                    out pairTable, out pairImage);
+                RememberCompared(result, pair);
+                result.Timings.ReadMs = swRead.ElapsedMilliseconds;
+                result.Timings.TableMs = pairTable;
+                result.Timings.ImageMs = pairImage;
+            }
+
+            var swLayout = Stopwatch.StartNew();
+            DiffResultLinker.AttachExpandedLayouts(result);
+            DiffResultLinker.MergeOneSidedTextsOnSamePair(result);
+            swLayout.Stop();
+            result.Timings.LayoutMs = swLayout.ElapsedMilliseconds;
+            sw.Stop();
+            result.Timings.TotalMs = sw.ElapsedMilliseconds;
+            result.Elapsed = sw.Elapsed;
+            Log.Info(string.Format(
+                CultureInfo.InvariantCulture,
+                "比較段階(追加 {0}↔{1}): 読込={2}ms 表={3}ms 画像={4}ms 配置={5}ms 合計={6}ms",
+                pair.LeftSheet,
+                pair.RightSheet,
+                result.Timings.ReadMs,
+                result.Timings.TableMs,
+                result.Timings.ImageMs,
+                result.Timings.LayoutMs,
+                result.Timings.TotalMs));
+        }
+
+        /// <summary>
+        /// Reader から SheetContent を構築する。populateNames のみ実読込、他は名前スタブ。
         /// </summary>
         private static WorkbookContent BuildWorkbookContent(
             XlsxPackageReader reader,
             string path,
-            string mediaDir)
+            string mediaDir,
+            IReadOnlyList<string> allSheetNames,
+            IList<string> populateNames)
         {
             var wb = new WorkbookContent
             {
@@ -250,12 +385,26 @@ namespace DiffXL.LOGIC.Diff
             }
 
             Directory.CreateDirectory(mediaDir);
+            var populate = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (populateNames != null)
+            {
+                foreach (string n in populateNames)
+                {
+                    if (!string.IsNullOrEmpty(n))
+                    {
+                        populate.Add(n);
+                    }
+                }
+            }
 
-            // 画像は一度抽出しシートごとに振り分ける
+            IReadOnlyList<string> sheetNames = allSheetNames ?? reader.GetSheetNames();
+            bool populateAll = populate.Count == 0;
+            List<string> extractFilter = populateAll ? null : populate.ToList();
+
             List<EmbeddedImage> allImages;
             try
             {
-                allImages = reader.ExtractImages(null, mediaDir).ToList();
+                allImages = reader.ExtractImages(extractFilter, mediaDir).ToList();
             }
             catch (Exception ex)
             {
@@ -263,10 +412,20 @@ namespace DiffXL.LOGIC.Diff
                 allImages = new List<EmbeddedImage>();
             }
 
-            IReadOnlyList<string> sheetNames = reader.GetSheetNames();
             for (int si = 0; si < sheetNames.Count; si++)
             {
                 string sheetName = sheetNames[si];
+                bool fill = populateAll || populate.Contains(sheetName);
+                if (!fill)
+                {
+                    wb.Sheets.Add(new SheetContent
+                    {
+                        Name = sheetName,
+                        IsPopulated = false
+                    });
+                    continue;
+                }
+
                 List<CellContent> cells;
                 try
                 {
@@ -299,7 +458,6 @@ namespace DiffXL.LOGIC.Diff
                     .ThenBy(i => i.FileName ?? string.Empty, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
-                // シート紐付けが無い画像は先頭シートへ（ブック単位フォールバック）
                 if (si == 0)
                 {
                     List<EmbeddedImage> unmapped = allImages
@@ -329,11 +487,233 @@ namespace DiffXL.LOGIC.Diff
                     LooseCells = detect.LooseCells ?? new List<CellContent>(),
                     Tables = detect.Tables ?? new List<TableBlock>(),
                     Images = sheetImages,
-                    Shapes = shapes != null ? shapes.ToList() : new List<ShapeContent>()
+                    Shapes = shapes != null ? shapes.ToList() : new List<ShapeContent>(),
+                    IsPopulated = true
                 });
             }
 
             return wb;
+        }
+
+        private static void AppendPairContentDiffs(
+            DiffResult result,
+            SheetContent leftSheet,
+            SheetContent rightSheet,
+            SheetPair pair,
+            string maskDir,
+            int pairIndex,
+            out long tableMs,
+            out long imageMs)
+        {
+            double baseHint = pairIndex * 1000.0;
+            var sw = Stopwatch.StartNew();
+            foreach (DiffItem item in CellBagComparer.Compare(
+                leftSheet.LooseCells, rightSheet.LooseCells, pair))
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
+                item.OrderHint = baseHint + Math.Max(0, item.OrderHint);
+                result.Items.Add(item);
+            }
+
+            foreach (DiffItem item in TableCompareService.Compare(
+                leftSheet.Tables, rightSheet.Tables, pair))
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
+                item.OrderHint = baseHint + 200 + Math.Max(0, item.OrderHint);
+                result.Items.Add(item);
+            }
+
+            sw.Stop();
+            tableMs = sw.ElapsedMilliseconds;
+
+            sw.Restart();
+            AddImageDiffItems(
+                leftSheet.Images,
+                rightSheet.Images,
+                pair,
+                maskDir,
+                result.Items,
+                pairIndex);
+            foreach (DiffItem item in ShapeCompareService.Compare(
+                leftSheet.Shapes, rightSheet.Shapes, pair))
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
+                item.OrderHint = baseHint + 700 + Math.Max(0, item.OrderHint);
+                result.Items.Add(item);
+            }
+
+            sw.Stop();
+            imageMs = sw.ElapsedMilliseconds;
+        }
+
+        private static List<SheetPair> ResolvePairsToCompare(
+            List<SheetPair> allPairs,
+            CompareOptions options,
+            bool lazy)
+        {
+            var list = new List<SheetPair>();
+            if (allPairs == null)
+            {
+                return list;
+            }
+
+            if (!lazy)
+            {
+                list.AddRange(allPairs);
+                return list;
+            }
+
+            SheetPair focus = options != null ? options.FocusPair : null;
+            if (focus != null)
+            {
+                foreach (SheetPair p in allPairs)
+                {
+                    if (SamePair(p, focus))
+                    {
+                        list.Add(p);
+                        return list;
+                    }
+                }
+            }
+
+            if (allPairs.Count > 0)
+            {
+                list.Add(allPairs[0]);
+            }
+
+            return list;
+        }
+
+        private static List<string> CollectSheetNames(IList<SheetPair> pairs, bool left)
+        {
+            var names = new List<string>();
+            if (pairs == null)
+            {
+                return names;
+            }
+
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (SheetPair p in pairs)
+            {
+                if (p == null)
+                {
+                    continue;
+                }
+
+                string n = left ? p.LeftSheet : p.RightSheet;
+                if (!string.IsNullOrEmpty(n) && seen.Add(n))
+                {
+                    names.Add(n);
+                }
+            }
+
+            return names;
+        }
+
+        private static bool ContainsPair(IList<SheetPair> pairs, SheetPair pair)
+        {
+            if (pairs == null || pair == null)
+            {
+                return false;
+            }
+
+            foreach (SheetPair p in pairs)
+            {
+                if (SamePair(p, pair))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool SamePair(SheetPair a, SheetPair b)
+        {
+            if (a == null || b == null)
+            {
+                return false;
+            }
+
+            return string.Equals(a.LeftSheet, b.LeftSheet, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(a.RightSheet, b.RightSheet, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void RememberCompared(DiffResult result, SheetPair pair)
+        {
+            if (result == null || pair == null)
+            {
+                return;
+            }
+
+            if (result.ComparedPairKeys == null)
+            {
+                result.ComparedPairKeys = new List<string>();
+            }
+
+            string key = MakePairKey(pair.LeftSheet, pair.RightSheet);
+            if (!IsPairCompared(result, pair.LeftSheet, pair.RightSheet))
+            {
+                result.ComparedPairKeys.Add(key);
+            }
+        }
+
+        private static void MergePopulatedSheets(WorkbookContent dest, WorkbookContent src)
+        {
+            if (dest == null || src == null || src.Sheets == null)
+            {
+                return;
+            }
+
+            if (dest.Sheets == null)
+            {
+                dest.Sheets = new List<SheetContent>();
+            }
+
+            foreach (SheetContent incoming in src.Sheets)
+            {
+                if (incoming == null || !incoming.IsPopulated || string.IsNullOrEmpty(incoming.Name))
+                {
+                    continue;
+                }
+
+                int idx = dest.Sheets.FindIndex(s => s != null
+                    && string.Equals(s.Name, incoming.Name, StringComparison.OrdinalIgnoreCase));
+                if (idx >= 0)
+                {
+                    dest.Sheets[idx] = incoming;
+                }
+                else
+                {
+                    dest.Sheets.Add(incoming);
+                }
+            }
+        }
+
+        private static void RemoveContentItemsForPair(DiffResult result, SheetPair pair)
+        {
+            if (result == null || result.Items == null || pair == null)
+            {
+                return;
+            }
+
+            result.Items.RemoveAll(item =>
+                item != null
+                && item.Kind != DiffKind.Structure
+                && string.Equals(item.SheetLeft, pair.LeftSheet, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(item.SheetRight, pair.RightSheet, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

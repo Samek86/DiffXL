@@ -3582,6 +3582,23 @@ namespace DiffXL
                 string left = _session.LeftPath;
                 string right = _session.RightPath;
                 CompareOptions options = _session.Options;
+                if (options != null)
+                {
+                    options.LazySheets = true;
+                    var combo = PairSheetCombo != null
+                        ? PairSheetCombo.SelectedItem as SheetPairComboItem
+                        : null;
+                    if (combo != null
+                        && (!string.IsNullOrEmpty(combo.LeftSheet) || !string.IsNullOrEmpty(combo.RightSheet)))
+                    {
+                        options.FocusPair = new SheetPair
+                        {
+                            LeftSheet = combo.LeftSheet,
+                            RightSheet = combo.RightSheet
+                        };
+                    }
+                }
+
                 result = await Task.Run(() => new DiffEngine().Compare(left, right, options, progress));
             }
             catch (Exception ex)
@@ -3649,16 +3666,95 @@ namespace DiffXL
                     RefreshMiniMapForCurrentSheet();
                 }));
             UpdateDiffStatus(result);
-            StatusText.Text = string.Format(
+            StatusText.Text = FormatCompareStatus(result);
+        }
+
+        /// <summary>
+        /// 段階時間つきの比較完了ステータス。
+        /// </summary>
+        private string FormatCompareStatus(DiffResult result)
+        {
+            if (result == null)
+            {
+                return "比較完了";
+            }
+
+            CompareTimings t = result.Timings ?? new CompareTimings();
+            string phases = string.Format(
                 CultureInfo.InvariantCulture,
-                "比較完了 {0} ms / 強調:{1} / 同期:{2}{3}",
-                (int)result.Elapsed.TotalMilliseconds,
+                "読込{0} 表{1} 画像{2} 配置{3}",
+                t.ReadMs,
+                t.TableMs,
+                t.ImageMs,
+                t.LayoutMs);
+            string lazy = result.IsLazy ? " / このシートのみ" : string.Empty;
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "比較完了 {0} ms ({1}){2} / 強調:{3} / 同期:{4}",
+                t.TotalMs > 0 ? t.TotalMs : (int)result.Elapsed.TotalMilliseconds,
+                phases,
+                lazy,
                 _highlightController != null && _highlightController.IsVisible ? "ON" : "OFF",
-                _scrollSync != null && _scrollSync.Enabled ? "ON" : "OFF",
-                (result.Alignments != null && result.Alignments.Count > 0)
-                    || (result.ScrollMaps != null && result.ScrollMaps.Count > 0)
-                    ? " / 内容対応"
-                    : string.Empty);
+                _scrollSync != null && _scrollSync.Enabled ? "ON" : "OFF");
+        }
+
+        /// <summary>
+        /// 遅延比較で未読のペアなら追加比較して再バインドする。
+        /// </summary>
+        private async System.Threading.Tasks.Task EnsureSheetPairComparedAsync(string leftSheet, string rightSheet)
+        {
+            if (_session == null || _session.LastResult == null || !_session.LastResult.IsLazy)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(leftSheet) || string.IsNullOrEmpty(rightSheet))
+            {
+                return;
+            }
+
+            if (DiffEngine.IsPairCompared(_session.LastResult, leftSheet, rightSheet))
+            {
+                return;
+            }
+
+            if (_session.IsBusy || !_session.HasBothPaths)
+            {
+                return;
+            }
+
+            _session.IsBusy = true;
+            ShowLoading("シートを比較しています...");
+            StatusText.Text = "シート比較中: " + leftSheet + " ↔ " + rightSheet;
+            var progress = new Progress<string>(msg =>
+            {
+                LoadingDetail.Text = msg;
+                StatusText.Text = msg;
+            });
+            try
+            {
+                DiffResult acc = _session.LastResult;
+                string left = _session.LeftPath;
+                string right = _session.RightPath;
+                CompareOptions options = _session.Options;
+                var pair = new SheetPair { LeftSheet = leftSheet, RightSheet = rightSheet };
+                await Task.Run(() => new DiffEngine().CompareSheetPair(
+                    acc, left, right, pair, options, progress));
+                BindContentPanes(acc);
+                RefreshMiniMapForCurrentSheet();
+                UpdateDiffStatus(acc);
+                StatusText.Text = FormatCompareStatus(acc);
+            }
+            catch (Exception ex)
+            {
+                Log.Exception(ex);
+                StatusText.Text = "シート比較失敗: " + ex.Message;
+            }
+            finally
+            {
+                _session.IsBusy = false;
+                HideLoading();
+            }
         }
 
         /// <summary>
@@ -3891,6 +3987,7 @@ namespace DiffXL
             }
 
             string pairedRight = ResolvePairedSheet(leftSheet, fromLeft: true);
+            string rightSheet = null;
             _syncingSheets = true;
             try
             {
@@ -3899,7 +3996,7 @@ namespace DiffXL
                     RightPane.TrySelectSheet(pairedRight);
                 }
 
-                string rightSheet = RightPane != null ? RightPane.SelectedSheetName : null;
+                rightSheet = RightPane != null ? RightPane.SelectedSheetName : null;
                 if (LeftPane != null)
                 {
                     LeftPane.SetPartnerPreferredSheet(rightSheet);
@@ -3930,6 +4027,8 @@ namespace DiffXL
             {
                 _syncingSheets = false;
             }
+
+            _ = EnsureSheetPairComparedAsync(leftSheet, rightSheet);
         }
 
         /// <summary>
@@ -3943,6 +4042,7 @@ namespace DiffXL
             }
 
             string pairedLeft = ResolvePairedSheet(rightSheet, fromLeft: false);
+            string leftSheet = null;
             _syncingSheets = true;
             try
             {
@@ -3951,7 +4051,7 @@ namespace DiffXL
                     LeftPane.TrySelectSheet(pairedLeft);
                 }
 
-                string leftSheet = LeftPane != null ? LeftPane.SelectedSheetName : null;
+                leftSheet = LeftPane != null ? LeftPane.SelectedSheetName : null;
                 if (RightPane != null)
                 {
                     RightPane.SetPartnerPreferredSheet(leftSheet);
@@ -3982,6 +4082,8 @@ namespace DiffXL
             {
                 _syncingSheets = false;
             }
+
+            _ = EnsureSheetPairComparedAsync(leftSheet, rightSheet);
         }
 
         /// <summary>
@@ -4034,6 +4136,8 @@ namespace DiffXL
             {
                 _syncingSheets = false;
             }
+
+            _ = EnsureSheetPairComparedAsync(item.LeftSheet, item.RightSheet);
         }
 
         /// <summary>

@@ -426,16 +426,62 @@ namespace DiffXL.LOGIC.Diff
         /// <returns>画像一覧</returns>
         public IReadOnlyList<EmbeddedImage> ExtractImages(string sheetName, string cacheDir)
         {
+            if (string.IsNullOrEmpty(sheetName))
+            {
+                return ExtractImages((IList<string>)null, cacheDir);
+            }
+
+            return ExtractImages(new List<string> { sheetName }, cacheDir);
+        }
+
+        /// <summary>
+        /// 指定シートの画像だけ抽出する（null/空なら全 media）。
+        /// </summary>
+        public IReadOnlyList<EmbeddedImage> ExtractImages(IList<string> sheetFilter, string cacheDir)
+        {
             EnsureOpen();
             Directory.CreateDirectory(cacheDir);
 
-            // 全 media を抽出
+            HashSet<string> neededPaths = null;
+            if (sheetFilter != null && sheetFilter.Count > 0)
+            {
+                Dictionary<string, List<DrawingMediaAnchor>> map = TryMapSheetMediaAnchors();
+                neededPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (string sn in sheetFilter)
+                {
+                    List<DrawingMediaAnchor> anc;
+                    if (string.IsNullOrEmpty(sn) || !map.TryGetValue(sn, out anc) || anc == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (DrawingMediaAnchor a in anc)
+                    {
+                        if (a != null && !string.IsNullOrEmpty(a.MediaPackagePath))
+                        {
+                            neededPaths.Add(NormalizePackagePath(a.MediaPackagePath));
+                        }
+                    }
+                }
+            }
+
+            string sheetName = (sheetFilter != null && sheetFilter.Count == 1)
+                ? sheetFilter[0]
+                : null;
+
+            // 必要な media だけ抽出（フィルタ無しなら全件）
             var allMedia = new List<EmbeddedImage>();
             foreach (ZipArchiveEntry entry in _zip.Entries)
             {
                 string name = entry.FullName.Replace('\\', '/');
                 if (!name.StartsWith("xl/media/", StringComparison.OrdinalIgnoreCase)
                     || name.EndsWith("/"))
+                {
+                    continue;
+                }
+
+                if (neededPaths != null
+                    && !neededPaths.Contains(NormalizePackagePath(name)))
                 {
                     continue;
                 }

@@ -50,7 +50,8 @@ $names = @(
     'TableTruthSmoke',
     'TableRowDiffSmoke',
     'TableDetectorSmoke',
-    'DiffPairIndexSmoke'
+    'DiffPairIndexSmoke',
+    'SheetLazyCompareSmoke'
 )
 
 Write-Host "Root=$root"

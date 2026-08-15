@@ -198,6 +198,45 @@ namespace DiffXL.LOGIC.Diff
         /// 右ブックの正規化内容（内容ベース比較用。未設定可）。
         /// </summary>
         public WorkbookContent RightContent { get; set; }
+
+        /// <summary>
+        /// 段階別所要時間（読込・表・画像・配置）。
+        /// </summary>
+        public CompareTimings Timings { get; set; } = new CompareTimings();
+
+        /// <summary>
+        /// 内容を比較済みのシートペアキー（"左\t右"）。
+        /// </summary>
+        public List<string> ComparedPairKeys { get; set; } = new List<string>();
+
+        /// <summary>
+        /// UI がシート遅延比較を使ったか（状態表示用）。
+        /// </summary>
+        public bool IsLazy { get; set; }
+    }
+
+    /// <summary>
+    /// 比較の段階別ミリ秒。
+    /// </summary>
+    public sealed class CompareTimings
+    {
+        /// <summary>xlsx 抽出・モデル構築。</summary>
+        public long ReadMs { get; set; }
+
+        /// <summary>セル袋＋表 LCS。</summary>
+        public long TableMs { get; set; }
+
+        /// <summary>画像 DP＋視覚比較＋図形。</summary>
+        public long ImageMs { get; set; }
+
+        /// <summary>ストリーム Attach／マージ。</summary>
+        public long LayoutMs { get; set; }
+
+        /// <summary>初回 Realize（UI）。未計測は -1。</summary>
+        public long RealizeMs { get; set; } = -1;
+
+        /// <summary>Compare 全体。</summary>
+        public long TotalMs { get; set; }
     }
 
     /// <summary>
@@ -245,6 +284,17 @@ namespace DiffXL.LOGIC.Diff
         /// 手動画像対応ピン（null または空なら自動マッチのみ）。
         /// </summary>
         public List<ManualImagePin> ManualImagePins { get; set; }
+
+        /// <summary>
+        /// true なら FocusPair（無ければ先頭ペア）だけ内容比較する。
+        /// 既定 false（全シート。ContentDiffSmoke 互換）。
+        /// </summary>
+        public bool LazySheets { get; set; }
+
+        /// <summary>
+        /// LazySheets 時に先に比較するペア。null なら対応の先頭。
+        /// </summary>
+        public SheetPair FocusPair { get; set; }
     }
 
     /// <summary>

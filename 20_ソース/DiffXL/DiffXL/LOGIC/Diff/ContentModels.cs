@@ -141,6 +141,11 @@ namespace DiffXL.LOGIC.Diff
         /// 図形一覧（出現順）。
         /// </summary>
         public List<ShapeContent> Shapes { get; set; } = new List<ShapeContent>();
+
+        /// <summary>
+        /// セル・表・画像を読み済みなら true。遅延比較の名前スタブは false。
+        /// </summary>
+        public bool IsPopulated { get; set; } = true;
     }
 
     /// <summary>
