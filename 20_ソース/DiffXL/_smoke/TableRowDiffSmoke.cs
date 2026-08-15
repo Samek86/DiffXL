@@ -7,6 +7,7 @@ using DiffXL.LOGIC.Diff;
 /// TableRowAligner / TableCompareService のスモーク。
 /// 1) 12345 vs 1245 → TableRowDelete×1（"3"）、Insert 0
 /// 2) 対応行内 1 セル変更 → TableCellChange
+/// 3) 背景のみの差は TableCellChange にしない（zebra）
 /// </summary>
 class Program
 {
@@ -156,7 +157,7 @@ class Program
             }
         }
 
-        // --- 3: Bg のみ差でも TableCellChange ---
+        // --- 3: 背景のみの差は差分にしない（zebra） ---
         {
             var left = new TableBlock
             {
@@ -186,22 +187,15 @@ class Program
                 new[] { right },
                 pair);
 
-            if (items.Count != 1 || items[0].Kind != DiffKind.TableCellChange)
+            if (items.Count != 0)
             {
-                Console.WriteLine("FAIL case3 expected 1 TableCellChange for bg-only");
-                Dump(items);
-                fail++;
-            }
-            else if (items[0].BackgroundLeft != "#FFFF0000"
-                     || items[0].BackgroundRight != "#FFFFFFFF")
-            {
-                Console.WriteLine("FAIL case3 BackgroundLeft/Right");
+                Console.WriteLine("FAIL case3 expected 0 diffs for bg-only (zebra ignored)");
                 Dump(items);
                 fail++;
             }
             else
             {
-                Console.WriteLine("OK case3 bg-only TableCellChange");
+                Console.WriteLine("OK case3 bg-only is not a TableCellChange");
             }
         }
 

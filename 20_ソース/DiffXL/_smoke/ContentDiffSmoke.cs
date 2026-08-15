@@ -143,27 +143,41 @@ class Program
             }
         }
 
-        // --- 4: 表セル変更 (S_TableCell) ---
+        // --- 4: 2 列 Hello World vs Hello Changed (S_TableCell) ---
+        // H2: 非空一致 1 では Match せず、TableRowDelete + TableRowInsert になる
         {
             List<DiffItem> sheetItems = OnSheet(result.Items, "S_TableCell");
             int ch = sheetItems.Count(i => i.Kind == DiffKind.TableCellChange);
-            if (ch < 1)
+            int del = sheetItems.Count(i => i.Kind == DiffKind.TableRowDelete);
+            int ins = sheetItems.Count(i => i.Kind == DiffKind.TableRowInsert);
+            if (ch != 0 || del != 1 || ins != 1)
             {
-                Console.WriteLine("FAIL case4 S_TableCell expected >=1 TableCellChange, got " + ch);
+                Console.WriteLine(string.Format(
+                    "FAIL case4 S_TableCell expected Delete×1 Insert×1 TableCellChange×0 got D={0} I={1} C={2}",
+                    del, ins, ch));
                 Dump(sheetItems);
                 fail++;
             }
             else
             {
-                DiffItem c = sheetItems.First(i => i.Kind == DiffKind.TableCellChange);
-                string sum = c.Summary ?? string.Empty;
-                if (sum.IndexOf("Changed", StringComparison.Ordinal) < 0
-                    && sum.IndexOf("World", StringComparison.Ordinal) < 0)
+                DiffItem d = sheetItems.First(i => i.Kind == DiffKind.TableRowDelete);
+                DiffItem n = sheetItems.First(i => i.Kind == DiffKind.TableRowInsert);
+                string dsum = d.Summary ?? string.Empty;
+                string nsum = n.Summary ?? string.Empty;
+                if (dsum.IndexOf("World", StringComparison.Ordinal) < 0)
                 {
-                    Console.WriteLine("WARN case4 summary may not mention World/Changed: " + sum);
+                    Console.WriteLine("FAIL case4 Delete summary should mention World: " + dsum);
+                    fail++;
                 }
-
-                Console.WriteLine("OK case4 table cell change TableCellChange×" + ch);
+                else if (nsum.IndexOf("Changed", StringComparison.Ordinal) < 0)
+                {
+                    Console.WriteLine("FAIL case4 Insert summary should mention Changed: " + nsum);
+                    fail++;
+                }
+                else
+                {
+                    Console.WriteLine("OK case4 H2 skip-pair Hello World / Hello Changed (Delete+Insert)");
+                }
             }
         }
 
@@ -317,21 +331,26 @@ class Program
     {
         // _smoke → DiffXL → 20_ソース → repo
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        string[] candidates = new[]
+        string dir = baseDir;
+        for (int i = 0; i < 10; i++)
         {
-            Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\30_参考資料\samples")),
-            Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\30_参考資料\samples")),
-            @"C:\JUN\WORK\DiffXL\30_参考資料\samples",
-        };
-        foreach (string c in candidates)
-        {
-            if (Directory.Exists(c))
+            string samples = Path.Combine(dir, @"30_参考資料\samples");
+            if (Directory.Exists(samples)
+                && File.Exists(Path.Combine(samples, "content_diff_left.xlsx")))
             {
-                return c;
+                return samples;
             }
+
+            string parent = Path.GetDirectoryName(dir);
+            if (string.IsNullOrEmpty(parent) || parent == dir)
+            {
+                break;
+            }
+
+            dir = parent;
         }
 
-        return candidates[candidates.Length - 1];
+        return Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\..\..\30_参考資料\samples"));
     }
 
     static List<DiffItem> OnSheet(IList<DiffItem> items, string sheet)
