@@ -10,6 +10,7 @@
     <Grid Background="#FFF9FAFB">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -27,10 +28,57 @@
                 Text="内容未読込" />
         </Border>
 
+        <!-- 次の差分の対象だけを絞る（本文ストリームは隠さない） -->
+        <StackPanel
+            Grid.Row="1"
+            Orientation="Horizontal"
+            Margin="8,4,8,4">
+            <ToggleButton
+                x:Name="ChipAll"
+                Style="{StaticResource ToolBarToggleButtonStyle}"
+                Padding="8,2"
+                MinHeight="22"
+                FontSize="11"
+                Margin="0,0,4,0"
+                IsChecked="True"
+                Click="KindFilterChip_Click"
+                ToolTip="次の差分: すべて"
+                Content="すべて" />
+            <ToggleButton
+                x:Name="ChipTable"
+                Style="{StaticResource ToolBarToggleButtonStyle}"
+                Padding="8,2"
+                MinHeight="22"
+                FontSize="11"
+                Margin="0,0,4,0"
+                Click="KindFilterChip_Click"
+                ToolTip="次の差分: 表のみ"
+                Content="表" />
+            <ToggleButton
+                x:Name="ChipImage"
+                Style="{StaticResource ToolBarToggleButtonStyle}"
+                Padding="8,2"
+                MinHeight="22"
+                FontSize="11"
+                Margin="0,0,4,0"
+                Click="KindFilterChip_Click"
+                ToolTip="次の差分: 画像のみ"
+                Content="画像" />
+            <ToggleButton
+                x:Name="ChipCell"
+                Style="{StaticResource ToolBarToggleButtonStyle}"
+                Padding="8,2"
+                MinHeight="22"
+                FontSize="11"
+                Click="KindFilterChip_Click"
+                ToolTip="次の差分: 表の外のセルのみ"
+                Content="セル" />
+        </StackPanel>
+
         <!-- 仮想化: Top/Bottom スペーサ + 可視範囲のみ ViewportHost に生成 -->
         <ScrollViewer
             x:Name="StreamScroll"
-            Grid.Row="1"
+            Grid.Row="2"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Auto"
             Padding="8"

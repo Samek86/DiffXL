@@ -3,11 +3,30 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using DiffXL.LOGIC.Diff;
 
 namespace DiffXL.VIEW.Controls
 {
+    /// <summary>
+    /// 次の差分の対象種別。本文ストリームと高さマップは変えない。
+    /// </summary>
+    public enum StreamKindFilter
+    {
+        /// <summary>すべての差分。</summary>
+        All = 0,
+
+        /// <summary>表（TableHeader / TableRow / Table*）。</summary>
+        Table = 1,
+
+        /// <summary>画像ブロック。</summary>
+        Image = 2,
+
+        /// <summary>表の外のセル（LooseRow）。</summary>
+        Cell = 3
+    }
+
     /// <summary>
     /// 内容ストリームへのスクロール適用モード。
     /// </summary>
@@ -106,6 +125,9 @@ namespace DiffXL.VIEW.Controls
         /// <summary>現在選択中のペア index（-1=なし）。</summary>
         private int _selectedPairIndex = -1;
 
+        /// <summary>次の差分の種類フィルタ（本文は隠さない）。</summary>
+        private StreamKindFilter _kindFilter = StreamKindFilter.All;
+
         /// <summary>実現範囲。</summary>
         private int _firstRealized = -1;
 
@@ -115,6 +137,36 @@ namespace DiffXL.VIEW.Controls
         public ContentPane()
         {
             InitializeComponent();
+            SyncKindFilterChips();
+        }
+
+        /// <summary>
+        /// 種類フィルタが変わった（左右同期用）。
+        /// </summary>
+        public event Action<StreamKindFilter> KindFilterChanged;
+
+        /// <summary>
+        /// 次の差分の対象種別。Realize / 高さマップは変えない。
+        /// </summary>
+        public StreamKindFilter KindFilter
+        {
+            get { return _kindFilter; }
+            set
+            {
+                if (_kindFilter == value)
+                {
+                    SyncKindFilterChips();
+                    return;
+                }
+
+                _kindFilter = value;
+                SyncKindFilterChips();
+                Action<StreamKindFilter> handler = KindFilterChanged;
+                if (handler != null)
+                {
+                    handler(_kindFilter);
+                }
+            }
         }
 
         /// <summary>
@@ -644,7 +696,7 @@ namespace DiffXL.VIEW.Controls
         /// </summary>
         public IList<int> GetDiffPairIndices(IEnumerable<DiffItem> items)
         {
-            return DiffPairNavigator.CollectDiffPairIndices(_pairs, items);
+            return DiffPairNavigator.CollectDiffPairIndices(_pairs, items, _kindFilter);
         }
 
         /// <summary>
@@ -2140,6 +2192,47 @@ namespace DiffXL.VIEW.Controls
                 RealizeViewport(force: true);
             }
         }
+
+        /// <summary>
+        /// チップは排他。本文は再構築しない。
+        /// </summary>
+        private void KindFilterChip_Click(object sender, RoutedEventArgs e)
+        {
+            StreamKindFilter next = StreamKindFilter.All;
+            if (sender == ChipTable)
+            {
+                next = StreamKindFilter.Table;
+            }
+            else if (sender == ChipImage)
+            {
+                next = StreamKindFilter.Image;
+            }
+            else if (sender == ChipCell)
+            {
+                next = StreamKindFilter.Cell;
+            }
+
+            KindFilter = next;
+        }
+
+        /// <summary>
+        /// チップの IsChecked を KindFilter に合わせる。
+        /// </summary>
+        private void SyncKindFilterChips()
+        {
+            SetChipChecked(ChipAll, _kindFilter == StreamKindFilter.All);
+            SetChipChecked(ChipTable, _kindFilter == StreamKindFilter.Table);
+            SetChipChecked(ChipImage, _kindFilter == StreamKindFilter.Image);
+            SetChipChecked(ChipCell, _kindFilter == StreamKindFilter.Cell);
+        }
+
+        private static void SetChipChecked(ToggleButton chip, bool isChecked)
+        {
+            if (chip != null && chip.IsChecked != isChecked)
+            {
+                chip.IsChecked = isChecked;
+            }
+        }
     }
 
     /// <summary>
@@ -2153,6 +2246,18 @@ namespace DiffXL.VIEW.Controls
         public static IList<int> CollectDiffPairIndices(
             IList<ContentStreamPair> pairs,
             IEnumerable<DiffItem> items)
+        {
+            return CollectDiffPairIndices(pairs, items, StreamKindFilter.All);
+        }
+
+        /// <summary>
+        /// Skip 行 ∪ 非 Structure かつ StreamPairIndex ≥ 0 の index（昇順・重複なし）。
+        /// filter はジャンプ対象だけを絞る（高さマップは変えない）。
+        /// </summary>
+        public static IList<int> CollectDiffPairIndices(
+            IList<ContentStreamPair> pairs,
+            IEnumerable<DiffItem> items,
+            StreamKindFilter filter)
         {
             var set = new SortedSet<int>();
             if (pairs != null)
@@ -2187,10 +2292,117 @@ namespace DiffXL.VIEW.Controls
             var list = new List<int>(set.Count);
             foreach (int i in set)
             {
+                if (!MatchesKindFilter(pairs, items, i, filter))
+                {
+                    continue;
+                }
+
                 list.Add(i);
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// pair ブロック種別または Table* / Image* DiffKind がフィルタに合うか。
+        /// </summary>
+        public static bool MatchesKindFilter(
+            IList<ContentStreamPair> pairs,
+            IEnumerable<DiffItem> items,
+            int pairIndex,
+            StreamKindFilter filter)
+        {
+            if (filter == StreamKindFilter.All)
+            {
+                return true;
+            }
+
+            if (pairs != null && pairIndex >= 0 && pairIndex < pairs.Count
+                && PairMatchesFilter(pairs[pairIndex], filter))
+            {
+                return true;
+            }
+
+            if (items == null)
+            {
+                return false;
+            }
+
+            foreach (DiffItem it in items)
+            {
+                if (it == null || it.StreamPairIndex != pairIndex)
+                {
+                    continue;
+                }
+
+                if (ItemMatchesFilter(it, filter))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool PairMatchesFilter(ContentStreamPair pair, StreamKindFilter filter)
+        {
+            if (pair == null)
+            {
+                return false;
+            }
+
+            return BlockMatchesFilter(pair.Left, filter) || BlockMatchesFilter(pair.Right, filter);
+        }
+
+        private static bool BlockMatchesFilter(ContentStreamBlock block, StreamKindFilter filter)
+        {
+            if (block == null)
+            {
+                return false;
+            }
+
+            if (filter == StreamKindFilter.Table)
+            {
+                return block.Kind == ContentBlockKind.Table
+                    || block.Kind == ContentBlockKind.TableHeader
+                    || block.Kind == ContentBlockKind.TableRow;
+            }
+
+            if (filter == StreamKindFilter.Image)
+            {
+                return block.Kind == ContentBlockKind.Image;
+            }
+
+            if (filter == StreamKindFilter.Cell)
+            {
+                return block.Kind == ContentBlockKind.LooseRow;
+            }
+
+            return true;
+        }
+
+        private static bool ItemMatchesFilter(DiffItem item, StreamKindFilter filter)
+        {
+            if (item == null)
+            {
+                return false;
+            }
+
+            if (filter == StreamKindFilter.Table)
+            {
+                return item.Kind == DiffKind.TableRowDelete
+                    || item.Kind == DiffKind.TableRowInsert
+                    || item.Kind == DiffKind.TableCellChange;
+            }
+
+            if (filter == StreamKindFilter.Image)
+            {
+                return item.Kind == DiffKind.Image
+                    || item.Kind == DiffKind.ImageOnlyLeft
+                    || item.Kind == DiffKind.ImageOnlyRight;
+            }
+
+            return false;
         }
 
         /// <summary>

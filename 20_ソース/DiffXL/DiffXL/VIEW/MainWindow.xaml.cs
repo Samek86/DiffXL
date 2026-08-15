@@ -53,6 +53,11 @@ namespace DiffXL
         private bool _syncingSheets;
 
         /// <summary>
+        /// 種類フィルタ左右同期の再入防止。
+        /// </summary>
+        private bool _syncingKindFilter;
+
+        /// <summary>
         /// ツールバーのシート対応コンボ更新中。
         /// </summary>
         private bool _suppressPairComboEvent;
@@ -130,6 +135,16 @@ namespace DiffXL
             // 内容ストリーム（統一リスト）の左右スクロール同期
             LeftPane.ContentScrollRatioChanged += OnLeftContentScrollRatioChanged;
             RightPane.ContentScrollRatioChanged += OnRightContentScrollRatioChanged;
+            if (LeftPane.ContentHostControl != null)
+            {
+                LeftPane.ContentHostControl.KindFilterChanged += OnContentKindFilterChanged;
+            }
+
+            if (RightPane.ContentHostControl != null)
+            {
+                RightPane.ContentHostControl.KindFilterChanged += OnContentKindFilterChanged;
+            }
+
             Startup.StartCompareRequested += OnStartCompareRequested;
             Loaded += MainWindow_Loaded;
             Closed += MainWindow_Closed;
@@ -2852,6 +2867,37 @@ namespace DiffXL
         private void BtnNextDiff_Click(object sender, RoutedEventArgs e)
         {
             MoveToDiff(1);
+        }
+
+        /// <summary>
+        /// 左右 ContentPane に同じ種類フィルタを入れる。
+        /// </summary>
+        private void OnContentKindFilterChanged(StreamKindFilter filter)
+        {
+            if (_syncingKindFilter)
+            {
+                return;
+            }
+
+            _syncingKindFilter = true;
+            try
+            {
+                ContentPane left = LeftPane != null ? LeftPane.ContentHostControl : null;
+                ContentPane right = RightPane != null ? RightPane.ContentHostControl : null;
+                if (left != null)
+                {
+                    left.KindFilter = filter;
+                }
+
+                if (right != null)
+                {
+                    right.KindFilter = filter;
+                }
+            }
+            finally
+            {
+                _syncingKindFilter = false;
+            }
         }
 
         /// <summary>
