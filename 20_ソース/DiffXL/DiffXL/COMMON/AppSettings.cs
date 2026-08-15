@@ -64,9 +64,9 @@ namespace DiffXL.COMMON
         public string ImageHighlightFillColor { get; set; } = "#80FFFF00";
 
         /// <summary>
-        /// 画像対応で割当禁止とする差分比率（0..1）。既定 0.85（Match 最小類似度 = 1 - 本値）。
+        /// 画像対応で割当禁止とする差分比率（0..1）。既定 0.45（Match 最小類似度 = 1 - 本値 = 0.55）。
         /// </summary>
-        public double ImageRejectDiffRatio { get; set; } = 0.85;
+        public double ImageRejectDiffRatio { get; set; } = 0.45;
 
         /// <summary>
         /// absdiff 後の二値化閾値。既定 15。

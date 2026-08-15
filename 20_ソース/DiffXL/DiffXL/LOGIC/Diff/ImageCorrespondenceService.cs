@@ -17,7 +17,7 @@ namespace DiffXL.LOGIC.Diff
         /// <summary>
         /// これより大きい差分比率は割当禁止（コスト +∞）。
         /// </summary>
-        public const double RejectDiffRatio = 0.85;
+        public const double RejectDiffRatio = 0.45;
 
         /// <summary>
         /// 数値用の「無限大」コスト（Hungarian 内部）。

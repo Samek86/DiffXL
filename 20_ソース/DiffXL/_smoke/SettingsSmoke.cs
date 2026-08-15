@@ -93,7 +93,7 @@ class SettingsSmoke {
     AppSettings.Current.Diff.ImageHighlightBorderColor = "#FFFF0000";
     AppSettings.Current.Diff.ImageHighlightFillColor = "#80FFFF00";
     AppSettings.Current.Diff.ImageHighlightBorderThickness = 3;
-    AppSettings.Current.Diff.ImageRejectDiffRatio = 0.85;
+    AppSettings.Current.Diff.ImageRejectDiffRatio = 0.45;
     AppSettings.Current.Diff.ImageAbsDiffThreshold = 15;
     AppSettings.Current.Diff.ImageMinRegionArea = 25;
     AppSettings.Current.Ui.SyncScroll = prevSync;

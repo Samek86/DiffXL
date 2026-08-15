@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using DiffXL.COMMON;
 
 namespace DiffXL.LOGIC.Diff
 {
@@ -1415,9 +1414,8 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
-        /// 画像類似度。<see cref="ImageSequenceAligner"/> と同じ見た目比較を使い、
-        /// 似ている画像（部分差分含む）をストリーム上でも Match できるようにする。
-        /// 系列アライン側の Match 下限（1 - RejectDiffRatio）以上なら UI 閾値以上へスケールする。
+        /// 画像類似度。<see cref="ImageSequenceAligner.ComputeSimilarity"/> をそのまま返す。
+        /// Match 判定は <see cref="MatchThreshold"/>（0.55）とエンジン側 1 - RejectDiffRatio が同じ数字。
         /// </summary>
         private static double ImageSimilarity(EmbeddedImage a, EmbeddedImage b)
         {
@@ -1426,49 +1424,7 @@ namespace DiffXL.LOGIC.Diff
                 return 0;
             }
 
-            double sim = ImageSequenceAligner.ComputeSimilarity(a, b);
-            if (sim <= 0)
-            {
-                return 0;
-            }
-
-            // ImageSequenceAligner の Match 下限（既定 Reject=0.85 → 類似度 0.15）
-            double alignMin = 0.15;
-            try
-            {
-                if (AppSettings.Current != null && AppSettings.Current.Diff != null)
-                {
-                    alignMin = 1.0 - AppSettings.Current.Diff.ImageRejectDiffRatio;
-                }
-                else
-                {
-                    alignMin = 1.0 - ImageDiffService.RejectDiffRatio;
-                }
-            }
-            catch
-            {
-                alignMin = 1.0 - ImageDiffService.RejectDiffRatio;
-            }
-
-            if (alignMin < 0)
-            {
-                alignMin = 0;
-            }
-
-            if (sim < alignMin)
-            {
-                return sim;
-            }
-
-            // [alignMin, 1] → [MatchThreshold, 1]（ストリームの MatchThreshold 0.55 を満たす）
-            double span = 1.0 - alignMin;
-            if (span <= 1e-9)
-            {
-                return 1.0;
-            }
-
-            double t = (sim - alignMin) / span;
-            return MatchThreshold + (1.0 - MatchThreshold) * t;
+            return ImageSequenceAligner.ComputeSimilarity(a, b);
         }
 
         private static double ShapeSimilarity(ShapeContent a, ShapeContent b)

@@ -12,6 +12,7 @@ using DiffXL.LOGIC.Diff;
 /// 2) 同一画像・異パス → IsSame
 /// 3) 一部だけ違う合成 PNG → Regions.Count &gt;= 1
 /// 4) max-side &gt; 1024 の部分差 → 領域が元画像座標へ拡大されていること
+/// 5) 類似度 0.20 は engine / stream とも Skip。ハッシュ同一は両方 Match。
 /// </summary>
 class Program
 {
@@ -261,6 +262,89 @@ class Program
                     }
                 }
             }
+
+            // --- 5: 類似度 0.20 は engine / stream とも Skip。ハッシュ同一は両方 Match ---
+            {
+                string pL = Path.Combine(dir, "sim20_l.png");
+                string pR = Path.Combine(dir, "sim20_r.png");
+                WriteSameRatioPair(pL, pR, 10, 10, 20);
+
+                var lowL = ImgPath("sim20L", "hash-low-L", pL, 1);
+                var lowR = ImgPath("sim20R", "hash-low-R", pR, 1);
+                double sim = ImageSequenceAligner.ComputeSimilarity(lowL, lowR);
+                Console.WriteLine("case5 sim20=" + sim.ToString("0.####"));
+                if (Math.Abs(sim - 0.20) > 0.02)
+                {
+                    Console.WriteLine("FAIL case5 expected visual sim≈0.20 got " + sim);
+                    fail++;
+                }
+                else
+                {
+                    IList<AlignStep> engineLow = ImageSequenceAligner.Align(
+                        new List<EmbeddedImage> { lowL },
+                        new List<EmbeddedImage> { lowR });
+                    bool engineSkip = IsPairSkip(engineLow);
+                    Console.WriteLine("case5 engine ops=" + FormatOps(engineLow)
+                        + " skip=" + engineSkip);
+                    if (!engineSkip)
+                    {
+                        Console.WriteLine("FAIL case5 ImageSequenceAligner should Skip sim 0.20");
+                        fail++;
+                    }
+                    else
+                    {
+                        Console.WriteLine("OK case5 engine Skip for sim 0.20");
+                    }
+
+                    IList<ContentStreamPair> streamLow = ContentStreamBuilder.Align(
+                        ContentStreamBuilder.Build(SheetWith(lowL)),
+                        ContentStreamBuilder.Build(SheetWith(lowR)));
+                    bool streamSkip = IsStreamPairSkip(streamLow);
+                    Console.WriteLine("case5 stream ops=" + FormatStreamOps(streamLow)
+                        + " skip=" + streamSkip);
+                    if (!streamSkip)
+                    {
+                        Console.WriteLine("FAIL case5 ContentStreamBuilder should Skip sim 0.20");
+                        fail++;
+                    }
+                    else
+                    {
+                        Console.WriteLine("OK case5 stream Skip for sim 0.20");
+                    }
+                }
+
+                var sameL = Img("sameL", "hash-IDENT", 1);
+                var sameR = Img("sameR", "hash-IDENT", 2);
+                IList<AlignStep> engineSame = ImageSequenceAligner.Align(
+                    new List<EmbeddedImage> { sameL },
+                    new List<EmbeddedImage> { sameR });
+                IList<ContentStreamPair> streamSame = ContentStreamBuilder.Align(
+                    ContentStreamBuilder.Build(SheetWith(sameL)),
+                    ContentStreamBuilder.Build(SheetWith(sameR)));
+                bool engineMatch = engineSame.Count == 1 && engineSame[0].Op == AlignOp.Match;
+                bool streamMatch = streamSame.Count == 1 && streamSame[0].Op == AlignOp.Match;
+                Console.WriteLine("case5 identical-hash engine=" + FormatOps(engineSame)
+                    + " stream=" + FormatStreamOps(streamSame));
+                if (!engineMatch)
+                {
+                    Console.WriteLine("FAIL case5 ImageSequenceAligner should Match identical hash");
+                    fail++;
+                }
+                else
+                {
+                    Console.WriteLine("OK case5 engine Match for identical hash");
+                }
+
+                if (!streamMatch)
+                {
+                    Console.WriteLine("FAIL case5 ContentStreamBuilder should Match identical hash");
+                    fail++;
+                }
+                else
+                {
+                    Console.WriteLine("OK case5 stream Match for identical hash");
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -308,6 +392,128 @@ class Program
                 ColEnd = 1
             }
         };
+    }
+
+    static EmbeddedImage ImgPath(string name, string hash, string path, int row)
+    {
+        EmbeddedImage img = Img(name, hash, row);
+        img.ExtractedPath = path;
+        return img;
+    }
+
+    static SheetContent SheetWith(EmbeddedImage image)
+    {
+        return new SheetContent
+        {
+            Name = "S",
+            Images = new List<EmbeddedImage> { image }
+        };
+    }
+
+    static bool IsPairSkip(IList<AlignStep> steps)
+    {
+        if (steps == null || steps.Count == 0)
+        {
+            return false;
+        }
+
+        bool skipLeft = false;
+        bool skipRight = false;
+        foreach (AlignStep s in steps)
+        {
+            if (s.Op == AlignOp.Match)
+            {
+                return false;
+            }
+
+            if (s.Op == AlignOp.SkipLeft)
+            {
+                skipLeft = true;
+            }
+
+            if (s.Op == AlignOp.SkipRight)
+            {
+                skipRight = true;
+            }
+        }
+
+        return skipLeft && skipRight;
+    }
+
+    static bool IsStreamPairSkip(IList<ContentStreamPair> pairs)
+    {
+        if (pairs == null || pairs.Count == 0)
+        {
+            return false;
+        }
+
+        bool skipLeft = false;
+        bool skipRight = false;
+        foreach (ContentStreamPair p in pairs)
+        {
+            if (p.Op == AlignOp.Match)
+            {
+                return false;
+            }
+
+            if (p.Op == AlignOp.SkipLeft)
+            {
+                skipLeft = true;
+            }
+
+            if (p.Op == AlignOp.SkipRight)
+            {
+                skipRight = true;
+            }
+        }
+
+        return skipLeft && skipRight;
+    }
+
+    static string FormatOps(IList<AlignStep> steps)
+    {
+        if (steps == null)
+        {
+            return "(null)";
+        }
+
+        return string.Join(",", steps.Select(s => s.Op.ToString()).ToArray());
+    }
+
+    static string FormatStreamOps(IList<ContentStreamPair> pairs)
+    {
+        if (pairs == null)
+        {
+            return "(null)";
+        }
+
+        return string.Join(",", pairs.Select(p => p.Op.ToString()).ToArray());
+    }
+
+    /// <summary>
+    /// 左は全面同一色、右は先頭 sameCount 画素だけ同じ色。残りは別色。
+    /// </summary>
+    static void WriteSameRatioPair(string leftPath, string rightPath, int w, int h, int sameCount)
+    {
+        using (var left = new Bitmap(w, h))
+        using (var right = new Bitmap(w, h))
+        {
+            Color same = Color.FromArgb(255, 40, 40, 180);
+            Color diff = Color.FromArgb(255, 240, 220, 20);
+            int n = 0;
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    left.SetPixel(x, y, same);
+                    right.SetPixel(x, y, n < sameCount ? same : diff);
+                    n++;
+                }
+            }
+
+            left.Save(leftPath, ImageFormat.Png);
+            right.Save(rightPath, ImageFormat.Png);
+        }
     }
 
     static void WriteSolidPng(string path, int w, int h, int r, int g, int b)
