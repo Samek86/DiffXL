@@ -36,3 +36,6 @@ Desktop.ini
 *.pyc
 **/_build_err.log
 10_管理資料/テスト/_latest_stream_align_evidence.txt
+
+# Isolated git worktrees
+.worktrees/
