@@ -742,6 +742,11 @@ namespace DiffXL.VIEW.Controls
                 return -1;
             }
 
+            if (item.StreamPairIndex >= 0 && item.StreamPairIndex < _pairs.Count)
+            {
+                return item.StreamPairIndex;
+            }
+
             if (item.Kind == DiffKind.Image
                 || item.Kind == DiffKind.ImageOnlyLeft
                 || item.Kind == DiffKind.ImageOnlyRight)

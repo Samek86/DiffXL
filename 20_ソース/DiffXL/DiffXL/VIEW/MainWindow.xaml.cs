@@ -3448,6 +3448,10 @@ namespace DiffXL
             // 新旧シートで共有レイアウトが混ざらないようキャッシュを破棄
             ContentStreamBuilder.ClearLayoutCache();
 
+            // 展開済みレイアウト構築 → Attach → 同一 pair の片側 Text を 1 件に
+            DiffResultLinker.AttachExpandedLayouts(result);
+            DiffResultLinker.MergeOneSidedTextsOnSamePair(result);
+
             string leftPreferred = null;
             string rightPreferred = null;
             IList<SheetPair> pairs = GetActiveSheetPairs(result);

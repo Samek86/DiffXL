@@ -35,6 +35,115 @@ namespace DiffXL.LOGIC.Diff
         }
 
         /// <summary>
+        /// 各シートペアの展開済みレイアウト（GetOrBuildLayout）へ Attach する。
+        /// </summary>
+        /// <param name="result">比較結果（null 可）</param>
+        public static void AttachExpandedLayouts(DiffResult result)
+        {
+            if (result == null || result.Items == null
+                || result.SheetPairs == null
+                || result.LeftContent == null
+                || result.RightContent == null)
+            {
+                return;
+            }
+
+            for (int p = 0; p < result.SheetPairs.Count; p++)
+            {
+                SheetPair pair = result.SheetPairs[p];
+                if (pair == null)
+                {
+                    continue;
+                }
+
+                SheetContent leftSheet = FindSheet(result.LeftContent, pair.LeftSheet);
+                SheetContent rightSheet = FindSheet(result.RightContent, pair.RightSheet);
+                ContentStreamLayout layout = ContentStreamBuilder.GetOrBuildLayout(leftSheet, rightSheet);
+                if (layout == null || layout.Pairs == null)
+                {
+                    continue;
+                }
+
+                var subset = new DiffResult();
+                for (int i = 0; i < result.Items.Count; i++)
+                {
+                    DiffItem item = result.Items[i];
+                    if (item != null && BelongsToSheetPair(item, pair))
+                    {
+                        subset.Items.Add(item);
+                    }
+                }
+
+                Attach(subset, layout.Pairs);
+            }
+        }
+
+        /// <summary>
+        /// 同じ StreamPairIndex の片側 Text 2 件を 1 件のテキスト変更にまとめる。
+        /// Structure / Image は対象外。
+        /// </summary>
+        /// <param name="result">比較結果（null 可）</param>
+        public static void MergeOneSidedTextsOnSamePair(DiffResult result)
+        {
+            if (result == null || result.Items == null || result.Items.Count == 0)
+            {
+                return;
+            }
+
+            var groups = new Dictionary<int, List<DiffItem>>();
+            for (int i = 0; i < result.Items.Count; i++)
+            {
+                DiffItem item = result.Items[i];
+                if (item == null || item.Kind != DiffKind.Text || item.StreamPairIndex < 0)
+                {
+                    continue;
+                }
+
+                List<DiffItem> list;
+                if (!groups.TryGetValue(item.StreamPairIndex, out list))
+                {
+                    list = new List<DiffItem>();
+                    groups[item.StreamPairIndex] = list;
+                }
+
+                list.Add(item);
+            }
+
+            var drop = new HashSet<DiffItem>();
+            foreach (KeyValuePair<int, List<DiffItem>> kv in groups)
+            {
+                List<DiffItem> lefts = new List<DiffItem>();
+                List<DiffItem> rights = new List<DiffItem>();
+                for (int i = 0; i < kv.Value.Count; i++)
+                {
+                    DiffItem item = kv.Value[i];
+                    if (IsLeftOnlyText(item))
+                    {
+                        lefts.Add(item);
+                    }
+                    else if (IsRightOnlyText(item))
+                    {
+                        rights.Add(item);
+                    }
+                }
+
+                int n = Math.Min(lefts.Count, rights.Count);
+                for (int i = 0; i < n; i++)
+                {
+                    MergeLeftAndRight(lefts[i], rights[i]);
+                    drop.Add(rights[i]);
+                }
+            }
+
+            if (drop.Count == 0)
+            {
+                return;
+            }
+
+            result.Items.RemoveAll(item => item != null && drop.Contains(item));
+        }
+
+        /// <summary>
         /// Structure を除き、未割当（<see cref="DiffItem.StreamPairIndex"/> &lt; 0）の件数。
         /// </summary>
         /// <param name="result">比較結果（null 可）</param>
@@ -290,6 +399,107 @@ namespace DiffXL.LOGIC.Diff
 
             return !string.IsNullOrEmpty(leaf)
                 && string.Equals(fileName, leaf, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsLeftOnlyText(DiffItem item)
+        {
+            return item != null
+                && item.Kind == DiffKind.Text
+                && !string.IsNullOrEmpty(item.AddressLeft)
+                && string.IsNullOrEmpty(item.AddressRight);
+        }
+
+        private static bool IsRightOnlyText(DiffItem item)
+        {
+            return item != null
+                && item.Kind == DiffKind.Text
+                && !string.IsNullOrEmpty(item.AddressRight)
+                && string.IsNullOrEmpty(item.AddressLeft);
+        }
+
+        private static void MergeLeftAndRight(DiffItem left, DiffItem right)
+        {
+            left.AddressRight = right.AddressRight;
+            if (string.IsNullOrEmpty(left.SheetRight))
+            {
+                left.SheetRight = right.SheetRight;
+            }
+
+            if (string.IsNullOrEmpty(left.BackgroundRight))
+            {
+                left.BackgroundRight = right.BackgroundRight;
+            }
+
+            left.Summary = string.Format(
+                CultureInfo.InvariantCulture,
+                "テキスト変更 「{0}」 → 「{1}」",
+                SnippetFromSummary(left.Summary, 40),
+                SnippetFromSummary(right.Summary, 40));
+        }
+
+        private static string SnippetFromSummary(string summary, int max)
+        {
+            if (string.IsNullOrEmpty(summary))
+            {
+                return string.Empty;
+            }
+
+            string raw = summary;
+            int open = summary.IndexOf('「');
+            int close = summary.LastIndexOf('」');
+            if (open >= 0 && close > open)
+            {
+                raw = summary.Substring(open + 1, close - open - 1);
+            }
+
+            if (raw.Length <= max)
+            {
+                return raw;
+            }
+
+            return raw.Substring(0, max) + "…";
+        }
+
+        private static bool BelongsToSheetPair(DiffItem item, SheetPair pair)
+        {
+            if (item == null || pair == null)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(item.SheetLeft)
+                && string.Equals(item.SheetLeft, pair.LeftSheet, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrEmpty(item.SheetRight)
+                && string.Equals(item.SheetRight, pair.RightSheet, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static SheetContent FindSheet(WorkbookContent workbook, string name)
+        {
+            if (workbook == null || workbook.Sheets == null || string.IsNullOrEmpty(name))
+            {
+                return null;
+            }
+
+            for (int i = 0; i < workbook.Sheets.Count; i++)
+            {
+                SheetContent sheet = workbook.Sheets[i];
+                if (sheet != null
+                    && string.Equals(sheet.Name, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return sheet;
+                }
+            }
+
+            return null;
         }
     }
 }

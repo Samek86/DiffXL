@@ -103,6 +103,62 @@ internal static class StreamPairLinkSmoke
             Expect(leftNote.StreamPairIndex == rightNote.StreamPairIndex
                 && leftNote.StreamPairIndex >= 0, "same pair");
             Expect(DiffResultLinker.CountUnlinkedContentItems(result) == 0, "all linked");
+
+            int pairIdx = leftNote.StreamPairIndex;
+            DiffResultLinker.MergeOneSidedTextsOnSamePair(result);
+            List<DiffItem> merged = result.Items
+                .Where(i => i != null && i.Kind == DiffKind.Text && i.StreamPairIndex == pairIdx)
+                .ToList();
+            Expect(merged.Count == 1, "B merge to 1 Text");
+            Expect(
+                merged.Count == 1
+                    && !string.IsNullOrEmpty(merged[0].AddressLeft)
+                    && !string.IsNullOrEmpty(merged[0].AddressRight),
+                "B both addresses");
+            Expect(
+                merged.Count == 1
+                    && merged[0].Summary != null
+                    && merged[0].Summary.IndexOf("テキスト変更", StringComparison.Ordinal) >= 0,
+                "B summary テキスト変更");
+        }
+
+        // D: Text のみマージ。同一 pair の Image / Structure は残す
+        {
+            var result = new DiffResult();
+            result.Items.Add(new DiffItem
+            {
+                Kind = DiffKind.Text,
+                AddressLeft = "A1",
+                Summary = "left-only",
+                StreamPairIndex = 3
+            });
+            result.Items.Add(new DiffItem
+            {
+                Kind = DiffKind.Text,
+                AddressRight = "A2",
+                Summary = "right-only",
+                StreamPairIndex = 3
+            });
+            result.Items.Add(new DiffItem
+            {
+                Kind = DiffKind.Image,
+                LeftImagePath = "x.png",
+                StreamPairIndex = 3
+            });
+            result.Items.Add(new DiffItem
+            {
+                Kind = DiffKind.Structure,
+                SheetLeft = "S",
+                Summary = "左のみのシート: S"
+            });
+            DiffResultLinker.MergeOneSidedTextsOnSamePair(result);
+            Expect(result.Items.Count(i => i.Kind == DiffKind.Text) == 1, "D text merged");
+            Expect(result.Items.Count(i => i.Kind == DiffKind.Image) == 1, "D image kept");
+            Expect(result.Items.Count(i => i.Kind == DiffKind.Structure) == 1, "D structure kept");
+            DiffItem text = result.Items.First(i => i.Kind == DiffKind.Text);
+            Expect(
+                !string.IsNullOrEmpty(text.AddressLeft) && !string.IsNullOrEmpty(text.AddressRight),
+                "D both addresses");
         }
 
         Console.WriteLine(_fails == 0 ? "ALL PASS" : "FAILED " + _fails);

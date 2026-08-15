@@ -203,6 +203,10 @@ namespace DiffXL.LOGIC.Diff
                     .ThenBy(i => i.AddressLeft ?? string.Empty, StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
+                // 展開済みストリームへ付着し、同一 pair の片側 Text を 1 件にまとめる
+                DiffResultLinker.AttachExpandedLayouts(result);
+                DiffResultLinker.MergeOneSidedTextsOnSamePair(result);
+
                 sw.Stop();
                 result.Elapsed = sw.Elapsed;
                 Log.Info(string.Format(
