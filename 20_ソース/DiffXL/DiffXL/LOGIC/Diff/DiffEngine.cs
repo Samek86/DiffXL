@@ -40,6 +40,7 @@ namespace DiffXL.LOGIC.Diff
                 ValidateXlsx(leftPath, "左");
                 ValidateXlsx(rightPath, "右");
                 Report(progress, "キャッシュを準備しています...");
+                ImageDiffService.ClearCompareCache();
 
                 // 大画像比較の連打で AppData\cache が肥大化しないよう整理
                 try
@@ -182,6 +183,11 @@ namespace DiffXL.LOGIC.Diff
 
                     result.Timings.TableMs = tableAcc;
                     result.Timings.ImageMs = imageAcc;
+                    Log.Info(string.Format(
+                        CultureInfo.InvariantCulture,
+                        "画像サムネ: decode={0} ratioHits={1}",
+                        ImageDiffService.DecodeCount,
+                        ImageDiffService.RatioCacheHits));
                 }
 
                 // 安定した並び

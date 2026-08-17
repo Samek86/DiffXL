@@ -37,11 +37,52 @@ namespace DiffXL.LOGIC.Diff
         /// </summary>
         public const double PhaseCorrelateMinResponse = 0.05;
 
+        private const int AlignThumbMaxW = 320;
+        private const int AlignThumbMaxH = 240;
+
+        private static readonly object CacheLock = new object();
+        private static readonly Dictionary<string, AlignThumb> ThumbCache =
+            new Dictionary<string, AlignThumb>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, double> RatioCache =
+            new Dictionary<string, double>(StringComparer.Ordinal);
+
+        /// <summary>ImRead してサムネを作った回数（テスト用）。</summary>
+        public static int DecodeCount { get; private set; }
+
+        /// <summary>差分比率キャッシュのヒット回数（テスト用）。</summary>
+        public static int RatioCacheHits { get; private set; }
+
+        /// <summary>
+        /// 比較セッション開始時にサムネ／比率キャッシュを捨てる。
+        /// </summary>
+        public static void ClearCompareCache()
+        {
+            lock (CacheLock)
+            {
+                ThumbCache.Clear();
+                RatioCache.Clear();
+                DecodeCount = 0;
+                RatioCacheHits = 0;
+            }
+        }
+
         /// <summary>
         /// 差分画素比率を返す（0=同一, 1=全画素差）。読み込み失敗時は null。
-        /// スクロール内容対応の類似判定にも使う。
+        /// スクロール内容対応の類似判定にも使う。サムネは 1 画像 1 回だけ読む。
         /// </summary>
         public static double? TryGetDiffRatio(string leftPath, string rightPath)
+        {
+            return TryGetDiffRatio(leftPath, rightPath, null, null);
+        }
+
+        /// <summary>
+        /// 差分画素比率。hash があればペア結果をハッシュキーでも覚える。
+        /// </summary>
+        public static double? TryGetDiffRatio(
+            string leftPath,
+            string rightPath,
+            string leftHash,
+            string rightHash)
         {
             if (string.IsNullOrEmpty(leftPath) || !File.Exists(leftPath)
                 || string.IsNullOrEmpty(rightPath) || !File.Exists(rightPath))
@@ -49,43 +90,157 @@ namespace DiffXL.LOGIC.Diff
                 return null;
             }
 
+            string pathKey = leftPath + "\0" + rightPath;
+            string hashKey = null;
+            if (!string.IsNullOrEmpty(leftHash) && !string.IsNullOrEmpty(rightHash))
+            {
+                hashKey = leftHash + "\0" + rightHash;
+            }
+
+            lock (CacheLock)
+            {
+                double cached;
+                if (hashKey != null && RatioCache.TryGetValue(hashKey, out cached))
+                {
+                    RatioCacheHits++;
+                    return cached;
+                }
+
+                if (RatioCache.TryGetValue(pathKey, out cached))
+                {
+                    RatioCacheHits++;
+                    return cached;
+                }
+            }
+
             try
             {
                 NativeBootstrap.EnsureNativeBinaries();
-                using (Mat left = Cv2.ImRead(leftPath, ImreadModes.Color))
-                using (Mat right = Cv2.ImRead(rightPath, ImreadModes.Color))
+                AlignThumb leftThumb = GetOrLoadThumb(leftPath);
+                AlignThumb rightThumb = GetOrLoadThumb(rightPath);
+                if (leftThumb == null || rightThumb == null)
                 {
-                    if (left.Empty() || right.Empty())
-                    {
-                        return null;
-                    }
+                    return null;
+                }
 
-                    int width = Math.Max(left.Width, right.Width);
-                    int height = Math.Max(left.Height, right.Height);
-                    // 類似判定は縮小して高速化
-                    int tw = Math.Min(width, 320);
-                    int th = Math.Min(height, 240);
-                    using (Mat leftResized = new Mat())
-                    using (Mat rightResized = new Mat())
-                    using (Mat diff = new Mat())
-                    using (Mat gray = new Mat())
-                    using (Mat mask = new Mat())
+                double ratio = DiffRatioFromThumbs(leftThumb, rightThumb);
+                lock (CacheLock)
+                {
+                    RatioCache[pathKey] = ratio;
+                    if (hashKey != null)
                     {
-                        Cv2.Resize(left, leftResized, new Size(tw, th), 0, 0, InterpolationFlags.Linear);
-                        Cv2.Resize(right, rightResized, new Size(tw, th), 0, 0, InterpolationFlags.Linear);
-                        Cv2.Absdiff(leftResized, rightResized, diff);
-                        Cv2.CvtColor(diff, gray, ColorConversionCodes.BGR2GRAY);
-                        Cv2.Threshold(gray, mask, AbsDiffThreshold, 255, ThresholdTypes.Binary);
-                        int nonZero = Cv2.CountNonZero(mask);
-                        return nonZero / (double)(tw * th);
+                        RatioCache[hashKey] = ratio;
                     }
                 }
+
+                return ratio;
             }
             catch (Exception ex)
             {
                 Log.Debug("TryGetDiffRatio: " + ex.Message);
                 return null;
             }
+        }
+
+        private sealed class AlignThumb
+        {
+            public int Width;
+            public int Height;
+            public byte[] Bgr;
+        }
+
+        private static AlignThumb GetOrLoadThumb(string path)
+        {
+            lock (CacheLock)
+            {
+                AlignThumb hit;
+                if (ThumbCache.TryGetValue(path, out hit))
+                {
+                    return hit;
+                }
+            }
+
+            using (Mat src = Cv2.ImRead(path, ImreadModes.Color))
+            {
+                if (src.Empty())
+                {
+                    return null;
+                }
+
+                int tw = Math.Min(src.Width, AlignThumbMaxW);
+                int th = Math.Min(src.Height, AlignThumbMaxH);
+                using (Mat resized = new Mat())
+                {
+                    if (src.Width == tw && src.Height == th)
+                    {
+                        src.CopyTo(resized);
+                    }
+                    else
+                    {
+                        Cv2.Resize(src, resized, new Size(tw, th), 0, 0, InterpolationFlags.Linear);
+                    }
+
+                    int len = tw * th * 3;
+                    var thumb = new AlignThumb
+                    {
+                        Width = tw,
+                        Height = th,
+                        Bgr = new byte[len]
+                    };
+                    if (resized.IsContinuous())
+                    {
+                        System.Runtime.InteropServices.Marshal.Copy(resized.Data, thumb.Bgr, 0, len);
+                    }
+                    else
+                    {
+                        using (Mat contig = resized.Clone())
+                        {
+                            System.Runtime.InteropServices.Marshal.Copy(contig.Data, thumb.Bgr, 0, len);
+                        }
+                    }
+
+                    lock (CacheLock)
+                    {
+                        ThumbCache[path] = thumb;
+                        DecodeCount++;
+                    }
+
+                    return thumb;
+                }
+            }
+        }
+
+        private static double DiffRatioFromThumbs(AlignThumb left, AlignThumb right)
+        {
+            int tw = Math.Min(Math.Max(left.Width, right.Width), AlignThumbMaxW);
+            int th = Math.Min(Math.Max(left.Height, right.Height), AlignThumbMaxH);
+            using (Mat leftResized = ThumbToMat(left, tw, th))
+            using (Mat rightResized = ThumbToMat(right, tw, th))
+            using (Mat diff = new Mat())
+            using (Mat gray = new Mat())
+            using (Mat mask = new Mat())
+            {
+                Cv2.Absdiff(leftResized, rightResized, diff);
+                Cv2.CvtColor(diff, gray, ColorConversionCodes.BGR2GRAY);
+                Cv2.Threshold(gray, mask, AbsDiffThreshold, 255, ThresholdTypes.Binary);
+                int nonZero = Cv2.CountNonZero(mask);
+                return nonZero / (double)(tw * th);
+            }
+        }
+
+        private static Mat ThumbToMat(AlignThumb thumb, int tw, int th)
+        {
+            var src = new Mat(thumb.Height, thumb.Width, MatType.CV_8UC3);
+            System.Runtime.InteropServices.Marshal.Copy(thumb.Bgr, 0, src.Data, thumb.Bgr.Length);
+            if (thumb.Width == tw && thumb.Height == th)
+            {
+                return src;
+            }
+
+            var dst = new Mat();
+            Cv2.Resize(src, dst, new Size(tw, th), 0, 0, InterpolationFlags.Linear);
+            src.Dispose();
+            return dst;
         }
 
         /// <summary>

@@ -51,6 +51,16 @@ Smoke: content_diff で LazySheets+FocusPair=S_Cells → LeftContent に全シ�
 - Status: `比較完了 320 ms (読込80 表40 画像150 配置30) / このシートのみ`
 - ContentPane.Load 後の初回 RealizeViewport で `表示Realize= Nms` を Log.Info
 
+### Task 4b: Image cheap compare (B)
+
+**Files:** ImageDiffService, ImageSequenceAligner, DiffEngine, ImageSequenceSmoke
+
+- サムネ 320×240 をパス単位で 1 回だけ ImRead
+- (path,path) と (hash,hash) で差分比率をキャッシュ
+- Compare 開始で ClearCompareCache
+- DP はサムネ比率のみ。本画像 OpenCV は従来どおり Match 後の ImageVisualComparer
+- Smoke case7: 3×3 Align の DecodeCount≤6、2 回目はデコード増なし
+
 ### Task 4: Verify
 
 - ContentDiffSmoke（全シート）PASS

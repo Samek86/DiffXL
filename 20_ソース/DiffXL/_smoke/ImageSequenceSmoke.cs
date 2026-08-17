@@ -399,6 +399,55 @@ class Program
                     }
                 }
             }
+
+            // --- 7: DP はサムネ 1 回デコード。3×3 で DecodeCount <= 6、2 回目は増えない ---
+            {
+                ImageDiffService.ClearCompareCache();
+                var left = new List<EmbeddedImage>();
+                var right = new List<EmbeddedImage>();
+                for (int i = 0; i < 3; i++)
+                {
+                    string pl = Path.Combine(dir, "grid_l" + i + ".png");
+                    string pr = Path.Combine(dir, "grid_r" + i + ".png");
+                    WriteSolidPng(pl, 12, 12, 40 + i * 50, 10 + i * 20, 8);
+                    WriteSolidPng(pr, 12, 12, 45 + i * 48, 12 + i * 18, 9);
+                    left.Add(ImgPath("gL" + i, "hash-grid-L" + i, pl, i + 1));
+                    right.Add(ImgPath("gR" + i, "hash-grid-R" + i, pr, i + 1));
+                }
+
+                ImageSequenceAligner.Align(left, right);
+                int firstDecode = ImageDiffService.DecodeCount;
+                int firstHits = ImageDiffService.RatioCacheHits;
+                Console.WriteLine("case7 decode1=" + firstDecode + " hits1=" + firstHits);
+                if (firstDecode > 6)
+                {
+                    Console.WriteLine("FAIL case7 expected DecodeCount<=6 got " + firstDecode);
+                    fail++;
+                }
+                else
+                {
+                    Console.WriteLine("OK case7 first Align decodes each image once");
+                }
+
+                ImageSequenceAligner.Align(left, right);
+                int secondDecode = ImageDiffService.DecodeCount;
+                int secondHits = ImageDiffService.RatioCacheHits;
+                Console.WriteLine("case7 decode2=" + secondDecode + " hits2=" + secondHits);
+                if (secondDecode != firstDecode)
+                {
+                    Console.WriteLine("FAIL case7 second Align should not decode again");
+                    fail++;
+                }
+                else if (secondHits <= firstHits)
+                {
+                    Console.WriteLine("FAIL case7 second Align should hit ratio cache");
+                    fail++;
+                }
+                else
+                {
+                    Console.WriteLine("OK case7 second Align uses cache");
+                }
+            }
         }
         catch (Exception ex)
         {

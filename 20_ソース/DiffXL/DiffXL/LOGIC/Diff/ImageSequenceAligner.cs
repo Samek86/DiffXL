@@ -91,7 +91,8 @@ namespace DiffXL.LOGIC.Diff
                 return 0.0;
             }
 
-            double? ratio = ImageDiffService.TryGetDiffRatio(lp, rp);
+            double? ratio = ImageDiffService.TryGetDiffRatio(
+                lp, rp, left.ContentHash, right.ContentHash);
             if (!ratio.HasValue)
             {
                 if (!string.IsNullOrEmpty(left.FileName)
