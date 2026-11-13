@@ -6,8 +6,8 @@ using DiffXL.COMMON;
 // Replicate DiffEngine image extract + map for catalog
 class P {
   static void Main() {
-    string left = @"C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx";
-    string right = @"C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_right.xlsx";
+    string left = Sample("full_feature_left.xlsx");
+    string right = Sample("full_feature_right.xlsx");
     string cache = System.IO.Path.Combine(System.IO.Path.GetTempPath(),"dxl_dbg");
     using (var lr = XlsxPackageReader.Open(left))
     using (var rr = XlsxPackageReader.Open(right)) {
@@ -28,4 +28,26 @@ class P {
       for (int i=4;i<=8;i++) Console.WriteLine("L"+i+"->R"+map.MapLeftToRight(i)+" R"+i+"->L"+map.MapRightToLeft(i));
     }
   }
+
+    static string Sample(string name)
+    {
+        string rel = System.IO.Path.Combine("30_参考資料", "samples", name);
+        string[] starts = new string[]
+        {
+            System.Environment.CurrentDirectory,
+            System.AppDomain.CurrentDomain.BaseDirectory
+        };
+        for (int i = 0; i < starts.Length; i++)
+        {
+            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(starts[i]);
+            while (dir != null)
+            {
+                string candidate = System.IO.Path.Combine(dir.FullName, rel);
+                if (System.IO.File.Exists(candidate)) return candidate;
+                dir = dir.Parent;
+            }
+        }
+        return rel;
+    }
+
 }

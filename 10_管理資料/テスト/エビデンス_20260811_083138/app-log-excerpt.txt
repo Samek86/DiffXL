@@ -52,7 +52,7 @@
 2026-08-11 08:28:34.178 [DEBUG] シート比較中 (4/6): 長い一覧 ↔ 長い一覧
 2026-08-11 08:28:34.194 [DEBUG] シート比較中 (5/6): レイアウト確認 ↔ レイアウト確認
 2026-08-11 08:28:34.194 [DEBUG] シート比較中 (6/6): ずれ試験 ↔ ずれ試験
-2026-08-11 08:28:34.194 [INFO] 比較完了: 差分 69 件 / 49 ms / cache=C:\Users\Jun\AppData\Roaming\DiffXL\cache\20260811_082834_145_e996a357
+2026-08-11 08:28:34.194 [INFO] 比較完了: 差分 69 件 / 49 ms / cache=C:\Users\<user>\AppData\Roaming\DiffXL\cache\20260811_082834_145_e996a357
 2026-08-11 08:28:34.194 [DEBUG] 比較完了
 2026-08-11 08:28:34.977 [INFO] [AUTO] RECOMPARE_OK count=69
 2026-08-11 08:28:34.995 [INFO] [AUTO] SETTINGS_OPEN_OK constructed SettingsWindow
@@ -72,25 +72,25 @@
 2026-08-11 08:28:37.396 [DEBUG] Excel Application を破棄しました。
 2026-08-11 08:28:37.396 [DEBUG] ScrollSync Detach
 2026-08-11 08:28:37.396 [DEBUG] ScrollSync Detach
-2026-08-11 08:34:20.662 [DEBUG] Native dir ready: C:\Users\Jun\AppData\Roaming\DiffXL\native
+2026-08-11 08:34:20.662 [DEBUG] Native dir ready: C:\Users\<user>\AppData\Roaming\DiffXL\native
 2026-08-11 08:34:20.662 [INFO] DiffXL 起動
-2026-08-11 08:34:20.932 [INFO] 設定を読み込み: C:\Users\Jun\AppData\Roaming\DiffXL\settings.yaml
-2026-08-11 08:34:20.932 [INFO] AutoLiveTest 有効 left=C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx right=C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_right.xlsx
+2026-08-11 08:34:20.932 [INFO] 設定を読み込み: C:\Users\<user>\AppData\Roaming\DiffXL\settings.yaml
+2026-08-11 08:34:20.932 [INFO] AutoLiveTest 有効 left=<repo>\30_参考資料\samples\full_feature_left.xlsx right=<repo>\30_参考資料\samples\full_feature_right.xlsx
 2026-08-11 08:34:20.932 [INFO] Excel を利用できます。
 2026-08-11 08:34:21.727 [INFO] [AUTO] BEGIN auto-live-test
 2026-08-11 08:34:21.727 [INFO] [AUTO] COMPARE start
 2026-08-11 08:34:23.277 [INFO] Excel Application を起動しました。Version=16.0
 2026-08-11 08:34:24.540 [DEBUG] Excel Window COM を保持しました。
 2026-08-11 08:34:25.512 [DEBUG] Excel ビューア用 UI（リボン等）を最小化／非表示にしました。
-2026-08-11 08:34:25.528 [INFO] ブックを読み取り専用で開きました: C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx
+2026-08-11 08:34:25.528 [INFO] ブックを読み取り専用で開きました: <repo>\30_参考資料\samples\full_feature_left.xlsx
 2026-08-11 08:34:25.559 [DEBUG] ScrollSync Detach
-2026-08-11 08:34:25.559 [INFO] 左 にファイルを表示: C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx
+2026-08-11 08:34:25.559 [INFO] 左 にファイルを表示: <repo>\30_参考資料\samples\full_feature_left.xlsx
 2026-08-11 08:34:26.694 [INFO] Excel Application を起動しました。Version=16.0
 2026-08-11 08:34:27.540 [DEBUG] Excel Window COM を保持しました。
 2026-08-11 08:34:28.440 [DEBUG] Excel ビューア用 UI（リボン等）を最小化／非表示にしました。
-2026-08-11 08:34:28.456 [INFO] ブックを読み取り専用で開きました: C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_right.xlsx
+2026-08-11 08:34:28.456 [INFO] ブックを読み取り専用で開きました: <repo>\30_参考資料\samples\full_feature_right.xlsx
 2026-08-11 08:34:28.487 [DEBUG] ScrollSync Attach
-2026-08-11 08:34:28.487 [INFO] 右 にファイルを表示: C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_right.xlsx
+2026-08-11 08:34:28.487 [INFO] 右 にファイルを表示: <repo>\30_参考資料\samples\full_feature_right.xlsx
 2026-08-11 08:34:28.487 [DEBUG] ScrollSync Attach
 2026-08-11 08:34:28.503 [DEBUG] キャッシュを準備しています...
 2026-08-11 08:34:28.518 [DEBUG] ブックを読み込んでいます...
@@ -101,7 +101,7 @@
 2026-08-11 08:34:28.675 [DEBUG] シート比較中 (4/6): 長い一覧 ↔ 長い一覧
 2026-08-11 08:34:28.675 [DEBUG] シート比較中 (5/6): レイアウト確認 ↔ レイアウト確認
 2026-08-11 08:34:28.675 [DEBUG] シート比較中 (6/6): ずれ試験 ↔ ずれ試験
-2026-08-11 08:34:28.690 [INFO] 比較完了: 差分 69 件 / 183 ms / cache=C:\Users\Jun\AppData\Roaming\DiffXL\cache\20260811_083428_503_662afcf0
+2026-08-11 08:34:28.690 [INFO] 比較完了: 差分 69 件 / 183 ms / cache=C:\Users\<user>\AppData\Roaming\DiffXL\cache\20260811_083428_503_662afcf0
 2026-08-11 08:34:28.690 [DEBUG] 比較完了
 2026-08-11 08:34:28.753 [DEBUG] Excel をホストへアタッチ: 1707418
 2026-08-11 08:34:29.259 [DEBUG] Excel ビューア用 UI（リボン等）を最小化／非表示にしました。
@@ -178,7 +178,7 @@
 2026-08-11 08:34:32.425 [DEBUG] シート比較中 (4/6): 長い一覧 ↔ 長い一覧
 2026-08-11 08:34:32.425 [DEBUG] シート比較中 (5/6): レイアウト確認 ↔ レイアウト確認
 2026-08-11 08:34:32.425 [DEBUG] シート比較中 (6/6): ずれ試験 ↔ ずれ試験
-2026-08-11 08:34:32.440 [INFO] 比較完了: 差分 69 件 / 60 ms / cache=C:\Users\Jun\AppData\Roaming\DiffXL\cache\20260811_083432_378_b7ede069
+2026-08-11 08:34:32.440 [INFO] 比較完了: 差分 69 件 / 60 ms / cache=C:\Users\<user>\AppData\Roaming\DiffXL\cache\20260811_083432_378_b7ede069
 2026-08-11 08:34:32.440 [DEBUG] 比較完了
 2026-08-11 08:34:33.196 [INFO] [AUTO] RECOMPARE_OK count=69
 2026-08-11 08:34:33.237 [INFO] [AUTO] SETTINGS_OPEN_OK constructed SettingsWindow

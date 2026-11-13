@@ -58,7 +58,7 @@
 2026-08-11 10:57:03.388 [DEBUG] シート比較中 (4/6): 長い一覧 ↔ 長い一覧
 2026-08-11 10:57:03.388 [DEBUG] シート比較中 (5/6): レイアウト確認 ↔ レイアウト確認
 2026-08-11 10:57:03.388 [DEBUG] シート比較中 (6/6): ずれ試験 ↔ ずれ試験
-2026-08-11 10:57:03.388 [INFO] 比較完了: 差分 69 件 / 70 ms / cache=C:\Users\Jun\AppData\Roaming\DiffXL\cache\20260811_105703_357_c2054d3b
+2026-08-11 10:57:03.388 [INFO] 比較完了: 差分 69 件 / 70 ms / cache=C:\Users\<user>\AppData\Roaming\DiffXL\cache\20260811_105703_357_c2054d3b
 2026-08-11 10:57:03.404 [DEBUG] 比較完了
 2026-08-11 10:57:04.087 [INFO] [AUTO] RECOMPARE_OK count=69
 2026-08-11 10:57:04.118 [INFO] [AUTO] SETTINGS_OPEN_OK constructed SettingsWindow

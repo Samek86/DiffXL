@@ -6,7 +6,7 @@
 #>
 $ErrorActionPreference = 'Continue'
 $Stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-$Repo = 'C:\JUN\WORK\DiffXL'
+$Repo = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $EvidenceRoot = Join-Path $Repo "10_管理資料\テスト\エビデンス_stream_align_$Stamp"
 $ShotDir = Join-Path $EvidenceRoot 'screenshots'
 New-Item -ItemType Directory -Force -Path $EvidenceRoot, $ShotDir | Out-Null

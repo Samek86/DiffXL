@@ -45,7 +45,7 @@
 2026-08-11 12:14:34.948 [DEBUG] シート比較中 (4/6): 長い一覧 ↔ 長い一覧
 2026-08-11 12:14:34.948 [DEBUG] シート比較中 (5/6): レイアウト確認 ↔ レイアウト確認
 2026-08-11 12:14:34.948 [DEBUG] シート比較中 (6/6): ずれ試験 ↔ ずれ試験
-2026-08-11 12:14:34.948 [INFO] 比較完了: 差分 69 件 / 60 ms / cache=C:\Users\Jun\AppData\Roaming\DiffXL\cache\20260811_121434_917_cdb65bba
+2026-08-11 12:14:34.948 [INFO] 比較完了: 差分 69 件 / 60 ms / cache=C:\Users\<user>\AppData\Roaming\DiffXL\cache\20260811_121434_917_cdb65bba
 2026-08-11 12:14:34.948 [DEBUG] 比較完了
 2026-08-11 12:14:35.612 [INFO] [AUTO] RECOMPARE_OK count=69
 2026-08-11 12:14:35.643 [INFO] [AUTO] SETTINGS_OPEN_OK constructed SettingsWindow
@@ -65,16 +65,16 @@
 2026-08-11 12:14:38.705 [DEBUG] Excel Application を破棄しました。
 2026-08-11 12:14:38.705 [DEBUG] ScrollSync Detach
 2026-08-11 12:14:38.721 [DEBUG] ScrollSync Detach
-2026-08-11 12:15:05.442 [DEBUG] Native dir ready: C:\Users\Jun\AppData\Roaming\DiffXL\native
+2026-08-11 12:15:05.442 [DEBUG] Native dir ready: C:\Users\<user>\AppData\Roaming\DiffXL\native
 2026-08-11 12:15:05.442 [INFO] DiffXL 起動
-2026-08-11 12:15:05.675 [INFO] 設定を読み込み: C:\Users\Jun\AppData\Roaming\DiffXL\settings.yaml
-2026-08-11 12:15:05.675 [INFO] AutoLiveTest 有効 left=C:\JUN\WORK\DiffXL\30_参考資料\samples\large_image_left.xlsx right=C:\JUN\WORK\DiffXL\30_参考資料\samples\large_image_right.xlsx
+2026-08-11 12:15:05.675 [INFO] 設定を読み込み: C:\Users\<user>\AppData\Roaming\DiffXL\settings.yaml
+2026-08-11 12:15:05.675 [INFO] AutoLiveTest 有効 left=<repo>\30_参考資料\samples\large_image_left.xlsx right=<repo>\30_参考資料\samples\large_image_right.xlsx
 2026-08-11 12:15:05.691 [INFO] Excel を利用できます。
 2026-08-11 12:15:06.517 [INFO] [AUTO] BEGIN auto-live-test
 2026-08-11 12:15:06.517 [INFO] [AUTO] COMPARE start
 2026-08-11 12:15:08.094 [INFO] Excel Application を起動しました。Version=16.0
 2026-08-11 12:15:09.824 [DEBUG] Excel Window COM を保持しました。
 2026-08-11 12:15:10.989 [DEBUG] Excel ビューア用 UI（リボン等）を最小化／非表示にしました。
-2026-08-11 12:15:11.004 [INFO] ブックを読み取り専用で開きました: C:\JUN\WORK\DiffXL\30_参考資料\samples\large_image_left.xlsx
+2026-08-11 12:15:11.004 [INFO] ブックを読み取り専用で開きました: <repo>\30_参考資料\samples\large_image_left.xlsx
 2026-08-11 12:15:11.051 [DEBUG] ScrollSync Detach
-2026-08-11 12:15:11.051 [INFO] 左 にファイルを表示: C:\JUN\WORK\DiffXL\30_参考資料\samples\large_image_left.xlsx
+2026-08-11 12:15:11.051 [INFO] 左 にファイルを表示: <repo>\30_参考資料\samples\large_image_left.xlsx

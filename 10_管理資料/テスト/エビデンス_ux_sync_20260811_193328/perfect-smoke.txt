@@ -1,7 +1,7 @@
 ﻿ContentScrollPerfectSmoke
-left=C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_left.xlsx
-right=C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_right.xlsx
-expected=C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_expected.json
+left=<repo>\30_参考資料\samples\content_scroll_left.xlsx
+right=<repo>\30_参考資料\samples\content_scroll_right.xlsx
+expected=<repo>\30_参考資料\samples\content_scroll_expected.json
 COMPARE_OK items=48 alignments=6 elapsedMs=259
 === sheet SC_画像ギャップ ===
 ContentScrollMap SC_画像ギャップ ↔ SC_画像ギャップ content segs=4 | Equal L1-7 R1-7 hold=0 | RightOnly L7-7 R8-11 hold=7 | Equal L8-10 R12-14 hold=0 | Equal L11-536870911 R15-536870911 hold=0

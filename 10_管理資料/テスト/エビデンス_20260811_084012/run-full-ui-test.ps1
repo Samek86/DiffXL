@@ -8,9 +8,10 @@ $EvidenceRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ShotDir = Join-Path $EvidenceRoot 'screenshots'
 New-Item -ItemType Directory -Force -Path $ShotDir | Out-Null
 
-$Exe = 'C:\JUN\WORK\DiffXL\40_リリース\DiffXL.exe'
-$LeftXlsx = 'C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx'
-$RightXlsx = 'C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_right.xlsx'
+$RepoRoot = Split-Path (Split-Path (Split-Path $EvidenceRoot -Parent) -Parent) -Parent
+$Exe = Join-Path $RepoRoot '40_リリース\DiffXL.exe'
+$LeftXlsx = Join-Path $RepoRoot '30_参考資料\samples\full_feature_left.xlsx'
+$RightXlsx = Join-Path $RepoRoot '30_参考資料\samples\full_feature_right.xlsx'
 $LogDir = Join-Path $env:APPDATA 'DiffXL\logs'
 $RunLog = Join-Path $EvidenceRoot 'run-log.txt'
 $ResultsMd = Join-Path $EvidenceRoot 'test-results.md'

@@ -1,7 +1,7 @@
 ﻿# ux_sync evidence
 
 - Generated: 2026-08-11 19:33:32
-- Repo: C:\JUN\WORK\DiffXL
+- Repo: <repo>
 - OverallFail: 0
 
 ## Stages

@@ -5,8 +5,8 @@ using DiffXL.LOGIC.Diff;
 
 class CellDump {
   static void Main() {
-    string L = @"C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx";
-    string R = @"C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_right.xlsx";
+    string L = Sample("full_feature_left.xlsx");
+    string R = Sample("full_feature_right.xlsx");
     using (var l = XlsxPackageReader.Open(L))
     using (var r = XlsxPackageReader.Open(R)) {
       Console.WriteLine("Lsheets=" + string.Join("|", l.GetSheetNames()));
@@ -24,4 +24,26 @@ class CellDump {
       Console.WriteLine("TOTAL_TEXT_DIFFS_IN_MAP=" + diffs + " Lcount=" + lc.Count + " Rcount=" + rc.Count);
     }
   }
+
+    static string Sample(string name)
+    {
+        string rel = System.IO.Path.Combine("30_参考資料", "samples", name);
+        string[] starts = new string[]
+        {
+            System.Environment.CurrentDirectory,
+            System.AppDomain.CurrentDomain.BaseDirectory
+        };
+        for (int i = 0; i < starts.Length; i++)
+        {
+            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(starts[i]);
+            while (dir != null)
+            {
+                string candidate = System.IO.Path.Combine(dir.FullName, rel);
+                if (System.IO.File.Exists(candidate)) return candidate;
+                dir = dir.Parent;
+            }
+        }
+        return rel;
+    }
+
 }

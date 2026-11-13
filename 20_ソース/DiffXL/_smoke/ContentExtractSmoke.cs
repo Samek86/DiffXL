@@ -14,7 +14,7 @@ class Program
     {
         string sample = args != null && args.Length > 0
             ? args[0]
-            : @"C:\JUN\WORK\DiffXL\30_参考資料\samples\content_extract_sample.xlsx";
+            : Sample("content_extract_sample.xlsx");
 
         if (!File.Exists(sample))
         {
@@ -178,4 +178,26 @@ class Program
     {
         return "\"" + (s ?? "") + "\"";
     }
+
+    static string Sample(string name)
+    {
+        string rel = System.IO.Path.Combine("30_参考資料", "samples", name);
+        string[] starts = new string[]
+        {
+            System.Environment.CurrentDirectory,
+            System.AppDomain.CurrentDomain.BaseDirectory
+        };
+        for (int i = 0; i < starts.Length; i++)
+        {
+            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(starts[i]);
+            while (dir != null)
+            {
+                string candidate = System.IO.Path.Combine(dir.FullName, rel);
+                if (System.IO.File.Exists(candidate)) return candidate;
+                dir = dir.Parent;
+            }
+        }
+        return rel;
+    }
+
 }

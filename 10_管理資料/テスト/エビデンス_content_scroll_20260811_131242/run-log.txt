@@ -1,7 +1,7 @@
-﻿[2026-08-11 13:12:42] BEGIN content-scroll harness RepoRoot=C:\JUN\WORK\DiffXL
-[2026-08-11 13:12:42] Evidence=C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_content_scroll_20260811_131242
+﻿[2026-08-11 13:12:42] BEGIN content-scroll harness RepoRoot=<repo>
+[2026-08-11 13:12:42] Evidence=<repo>\10_管理資料\テスト\エビデンス_content_scroll_20260811_131242
 [2026-08-11 13:12:42] BUILD skipped
-[2026-08-11 13:12:42] csc PerfectSmoke -> C:\JUN\WORK\DiffXL\20_ソース\DiffXL\DiffXL\bin\x64\Debug\ContentScrollPerfectSmoke.exe
+[2026-08-11 13:12:42] csc PerfectSmoke -> <repo>\20_ソース\DiffXL\DiffXL\bin\x64\Debug\ContentScrollPerfectSmoke.exe
 [2026-08-11 13:12:43] RUN PerfectSmoke
 [2026-08-11 13:12:43] PerfectSmoke exit=0
 [2026-08-11 13:12:43] PASS T1/T2 PERFECT_SCROLL_PASS

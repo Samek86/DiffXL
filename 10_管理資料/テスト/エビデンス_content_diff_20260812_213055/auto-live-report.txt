@@ -19,5 +19,5 @@
 21:31:02.286 MINIMAP_JUMP_OK
 21:31:02.879 MINIMAP_RATIO_CLICK L=0.85 R=0.85
 21:31:02.879 MINIMAP_RATIO_OK
-21:31:03.932 CONTENT_DIFF_VERIFY done failures=0 evidence=C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_content_diff_20260812_213055\screenshots
+21:31:03.932 CONTENT_DIFF_VERIFY done failures=0 evidence=<repo>\10_管理資料\テスト\エビデンス_content_diff_20260812_213055\screenshots
 21:31:03.932 AUTO_LIVE_PASS

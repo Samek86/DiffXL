@@ -13,7 +13,7 @@ class Program
     {
         string leftPath = args != null && args.Length > 0
             ? args[0]
-            : @"C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx";
+            : Sample("full_feature_left.xlsx");
 
         if (!File.Exists(leftPath))
         {
@@ -138,4 +138,26 @@ class Program
         Console.WriteLine("ANCHOR_RECT_SMOKE_FAIL count=" + fail);
         return 1;
     }
+
+    static string Sample(string name)
+    {
+        string rel = System.IO.Path.Combine("30_参考資料", "samples", name);
+        string[] starts = new string[]
+        {
+            System.Environment.CurrentDirectory,
+            System.AppDomain.CurrentDomain.BaseDirectory
+        };
+        for (int i = 0; i < starts.Length; i++)
+        {
+            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(starts[i]);
+            while (dir != null)
+            {
+                string candidate = System.IO.Path.Combine(dir.FullName, rel);
+                if (System.IO.File.Exists(candidate)) return candidate;
+                dir = dir.Parent;
+            }
+        }
+        return rel;
+    }
+
 }

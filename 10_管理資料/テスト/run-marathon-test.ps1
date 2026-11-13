@@ -12,9 +12,6 @@ param(
 
 $ErrorActionPreference = 'Continue'
 $RepoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-if (-not (Test-Path (Join-Path $RepoRoot '40_リリース\DiffXL.exe'))) {
-  $RepoRoot = 'C:\JUN\WORK\DiffXL'
-}
 
 $Exe = Join-Path $RepoRoot '40_リリース\DiffXL.exe'
 $Samples = Join-Path $RepoRoot '30_参考資料\samples'

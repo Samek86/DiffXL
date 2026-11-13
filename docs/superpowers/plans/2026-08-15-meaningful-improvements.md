@@ -23,7 +23,7 @@
 
 ```powershell
 $msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
-$root = "C:\JUN\WORK\DiffXL"
+$root = (git rev-parse --show-toplevel).Trim()
 $proj = "$root\20_ソース\DiffXL\DiffXL\DiffXL.csproj"
 $bin = "$root\20_ソース\DiffXL\DiffXL\bin\x64\Debug"
 $exe = "$bin\DiffXL.exe"

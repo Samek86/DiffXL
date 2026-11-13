@@ -1,6 +1,6 @@
 $end = (Get-Date).AddMinutes(190)
 $cache = Join-Path $env:APPDATA "DiffXL\cache"
-$log = "C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_marathon_20260811_094257\cache-janitor.log"
+$log = Join-Path $PSScriptRoot "エビデンス_marathon_20260811_094257\cache-janitor.log"
 while ((Get-Date) -lt $end) {
   try {
     $dirs = @(Get-ChildItem $cache -Directory -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending)

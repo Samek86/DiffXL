@@ -1,6 +1,6 @@
 ﻿[2026-08-11 09:42:58] Marathon BEGIN minMinutes=185 deadline=08/11/2026 12:47:58
-[2026-08-11 09:42:58] Exe=C:\JUN\WORK\DiffXL\40_リリース\DiffXL.exe
-[2026-08-11 09:42:58] Evidence=C:\JUN\WORK\DiffXL\10_管理資料\テスト\エビデンス_marathon_20260811_094257
+[2026-08-11 09:42:58] Exe=<repo>\40_リリース\DiffXL.exe
+[2026-08-11 09:42:58] Evidence=<repo>\10_管理資料\テスト\エビデンス_marathon_20260811_094257
 [2026-08-11 09:42:58] === ROUND 1 elapsed=0m remaining=185m ===
 [2026-08-11 09:43:01] START full_feature timeout=240s left=full_feature_left.xlsx
 [2026-08-11 09:43:16] END full_feature exit=0 pass=True dur=15s count=69 image=2
