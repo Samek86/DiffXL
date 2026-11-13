@@ -1,10 +1,10 @@
 ﻿# content_scroll evidence
 
 - Generated: 2026-08-11 13:13:03
-- Repo: C:\JUN\WORK\DiffXL
-- Left: C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_left.xlsx
-- Right: C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_right.xlsx
-- Expected: C:\JUN\WORK\DiffXL\30_参考資料\samples\content_scroll_expected.json
+- Repo: <repo>
+- Left: <repo>\30_参考資料\samples\content_scroll_left.xlsx
+- Right: <repo>\30_参考資料\samples\content_scroll_right.xlsx
+- Expected: <repo>\30_参考資料\samples\content_scroll_expected.json
 - OverallFail: 0
 
 ## Stages

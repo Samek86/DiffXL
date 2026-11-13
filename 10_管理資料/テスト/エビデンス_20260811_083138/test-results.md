@@ -1,7 +1,7 @@
 # DiffXL テスト結果
 
 - 実施日時: 2026-08-11T08:35:21.6737040+09:00
-- 実行ファイル: C:\JUN\WORK\DiffXL\40_リリース\DiffXL.exe
+- 実行ファイル: <repo>\40_リリース\DiffXL.exe
 - サンプル: full_feature_left/right.xlsx
 - 集計: **PASS=10 / FAIL=14 / BLOCKED=1 / TOTAL=25**
 

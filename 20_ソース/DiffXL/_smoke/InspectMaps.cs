@@ -4,8 +4,8 @@ using DiffXL.LOGIC.Diff;
 
 class P {
   static int Main() {
-    string left = @"C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_left.xlsx";
-    string right = @"C:\JUN\WORK\DiffXL\30_参考資料\samples\full_feature_right.xlsx";
+    string left = Sample("full_feature_left.xlsx");
+    string right = Sample("full_feature_right.xlsx");
     var r = new DiffEngine().Compare(left, right);
     Console.WriteLine("items="+r.Items.Count+" maps="+r.ScrollMaps.Count);
     foreach (var it in r.Items.Where(i => i.Kind==DiffKind.Image || i.Kind==DiffKind.ImageOnlyLeft || i.Kind==DiffKind.ImageOnlyRight)) {
@@ -36,4 +36,26 @@ class P {
     }
     return 0;
   }
+
+    static string Sample(string name)
+    {
+        string rel = System.IO.Path.Combine("30_参考資料", "samples", name);
+        string[] starts = new string[]
+        {
+            System.Environment.CurrentDirectory,
+            System.AppDomain.CurrentDomain.BaseDirectory
+        };
+        for (int i = 0; i < starts.Length; i++)
+        {
+            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(starts[i]);
+            while (dir != null)
+            {
+                string candidate = System.IO.Path.Combine(dir.FullName, rel);
+                if (System.IO.File.Exists(candidate)) return candidate;
+                dir = dir.Parent;
+            }
+        }
+        return rel;
+    }
+
 }

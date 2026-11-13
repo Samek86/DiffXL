@@ -4,7 +4,7 @@
 [09:20:58] compare ready
 [09:21:00] DiffXL ready for orca MiniMap tests
 [09:21:02] list-apps saved
-[09:21:10] screenshot=C:\Users\Jun\AppData\Local\Temp\orca-computer-use\bc5c0dc3-bb27-4373-bcd7-46ff18a67f70-screenshot.png
+[09:21:10] screenshot=C:\Users\<user>\AppData\Local\Temp\orca-computer-use\bc5c0dc3-bb27-4373-bcd7-46ff18a67f70-screenshot.png
 [09:24:01] click 11_longlist at 1320,350
 [09:24:16] shot click_11_longlist
 [09:24:16] STATUS HAS MiniMap navigate

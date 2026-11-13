@@ -36,7 +36,11 @@ Desktop.ini
 **/__pycache__/
 *.pyc
 **/_build_err.log
-10_管理資料/テスト/_latest_stream_align_evidence.txt
+
+# テスト実行の出力先。ログに作業PCのユーザーパスが残ることがあるため、新規ファイルはコミットしない。
+# 既に追跡されている証拠は履歴に残る（中身の個人パスはプレースホルダへ置換済み）。
+10_管理資料/テスト/エビデンス_*/
+10_管理資料/テスト/_latest_*.txt
 
 # Isolated git worktrees
 .worktrees/

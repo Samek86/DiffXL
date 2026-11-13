@@ -28,7 +28,7 @@ Window: "DiffXL", App: DiffXL.
 \t\t24 텍스트 差分 69 件（テキスト 63 / 画像 2 / 片側のみ 0 / 構造 4）
 \t25 사용자 지정 LeftPane
 \t\t26 텍스트 左
-\t\t27 텍스트 C:\\JUN\\WORK\\DiffXL\\30_参考資料\\samples\\full_feature_left.xlsx
+\t\t27 텍스트 <repo>\\30_参考資料\\samples\\full_feature_left.xlsx
 \t\t28 콤보 상자 SheetCombo
 \t\t29 단추 OpenButton
 \t\t\t30 텍스트 開く
@@ -293,7 +293,7 @@ Window: "DiffXL", App: DiffXL.
 \t289 엄지
 \t290 사용자 지정 RightPane
 \t\t291 텍스트 右
-\t\t292 텍스트 C:\\JUN\\WORK\\DiffXL\\30_参考資料\\samples\\full_feature_right.xlsx
+\t\t292 텍스트 <repo>\\30_参考資料\\samples\\full_feature_right.xlsx
 \t\t293 콤보 상자 SheetCombo
 \t\t294 단추 OpenButton
 \t\t\t295 텍스트 開く

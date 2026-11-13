@@ -62,7 +62,7 @@ Visual Studio / 手動編集で `DiffXL.sln` に `x64` を追加し、プロジ�
 Run:
 
 ```powershell
-cd "C:\JUN\WORK\DiffXL\20_ソース\DiffXL"
+cd "20_ソース\DiffXL"
 msbuild DiffXL.sln /p:Configuration=Debug /p:Platform=x64
 ```
 
